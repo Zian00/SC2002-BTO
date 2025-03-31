@@ -9,7 +9,7 @@ public class HDBManager extends User implements IProjectManagement, IEnquiryMana
     public void createProject(BTOProject project) {
         projects.add(project);
     }
-
+ 
     @Override
     public void editProject(BTOProject project) {
         // Edit the project details here
