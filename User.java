@@ -1,5 +1,3 @@
-
-
 public abstract class User implements IAuthentication {
     
     private String NRIC;

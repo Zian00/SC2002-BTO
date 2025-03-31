@@ -23,9 +23,20 @@ public class HDBOfficer extends Applicant implements IOfficerRegistration {
         // Update flat availability logic
     }
 
+    public BTOApplication retrieveApplication(String NRIC)
+    {
+        //return BTOApplication given provided NRIC
+        
+    }
+
     public void updateApplicationStatus(BTOApplication app, ApplicationStatus status) {
         // Update the application status
         app.setStatus(status);
+    }
+
+    public void updateTypeOfFlat(Applicant dude, int flattype)
+    {
+        //update applicats flat type
     }
 
     public Receipt generateReceipt(BTOApplication app) {

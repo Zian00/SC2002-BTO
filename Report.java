@@ -1,5 +1,3 @@
-
-
 public class Report {
 
     private String content;
