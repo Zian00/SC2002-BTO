@@ -1,6 +1,6 @@
 public class UserCSVRepository {
 
-	public List<Enquiry> readUserCSVRepo() {
+	public List<User> readUserCSVRepo() {
 		// TODO - implement UserCSVRepository.readUserCSVRepo
 		throw new UnsupportedOperationException();
 	}

@@ -1,6 +1,6 @@
 public class OfficerApplicationCSVRepository {
 
-	public List<BTOApplication> readOfficerApplicationFromCSV() {
+	public List<OfficerApplication> readOfficerApplicationFromCSV() {
 		// TODO - implement OfficerApplicationCSVRepository.readOfficerApplicationFromCSV
 		throw new UnsupportedOperationException();
 	}
@@ -9,7 +9,7 @@ public class OfficerApplicationCSVRepository {
 	 * 
 	 * @param applicationList
 	 */
-	public void writeOfficerApplicationToCSV(List<BTOApplication> applicationList) {
+	public void writeOfficerApplicationToCSV(List<OfficerApplication> applicationList) {
 		// TODO - implement OfficerApplicationCSVRepository.writeOfficerApplicationToCSV
 		throw new UnsupportedOperationException();
 	}
