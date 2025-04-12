@@ -1,3 +1,4 @@
+package views;
 import java.util.List;
 import models.BTOProject;
 
@@ -17,7 +18,7 @@ public class BTOProjectView {
 		throw new UnsupportedOperationException();
 	}
 
-	public BTOProj promptNewProject() {
+	public BTOProject promptNewProject() {
 		// TODO - implement BTOProjectView.promptNewProject
 		throw new UnsupportedOperationException();
 	}
@@ -40,7 +41,7 @@ public class BTOProjectView {
 	 * 
 	 * @param msg
 	 */
-	public void showMessage(string msg) {
+	public void showMessage(String msg) {
 		// TODO - implement BTOProjectView.showMessage
 		throw new UnsupportedOperationException();
 	}

@@ -4,12 +4,12 @@ import models.User;
 
 public class UserCSVRepository {
 
-	public List<User> readUserCSVRepo() {
+	public List<User> readUserFromCSV() {
 		// TODO - implement UserCSVRepository.readUserCSVRepo
 		throw new UnsupportedOperationException();
 	}
 
-	public void writeUserCSVRepo() {
+	public void writeUserFromCSV() {
 		// TODO - implement UserCSVRepository.writeUserCSVRepo
 		throw new UnsupportedOperationException();
 	}

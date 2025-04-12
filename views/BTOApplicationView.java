@@ -1,5 +1,7 @@
+package views;
 import java.util.List;
 import models.BTOApplication;
+import models.User;
 
 public class BTOApplicationView {
 

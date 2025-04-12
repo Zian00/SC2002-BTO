@@ -1,3 +1,4 @@
+package views;
 public class ManagerView extends UserView {
 
 	public void displayMenu() {

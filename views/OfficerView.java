@@ -1,3 +1,5 @@
+package views;
+
 public class OfficerView extends UserView {
 
 	public void displayMenu() {

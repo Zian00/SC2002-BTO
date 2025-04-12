@@ -1,3 +1,5 @@
+package views;
+
 public class ApplicantView extends UserView {
 
 	public void displayMenu() {

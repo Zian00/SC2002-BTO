@@ -1,3 +1,4 @@
+package views;
 public class EnquiryView {
 
 	public void displayMenu() {

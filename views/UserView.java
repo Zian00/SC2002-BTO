@@ -1,3 +1,5 @@
+package views;
+
 public class UserView {
 
 	public void displayLogin() {
