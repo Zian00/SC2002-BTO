@@ -1,3 +1,6 @@
+package models;
+import java.util.List;
+
 public class HDBOfficer extends Applicant {
 
 	private List<Integer> BTOInChargeIDList;

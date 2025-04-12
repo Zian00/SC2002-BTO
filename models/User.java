@@ -1,10 +1,13 @@
+package models;
+import models.enumerations.*;
+
 public class User {
 
-	private string NRIC;
-	private string password;
+	private String NRIC;
+	private String password;
 	private int age;
 	private MaritalState maritalStatus;
-	private string filterSettings;
+	private String filterSettings;
 	private Role role;
 
 }

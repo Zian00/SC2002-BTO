@@ -1,3 +1,7 @@
+package models.repositories;
+import java.util.List;
+import models.User;
+
 public class UserCSVRepository {
 
 	public List<User> readUserCSVRepo() {

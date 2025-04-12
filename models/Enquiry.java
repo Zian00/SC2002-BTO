@@ -1,9 +1,11 @@
+package models;
+
 public class Enquiry {
 
-	private string enquiryText;
+	private String enquiryText;
 	private Applicant submittedBy;
 	private BTOProject project;
-	private string response;
-	private string timestamp;
+	private String response;
+	private String timestamp;
 
 }

@@ -1,3 +1,5 @@
+package models;
+
 public class Applicant extends User {
 
 	private int applicationID;

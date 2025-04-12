@@ -1,3 +1,6 @@
+package models;
+import models.enumerations.RegistrationStatus;
+
 public class OfficerApplication {
 
 	private HDBOfficer officer;

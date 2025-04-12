@@ -1,3 +1,8 @@
+package controllers;
+import java.util.List;
+import javax.management.relation.Role;
+import models.User;
+
 public class UserCTRL {
 
 	private List<User> userList;
@@ -9,7 +14,7 @@ public class UserCTRL {
 	 * @param password
 	 * @param Role
 	 */
-	public boolean login(string NRIC, string password, Role Role) {
+	public boolean login(String NRIC, String password, Role Role) {
 		// TODO - implement UserCTRL.login
 		throw new UnsupportedOperationException();
 	}
@@ -18,7 +23,7 @@ public class UserCTRL {
 	 * 
 	 * @param newPassword
 	 */
-	public void changePassword(string newPassword) {
+	public void changePassword(String newPassword) {
 		// TODO - implement UserCTRL.changePassword
 		throw new UnsupportedOperationException();
 	}

@@ -1,3 +1,8 @@
+package models.repositories;
+import java.util.List;
+
+import models.BTOApplication;
+
 public class ApplicationCSVRepository {
 
 	public List<BTOApplication> readApplicaitonFromCSV() {

@@ -1,3 +1,8 @@
+package controllers;
+import java.util.List;
+import models.OfficerApplication;
+import models.User;
+
 public class OfficerApplicationCTRL {
 
 	private List<OfficerApplication> officerApplicationList;

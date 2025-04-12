@@ -1,3 +1,7 @@
+package models.repositories;
+import java.util.List;
+import models.OfficerApplication;
+
 public class OfficerApplicationCSVRepository {
 
 	public List<OfficerApplication> readOfficerApplicationFromCSV() {

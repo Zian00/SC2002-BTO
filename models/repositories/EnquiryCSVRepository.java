@@ -1,3 +1,7 @@
+package models.repositories;
+import java.util.List;
+import models.Enquiry;
+
 public class EnquiryCSVRepository {
 
 	public List<Enquiry> readOfficerApplicationFromCSV() {

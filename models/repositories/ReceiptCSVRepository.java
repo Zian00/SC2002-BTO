@@ -1,3 +1,6 @@
+package models.repositories;
+import models.Receipt;
+
 public class ReceiptCSVRepository {
 
 	/**

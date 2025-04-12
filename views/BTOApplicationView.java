@@ -1,3 +1,6 @@
+import java.util.List;
+import models.BTOApplication;
+
 public class BTOApplicationView {
 
 	public void displayMenu() {
@@ -19,7 +22,7 @@ public class BTOApplicationView {
 	 * @param applications
 	 * @param currentUser
 	 */
-	public void displayUserApplication(List<BTOApplication> applications, user currentUser) {
+	public void displayUserApplication(List<BTOApplication> applications, User currentUser) {
 		// TODO - implement BTOApplicationView.displayUserApplication
 		throw new UnsupportedOperationException();
 	}

@@ -1,16 +1,19 @@
+package models;
+import java.util.List;
+
 public class BTOProject {
 
 	private int projectID;
-	private string projectName;
-	private string neighborhood;
+	private String projectName;
+	private String neighborhood;
 	private int available2Room;
 	private int available3Room;
-	private string applicationOpeningDate;
-	private string applicationClosingDate;
+	private String applicationOpeningDate;
+	private String applicationClosingDate;
 	private int availableOfficerSlots;
 	private boolean visibility;
-	private string manager;
-	private List<string> pendingOfficer;
-	private List<string> approvedOfficer;
+	private String manager;
+	private List<String> pendingOfficer;
+	private List<String> approvedOfficer;
 
 }

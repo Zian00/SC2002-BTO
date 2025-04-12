@@ -1,3 +1,9 @@
+package controllers;
+import java.util.List;
+import models.Enquiry;
+import models.User;
+import models.interfaces.*;
+
 public class EnquiryCTRL implements IEnquiryResponse, IEnquirySubmission {
 
 	private List<Enquiry> enquiries;

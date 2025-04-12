@@ -18,7 +18,7 @@ public class EnquiryView {
 	 * 
 	 * @param newText
 	 */
-	public void edit(string newText) {
+	public void edit(String newText) {
 		// TODO - implement EnquiryView.edit
 		throw new UnsupportedOperationException();
 	}

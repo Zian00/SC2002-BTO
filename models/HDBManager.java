@@ -1,3 +1,6 @@
+package models;
+import java.util.List;
+
 public class HDBManager extends User {
 
 	private List<Integer> BTOProjectIDList;

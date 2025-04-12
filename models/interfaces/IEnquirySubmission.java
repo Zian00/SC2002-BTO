@@ -1,3 +1,6 @@
+package models.interfaces;
+import models.Enquiry;
+
 public interface IEnquirySubmission {
 
 	/**
