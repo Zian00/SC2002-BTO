@@ -1,7 +1,14 @@
 package models;
 import java.util.List;
+import models.enumerations.MaritalState;
+import models.enumerations.Role;
 
 public class HDBManager extends User {
+
+	public HDBManager(String NRIC, String Name, String password, int age, MaritalState maritalStatus,
+			String filterSettings, Role role) {
+		super(NRIC, Name, password, age, maritalStatus, filterSettings, role);
+	}
 
 	private List<Integer> BTOProjectIDList;
 
