@@ -1,11 +1,11 @@
-Name,NRIC,Age,Marital Status,Password,role
-Daniel,T2109876H,36,Single,password,officer
-Emily,S6543210I,28,Single,password,officer
-David,T1234567J,29,Married,password,officer
-Michael,T8765432F,36,Single,password,manager
-Jessica,S5678901G,26,Married,password,manager
-John,S1234567A,35,Single,password,applicant
-Sarah,T7654321B,40,Married,password,applicant
-Grace,S9876543C,37,Married,password,applicant
-James,T2345678D,30,Married,password,applicant
-Rachel,S3456789E,25,Single,password,applicant
+Name,NRIC,Age,Marital Status,Password,role,filterSettings
+Daniel,T2109876H,36,Single,password,officer,
+Emily,S6543210I,28,Single,password,officer,
+David,T1234567J,29,Married,password,officer,
+Michael,T8765432F,36,Single,password,manager,
+Jessica,S5678901G,26,Married,password,manager,
+John,S1234567A,35,Single,password,applicant,
+Sarah,T7654321B,40,Married,password,applicant,
+Grace,S9876543C,37,Married,password,applicant,
+James,T2345678D,30,Married,password,applicant,
+Rachel,S3456789E,25,Single,password,applicant,
