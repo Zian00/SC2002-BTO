@@ -19,31 +19,35 @@ public class UserCSVRepository {
         List<User> users = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(CSV_FILE))) {
             String line;
-            // Read and skip header line
+            // Skip the header:
             if ((line = br.readLine()) != null) {
-                // header read; do nothing
+                // header line read
             }
             while ((line = br.readLine()) != null) {
                 if (line.trim().isEmpty()) continue;
-                String[] tokens = line.split(",");
-                if (tokens.length < 7)
-                    continue; // or handle error
+                String[] tokens = line.split(",", -1); // Filter Settings is default as blank so -1 to prevent field getting deleted
+                // Ensure tokens length is correct
+                if (tokens.length < 7) {
+                    System.out.println("Skipping invalid record: " + line);
+                    continue;
+                }
+                // Parse tokens (make sure enum values match your CSV data)
                 String name = tokens[0].trim();
                 String nric = tokens[1].trim();
                 int age = Integer.parseInt(tokens[2].trim());
-                // Adjust the case/format as needed:
+                // Assume marital status in CSV is uppercase or adjust accordingly:
                 MaritalState maritalStatus = MaritalState.valueOf(tokens[3].trim().toUpperCase());
                 String password = tokens[4].trim();
                 Role role = Role.valueOf(tokens[5].trim().toUpperCase());
                 String filterSettings = tokens[6].trim();
-
-                // Assuming you have a constructor in User with these parameters
+    
                 User user = new User(nric, name, password, age, maritalStatus, filterSettings, role);
                 users.add(user);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+        System.out.println("Loaded " + users.size() + " user(s).");
         return users;
     }
 

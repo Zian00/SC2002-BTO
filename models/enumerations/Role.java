@@ -1,7 +1,7 @@
 package models.enumerations;
 
 public enum Role {
-	Applicant,
-	HDBOfficer,
-	HDBManager
+	APPLICANT,
+	HDBOFFICER,
+	HDBMANAGER
 }

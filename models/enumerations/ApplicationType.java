@@ -1,6 +1,6 @@
 package models.enumerations;
 
 public enum ApplicationType {
-	 Application,
-	 Withdrawal
+	 APPLICATION,
+	 WITHDRAWAL
 }

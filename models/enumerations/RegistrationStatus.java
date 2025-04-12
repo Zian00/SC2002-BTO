@@ -1,8 +1,8 @@
 package models.enumerations;
 
 public enum RegistrationStatus {
-	Pending,
-	Approved,
-	Rejected;
+	PENDING,
+	APPROVED,
+	REJECTED;
 
 }

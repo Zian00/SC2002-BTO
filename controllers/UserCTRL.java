@@ -45,6 +45,10 @@ public class UserCTRL {
         }
     }
 
+	public List<User> getUserList() {
+        return userList;
+    }
+
     public User getCurrentUser() {
         return currentUser;
     }
