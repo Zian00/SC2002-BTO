@@ -1,7 +1,8 @@
-
-
 public enum RegistrationStatus {
-    Pending,
-    Approved,
-    Rejected
+	;
+
+	int Pending;
+	int Approved;
+	int Rejected;
+
 }

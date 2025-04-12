@@ -1,37 +1,19 @@
-public class HDBOfficer extends Applicant implements IOfficerRegistration {
+public class HDBOfficer extends Applicant {
 
-    private BTOProject officerProject;
+	private List<Integer> BTOInChargeIDList;
 
-    @Override
-    public void registerForProject(BTOProject project) {
-        // Registration logic for the project
-        this.officerProject = project;
-    }
+	public List<Integer> getBTOInChargeIDList() {
+		// TODO - implement HDBOfficer.getBTOInChargeIDList
+		throw new UnsupportedOperationException();
+	}
 
-    @Override
-    public RegistrationStatus viewRegistrationStatus() {
-        // Return the registration status (stub)
-        return RegistrationStatus.Pending;
-    }
+	/**
+	 * 
+	 * @param BTOProjectID
+	 */
+	public void setBTOInChargeIDList(int BTOProjectID) {
+		// TODO - implement HDBOfficer.setBTOInChargeIDList
+		throw new UnsupportedOperationException();
+	}
 
-    public void replyEnquiry(Enquiry enquiry, String response) {
-        // Reply to an enquiry
-        // Stub implementation
-    }
-
-    public void updateFlatAvailability() {
-        // Update flat availability logic
-    }
-
-    public void updateApplicationStatus(BTOApplication app, ApplicationStatus status) {
-        // Update the application status
-        app.setStatus(status);
-    }
-
-    public Receipt generateReceipt(BTOApplication app) {
-        // Generate and return a receipt based on the application
-        Receipt receipt = new Receipt();
-        // Populate receipt details from app and applicant details
-        return receipt;
-    }
 }

@@ -1,49 +1,16 @@
-
-
 public class Receipt {
 
-    private String applicantName;
-    private String NRIC;
-    private int age;
-    private MaritalStatus maritalStatus;
-    private String flatType;
-    private BTOProject projectDetails;
+	private int receiptID;
+	private string NRIC;
+	private string applicantName;
+	private int age;
+	private MaritalState maritalStatus;
+	private string flatType;
+	private int projectID;
+	private string projectName;
+	private string neighborhood;
+	private string applicationOpeningDate;
+	private string applicationClosingDate;
+	private string manager;
 
-    // Getters and setters
-    public String getApplicantName() {
-        return applicantName;
-    }
-    public void setApplicantName(String applicantName) {
-        this.applicantName = applicantName;
-    }
-    public String getNRIC() {
-        return NRIC;
-    }
-    public void setNRIC(String NRIC) {
-        this.NRIC = NRIC;
-    }
-    public int getAge() {
-        return age;
-    }
-    public void setAge(int age) {
-        this.age = age;
-    }
-    public MaritalStatus getMaritalStatus() {
-        return maritalStatus;
-    }
-    public void setMaritalStatus(MaritalStatus maritalStatus) {
-        this.maritalStatus = maritalStatus;
-    }
-    public String getFlatType() {
-        return flatType;
-    }
-    public void setFlatType(String flatType) {
-        this.flatType = flatType;
-    }
-    public BTOProject getProjectDetails() {
-        return projectDetails;
-    }
-    public void setProjectDetails(BTOProject projectDetails) {
-        this.projectDetails = projectDetails;
-    }
 }

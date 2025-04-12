@@ -1,6 +1,6 @@
 public enum ApplicationStatus {
-    Pending,
-    Successful,
-    Unsuccessful,
-    Booked
+	Pending,
+	Successful,
+	Unsuccessful,
+	Booked
 }
