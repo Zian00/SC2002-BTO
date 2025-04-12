@@ -9,7 +9,7 @@ public class UserCSVRepository {
 		throw new UnsupportedOperationException();
 	}
 
-	public void writeUserFromCSV() {
+	public void writeUserFromCSV(List<User> userList) {
 		// TODO - implement UserCSVRepository.writeUserCSVRepo
 		throw new UnsupportedOperationException();
 	}

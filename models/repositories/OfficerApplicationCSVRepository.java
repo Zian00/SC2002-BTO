@@ -11,9 +11,9 @@ public class OfficerApplicationCSVRepository {
 
 	/**
 	 * 
-	 * @param applicationList
+	 * @param officerApplicationList
 	 */
-	public void writeOfficerApplicationToCSV(List<OfficerApplication> applicationList) {
+	public void writeOfficerApplicationToCSV(List<OfficerApplication> officerApplicationList) {
 		// TODO - implement OfficerApplicationCSVRepository.writeOfficerApplicationToCSV
 		throw new UnsupportedOperationException();
 	}

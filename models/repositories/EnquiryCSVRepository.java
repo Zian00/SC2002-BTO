@@ -4,16 +4,16 @@ import models.Enquiry;
 
 public class EnquiryCSVRepository {
 
-	public List<Enquiry> readOfficerApplicationFromCSV() {
+	public List<Enquiry> readEnquiriesFromCSV() {
 		// TODO - implement EnquiryCSVRepository.readOfficerApplicationFromCSV
 		throw new UnsupportedOperationException();
 	}
 
 	/**
 	 * 
-	 * @param applicationList
+	 * @param enquiryList
 	 */
-	public void writeOfficerApplicationToCSV(List<Enquiry> applicationList) {
+	public void writeEnquiriesToCSV(List<Enquiry> enquiryList) {
 		// TODO - implement EnquiryCSVRepository.writeOfficerApplicationToCSV
 		throw new UnsupportedOperationException();
 	}

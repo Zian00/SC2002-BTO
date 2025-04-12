@@ -11,9 +11,9 @@ public class BTOProjectCSVRepository {
 
 	/**
 	 * 
-	 * @param applicationList
+	 * @param btoProjectList
 	 */
-	public void writeBTOProjectToCSV(List<BTOProject> applicationList) {
+	public void writeBTOProjectToCSV(List<BTOProject> btoProjectList) {
 		// TODO - implement BTOProjectCSVRepository.writeBTOProjectToCSV
 		throw new UnsupportedOperationException();
 	}
