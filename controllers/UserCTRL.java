@@ -1,41 +1,55 @@
 package controllers;
+
 import java.util.List;
-import javax.management.relation.Role;
 import models.User;
+import models.enumerations.Role;
+import models.repositories.UserCSVRepository;
 
 public class UserCTRL {
 
-	private List<User> userList;
-	private User currentUser;
+    private List<User> userList;
+    private User currentUser;
+    private UserCSVRepository userRepo = new UserCSVRepository();
 
-	/**
-	 * 
-	 * @param NRIC
-	 * @param password
-	 * @param Role
-	 */
-	public boolean login(String NRIC, String password, Role Role) {
-		// TODO - implement UserCTRL.login
-		throw new UnsupportedOperationException();
-	}
+    // Loads the user data from the CSV file into the userList
+    public void loadUserData() {
+        userList = userRepo.readUserFromCSV();
+    }
 
-	/**
-	 * 
-	 * @param newPassword
-	 */
-	public void changePassword(String newPassword) {
-		// TODO - implement UserCTRL.changePassword
-		throw new UnsupportedOperationException();
-	}
+    // Persists the current user list back to the CSV file
+    public void saveUserData() {
+        userRepo.writeUserToCSV(userList);
+    }
 
-	public void getCurrentUser() {
-		// TODO - implement UserCTRL.getCurrentUser
-		throw new UnsupportedOperationException();
-	}
+    /**
+     * (Currently not implemented)
+     * @param NRIC
+     * @param password
+     * @param role
+     */
+    public boolean login(String NRIC, String password, Role role) {
+        // TODO - Implement login logic if needed
+        throw new UnsupportedOperationException();
+    }
 
-	public void setCurrentUser() {
-		// TODO - implement UserCTRL.setCurrentUser
-		throw new UnsupportedOperationException();
-	}
+    /**
+     * Changes the password for the current user and immediately saves the update.
+     * @param newPassword
+     */
+    public void changePassword(String newPassword) {
+        if (currentUser != null) {
+            currentUser.setPassword(newPassword);
+            saveUserData();  // Save changes immediately
+        } else {
+            System.out.println("Login to change password.");
+        }
+    }
 
+    public User getCurrentUser() {
+        return currentUser;
+    }
+
+    public void setCurrentUser(User user) {
+        currentUser = user;
+    }
 }
