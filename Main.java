@@ -37,15 +37,6 @@ public class Main {
         }
     }
 
-    /**
-     * Prompt the user once for a new password and apply it.
-     */
-    private static void handleChangePassword(Scanner sc, UserCTRL userCTRL) {
-        System.out.print("Enter new password: ");
-        String newPass = sc.nextLine().trim();
-        userCTRL.changePassword(newPass);
-    }
-
     private static void displayRoleMenu(Scanner sc, UserCTRL userCTRL) {
         Role role = userCTRL.getCurrentUser().getRole();
         switch (role) {
@@ -64,22 +55,29 @@ public class Main {
             view.displayMenu();
             String choice = sc.nextLine().trim();
             switch (choice) {
-                // case "1": … implement View Available Projects …
-                case "1":
-                    projectCTRL.viewAvailableProjects();
-                    break;
-                case "7":  // or whatever option number
+                case "1" -> projectCTRL.viewAvailableProjects();
+                case "7" -> // or whatever option number
                 handleChangePassword(sc, userCTRL);
-                break;
-                // case "2": … implement Apply for Project …
-                // ...
-                case "9":  // Logout
+                case "9" -> {
+                    // Logout
                     new UserView().displayLogout();
                     return;
-                default:
-                    System.out.println("Invalid choice, try again.");
+                }
+                default -> System.out.println("Invalid choice, try again.");
             }
+            // case "1": … implement View Available Projects …
+            // case "2": … implement Apply for Project …
+            // ...
         }
+    }
+
+    /**
+     * Prompt the user once for a new password and apply it.
+     */
+    private static void handleChangePassword(Scanner sc, UserCTRL userCTRL) {
+        System.out.print("Enter new password: ");
+        String newPass = sc.nextLine().trim();
+        userCTRL.changePassword(newPass);
     }
 
     private static void runOfficerMenu(Scanner sc, UserCTRL userCTRL) {
@@ -91,17 +89,17 @@ public class Main {
             view.displayMenu();
             String choice = sc.nextLine().trim();
             switch (choice) {
-                // … applicant options 1–9 …
-                case "10": // “View My Officer Projects”
+                case "10" -> // “View My Officer Projects”
                     projectCTRL.viewOfficerProjects();
-                    break;
-                // … more officer actions …
-                case "15": // Logout
+                case "15" -> {
+                    // Logout
                     new UserView().displayLogout();
                     return;
-                default:
-                    System.out.println("Invalid choice, try again.");
+                }
+                default -> System.out.println("Invalid choice, try again.");
             }
+            // … applicant options 1–9 …
+            // … more officer actions …
         }
     }
     
@@ -114,19 +112,18 @@ public class Main {
             view.displayMenu();
             String choice = sc.nextLine().trim();
             switch (choice) {
-                case "5":  // View All Projects
+                case "5" -> // View All Projects
                     projectCTRL.viewAllProjects();
-                    break;
-                case "6":  // View My Created Projects
+                case "6" -> // View My Created Projects
                     projectCTRL.viewMyCreatedProjects();
-                    break;
-                // … other manager actions …
-                case "16": // Logout
+                case "16" -> {
+                    // Logout
                     new UserView().displayLogout();
                     return;
-                default:
-                    System.out.println("Invalid choice, try again.");
+                }
+                default -> System.out.println("Invalid choice, try again.");
             }
+            // … other manager actions …
         }
     }
 }

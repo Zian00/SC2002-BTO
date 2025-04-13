@@ -2,7 +2,6 @@ package controllers;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
 import models.BTOProject;
 import models.User;
 import models.enumerations.Role;
@@ -28,7 +27,7 @@ public class BTOProjectCTRL {
     /** 2) Officers: all projects they’re assigned to (approved), ignore visibility */
     public void viewOfficerProjects() {
         if (currentUser.getRole() != Role.HDBOFFICER) {
-            System.out.println("Not an HDB Officer.");
+            System.out.println("Not a HDB Officer.");
             return;
         }
         List<BTOProject> mine = projects.stream()
@@ -46,7 +45,7 @@ public class BTOProjectCTRL {
     /** 3) Managers: view every project, regardless of visibility */
     public void viewAllProjects() {
         if (currentUser.getRole() != Role.HDBMANAGER) {
-            System.out.println("Not an HDB Manager.");
+            System.out.println("Not a HDB Manager.");
             return;
         }
         projects.forEach(System.out::println);
@@ -55,7 +54,7 @@ public class BTOProjectCTRL {
     /** 4) Managers: view only projects they created */
     public void viewMyCreatedProjects() {
         if (currentUser.getRole() != Role.HDBMANAGER) {
-            System.out.println("Not an HDB Manager.");
+            System.out.println("Not a HDB Manager.");
             return;
         }
         List<BTOProject> mine = projects.stream()
