@@ -56,8 +56,12 @@ public class Main {
             String choice = sc.nextLine().trim();
             switch (choice) {
                 case "1" -> projectCTRL.viewAvailableProjects();
-                case "7" -> // or whatever option number
-                handleChangePassword(sc, userCTRL);
+                case "7" -> {
+                    handleChangePassword(sc, userCTRL);
+                    if (userCTRL.getCurrentUser() == null) return;  // back to login
+                    break;
+                } // or whatever option number
+                
                 case "9" -> {
                     // Logout
                     new UserView().displayLogout();

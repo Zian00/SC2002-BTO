@@ -1,5 +1,6 @@
 package controllers;
 
+import java.io.IOException;
 import java.util.List;
 import models.User;
 import models.enumerations.Role;
@@ -43,20 +44,23 @@ public class UserCTRL {
     /** 
  * Change the current user’s password to newPassword, then persist to CSV.
  */
-    public void changePassword(String newPassword) {
-        if (newPassword == null || newPassword.trim().isEmpty()){
-            System.out.println("Password cannot be blank");
-            return;
-        }
-        
-        if (currentUser != null) {
-            currentUser.setPassword(newPassword);
-            saveUserData();  // writes out assets/userList.csv
-            System.out.println("Password changed successfully.");
-        } else {
-            System.out.println("Error: no user is currently logged in.");
-        }
+    public boolean changePassword(String newPassword) {
+    if (newPassword == null || newPassword.trim().isEmpty()) {
+        System.out.println("Error: password cannot be blank.");
+        return false;
     }
+    if (currentUser == null) {
+        System.out.println("Error: no user is currently logged in.");
+        return false;
+    }
+
+    currentUser.setPassword(newPassword);
+    saveUserData();  // writes out assets/userList.csv
+    System.out.println("Password changed successfully. You will be logged out now.");
+    currentUser = null;  // <— force logout
+    return true;
+}
+    
 
 
     // getters/setters…
