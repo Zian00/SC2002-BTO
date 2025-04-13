@@ -43,19 +43,22 @@ public class UserCTRL {
     /** 
  * Change the current user’s password to newPassword, then persist to CSV.
  */
-    public void changePassword(String newPassword) {
+    public boolean changePassword(String newPassword) {
         if (newPassword == null || newPassword.trim().isEmpty()){
             System.out.println("Password cannot be blank");
-            return;
+            return false;
         }
         
-        if (currentUser != null) {
-            currentUser.setPassword(newPassword);
-            saveUserData();  // writes out assets/userList.csv
-            System.out.println("Password changed successfully.");
-        } else {
+        if (currentUser == null) {
             System.out.println("Error: no user is currently logged in.");
+            return false;
         }
+
+        currentUser.setPassword(newPassword);
+        saveUserData();  // writes out assets/userList.csv
+        System.out.println("Password changed successfully. You will be logged out now.");
+        setCurrentUser(null);  // <— force logout
+        return true;
     }
 
 
@@ -63,5 +66,9 @@ public class UserCTRL {
 
     public User getCurrentUser() {
         return currentUser;
+    }
+
+    public void setCurrentUser(User user) {
+        currentUser = user;
     }
 }

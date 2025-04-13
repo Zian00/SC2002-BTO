@@ -37,37 +37,14 @@ public class Main {
         }
     }
 
+
+
     private static void displayRoleMenu(Scanner sc, UserCTRL userCTRL) {
         Role role = userCTRL.getCurrentUser().getRole();
         switch (role) {
             case APPLICANT    -> runApplicantMenu(sc, userCTRL);
             case HDBOFFICER   -> runOfficerMenu(sc, userCTRL);
             case HDBMANAGER   -> runManagerMenu(sc, userCTRL);
-        }
-    }
-
-    private static void runApplicantMenu(Scanner sc, UserCTRL userCTRL) {
-        ApplicantView view = new ApplicantView();
-        BTOProjectCTRL projectCTRL = new BTOProjectCTRL(userCTRL.getCurrentUser());
-        // TODO: instantiate controllers (BTOProjectCTRL, BTOApplicationCTRL, EnquiryCTRL)
-
-        while (true) {
-            view.displayMenu();
-            String choice = sc.nextLine().trim();
-            switch (choice) {
-                case "1" -> projectCTRL.viewAvailableProjects();
-                case "7" -> // or whatever option number
-                handleChangePassword(sc, userCTRL);
-                case "9" -> {
-                    // Logout
-                    new UserView().displayLogout();
-                    return;
-                }
-                default -> System.out.println("Invalid choice, try again.");
-            }
-            // case "1": … implement View Available Projects …
-            // case "2": … implement Apply for Project …
-            // ...
         }
     }
 
@@ -78,6 +55,38 @@ public class Main {
         System.out.print("Enter new password: ");
         String newPass = sc.nextLine().trim();
         userCTRL.changePassword(newPass);
+    }
+
+    private static void runApplicantMenu(Scanner sc, UserCTRL userCTRL) {
+        ApplicantView view = new ApplicantView();
+        BTOProjectCTRL projectCTRL = new BTOProjectCTRL(userCTRL.getCurrentUser());
+        // BTOApplicationCTRL applicationCTRL = new BTOApplicationCTRL(userCTRL.getCurrentUser());
+        // EnquiryCTRL enquiryCTRL = new EnquiryCTRL(userCTRL.getCurrentUser());
+        // TODO: instantiate controllers (BTOProjectCTRL, BTOApplicationCTRL, EnquiryCTRL)
+
+        while (true) {
+            view.displayMenu();
+            String choice = sc.nextLine().trim();
+            switch (choice) {
+                case "1" -> projectCTRL.viewAvailableProjects();
+                // case "2" -> applicationCTRL.viewUserApplications();
+                // case "3" -> enquiryCTRL.displayEnquiries(choice);
+                case "4" -> {
+                    handleChangePassword(sc, userCTRL);
+                    if (userCTRL.getCurrentUser() == null) return;  // back to login
+                }
+                case "5" -> {
+                    // Logout
+                    userCTRL.setCurrentUser(null);
+                    view.displayLogout();
+                    return;
+                }
+                default -> System.out.println("Invalid choice, try again.");
+            }
+            // case "1": … implement View Available Projects …
+            // case "2": … implement Apply for Project …
+            // ...
+        }
     }
 
     private static void runOfficerMenu(Scanner sc, UserCTRL userCTRL) {
@@ -93,7 +102,7 @@ public class Main {
                     projectCTRL.viewOfficerProjects();
                 case "15" -> {
                     // Logout
-                    new UserView().displayLogout();
+                    view.displayLogout();
                     return;
                 }
                 default -> System.out.println("Invalid choice, try again.");
@@ -118,7 +127,7 @@ public class Main {
                     projectCTRL.viewMyCreatedProjects();
                 case "16" -> {
                     // Logout
-                    new UserView().displayLogout();
+                    view.displayLogout();
                     return;
                 }
                 default -> System.out.println("Invalid choice, try again.");

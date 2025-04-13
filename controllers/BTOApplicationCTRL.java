@@ -2,7 +2,6 @@ package controllers;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
 import models.BTOApplication;
 import models.BTOProject;
 import models.User;
