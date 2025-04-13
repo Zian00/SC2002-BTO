@@ -1,13 +1,12 @@
-import java.util.Scanner;
-import java.util.regex.Pattern;
-
 import controllers.BTOProjectCTRL;
 import controllers.UserCTRL;
+import java.util.Scanner;
+import java.util.regex.Pattern;
 import models.enumerations.Role;
-import views.UserView;
 import views.ApplicantView;
-import views.OfficerView;
 import views.ManagerView;
+import views.OfficerView;
+import views.UserView;
 
 public class Main {
     // must start with S or T, then 7 digits, then an uppercase letter
@@ -50,52 +49,6 @@ private static void handleChangePassword(Scanner sc, UserCTRL userCTRL) {
     String newPass = sc.nextLine().trim();
     userCTRL.changePassword(newPass);
 }
-
-    
-
-    // private static boolean loginFlow(Scanner sc, UserCTRL userCTRL) {
-    //     UserView uv = new UserView();
-    //     uv.displayLogin();
-
-    //     System.out.print("NRIC (uppercase only): ");
-    //     String nric = sc.nextLine().trim();
-
-    //     // enforce uppercase
-    //     if (!nric.equals(nric.toUpperCase())) {
-    //         System.out.println("Error: NRIC must be in uppercase.");
-    //         return false;
-    //     }
-    //     // validate structure
-    //     if (!NRIC_PATTERN.matcher(nric).matches()) {
-    //         System.out.println("Invalid NRIC format. It must:");
-    //         System.out.println("- Start with 'S' or 'T'");
-    //         System.out.println("- Followed by exactly 7 digits");
-    //         System.out.println("- End with an uppercase letter");
-    //         return false;
-    //     }
-
-    //     System.out.print("Password: ");
-    //     String password = sc.nextLine().trim();
-
-    //     System.out.print("Role (APPLICANT, HDBOFFICER, HDBMANAGER): ");
-    //     String roleInput = sc.nextLine().trim().toUpperCase();
-    //     Role role;
-    //     try {
-    //         role = Role.valueOf(roleInput);
-    //     } catch (IllegalArgumentException e) {
-    //         System.out.println("Invalid role. Returning to main menu.");
-    //         return false;
-    //     }
-
-    //     if (userCTRL.login(nric, password, role)) {
-    //         System.out.println("Login successful! Welcome, " +
-    //                            userCTRL.getCurrentUser().getName());
-    //         return true;
-    //     } else {
-    //         System.out.println("Invalid credentials or role. Returning to main menu.");
-    //         return false;
-    //     }
-    // }
 
     private static void displayRoleMenu(Scanner sc, UserCTRL userCTRL) {
         Role role = userCTRL.getCurrentUser().getRole();
