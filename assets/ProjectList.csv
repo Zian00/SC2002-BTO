@@ -1,7 +1,7 @@
-﻿ID,Project Name,Neighborhood,Type,Number of units,Selling price for Type 1,Application opening date,Application closing date,Manager,Officer Slot,ApprovedOfficerNRIC,Visibility
-1,Acacia Breeze,Yishun,2-Room,1,350000,15-02-25,20-03-25,Jessica,3,"""T2109876H,S6543210I""",TRUE
-2,Acacia Breeze,Yishun,2-Room,1,350000,16-02-25,21-03-25,Jessica,3,S6543210I,TRUE
-3,Acacia Breeze,Yishun,3-Room,1,350000,17-02-25,22-03-25,Jessica,3,S6543210I,TRUE
-4,Acacia Breeze,Yishun,3-Room,1,450000,18-02-25,23-03-25,Jessica,3,S6543210I,TRUE
-5,Acacia Breeze,Yishun,3-Room,1,450000,19-02-25,24-03-25,Jessica,3,S6543210I,TRUE
-6,Acacia Breeze,Yishun,3-Room,1,450000,20-02-25,25-03-25,Jessica,3,S6543210I,TRUE
+﻿ID,Project Name,Neighborhood,Type,Number of units,Selling price for Type 1,Application opening date,Application closing date,Manager,Officer Slot,PendingOfficerNRIC,ApprovedOfficerNRIC,Visibility
+1,Acacia Breeze,Yishun,2-Room,1,350000,15-02-25,20-03-25,Jessica,3,T1234567J,"""T2109876H,S6543210I""",TRUE
+2,Acacia Breeze,Yishun,2-Room,1,350000,16-02-25,21-03-25,Jessica,3,T1234567J,S6543210I,TRUE
+3,Acacia Breeze,Yishun,3-Room,1,350000,17-02-25,22-03-25,Jessica,3,T1234567J,S6543210I,TRUE
+4,Acacia Breeze,Yishun,3-Room,1,450000,18-02-25,23-03-25,Jessica,3,T1234567J,S6543210I,TRUE
+5,Acacia Breeze,Yishun,3-Room,1,450000,19-02-25,24-03-25,Jessica,3,T1234567J,S6543210I,TRUE
+6,Acacia Breeze,Yishun,3-Room,1,450000,20-02-25,25-03-25,Jessica,3,T1234567J,S6543210I,TRUE
