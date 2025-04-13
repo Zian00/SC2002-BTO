@@ -3,6 +3,7 @@ import controllers.UserCTRL;
 import java.util.Scanner;
 import models.enumerations.Role;
 import views.ApplicantView;
+import views.BTOProjectView;
 import views.ManagerView;
 import views.OfficerView;
 import views.UserView;
@@ -60,6 +61,7 @@ public class Main {
     private static void runApplicantMenu(Scanner sc, UserCTRL userCTRL) {
         ApplicantView view = new ApplicantView();
         BTOProjectCTRL projectCTRL = new BTOProjectCTRL(userCTRL.getCurrentUser());
+        BTOProjectView projectView = new BTOProjectView();
         // BTOApplicationCTRL applicationCTRL = new BTOApplicationCTRL(userCTRL.getCurrentUser());
         // EnquiryCTRL enquiryCTRL = new EnquiryCTRL(userCTRL.getCurrentUser());
         // TODO: instantiate controllers (BTOProjectCTRL, BTOApplicationCTRL, EnquiryCTRL)
@@ -68,7 +70,11 @@ public class Main {
             view.displayMenu();
             String choice = sc.nextLine().trim();
             switch (choice) {
-                case "1" -> projectCTRL.viewAvailableProjects();
+                case "1" -> {
+                    // Filter projects (in the controller) and then have the view display them.
+                    var filteredProjects = projectCTRL.getFilteredProjects();
+                    projectView.displayAllProject(filteredProjects);
+                }
                 // case "2" -> applicationCTRL.viewUserApplications();
                 // case "3" -> enquiryCTRL.displayEnquiries(choice);
                 case "4" -> {
@@ -89,6 +95,7 @@ public class Main {
     private static void runOfficerMenu(Scanner sc, UserCTRL userCTRL) {
         OfficerView view = new OfficerView();
         BTOProjectCTRL projectCTRL = new BTOProjectCTRL(userCTRL.getCurrentUser());
+        BTOProjectView projectView = new BTOProjectView();
         // OfficerApplicationCTRL officerApplicationCTRL = new OfficerApplicationCTRL(userCTRL.getCurrentUser());
         // TODO: instantiate controllers (BTOProjectCTRL, BTOApplicationCTRL, EnquiryCTRL)
         // … other controllers …
@@ -97,7 +104,11 @@ public class Main {
             view.displayMenu();
             String choice = sc.nextLine().trim();
             switch (choice) {
-                case "1" -> projectCTRL.viewAvailableProjects();
+                case "1" -> {
+                    // Filter projects (in the controller) and then have the view display them.
+                    var filteredProjects = projectCTRL.getFilteredProjects();
+                    projectView.displayAllProject(filteredProjects);
+                }
                 // case "2" -> applicationCTRL.viewUserApplications();
                 // case "3" -> enquiryCTRL.displayEnquiries(choice);
                 case "4" -> {
@@ -119,6 +130,7 @@ public class Main {
     private static void runManagerMenu(Scanner sc, UserCTRL userCTRL) {
         ManagerView view = new ManagerView();
         BTOProjectCTRL projectCTRL = new BTOProjectCTRL(userCTRL.getCurrentUser());
+        BTOProjectView projectView = new BTOProjectView();
         // OfficerApplicationCTRL officerApplicationCTRL = new OfficerApplicationCTRL(userCTRL.getCurrentUser());
         // TODO: instantiate controllers (BTOProjectCTRL, BTOApplicationCTRL, EnquiryCTRL)
         // … other controllers …
@@ -127,7 +139,11 @@ public class Main {
             view.displayMenu();
             String choice = sc.nextLine().trim();
             switch (choice) {
-                case "1" -> projectCTRL.viewAllProjects();
+                case "1" -> {
+                    // Filter projects (in the controller) and then have the view display them.
+                    var filteredProjects = projectCTRL.getFilteredProjects();
+                    projectView.displayAllProject(filteredProjects);
+                }
                 // case "2" -> applicationCTRL.viewUserApplications();
                 // case "3" -> enquiryCTRL.displayEnquiries(choice);
                 case "4" -> {

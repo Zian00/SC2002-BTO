@@ -9,6 +9,8 @@ public class BTOProject {
     private String neighborhood;
     private int available2Room;
     private int available3Room;
+    private int twoRoomPrice;
+    private int threeRoomPrice;
     private String applicationOpeningDate;
     private String applicationClosingDate;
     private int availableOfficerSlots;
@@ -16,10 +18,6 @@ public class BTOProject {
     private String manager;
     private List<String> pendingOfficer;
     private List<String> approvedOfficer;
-
-    public BTOProject() {
-        // default constructor
-    }
 
     public int getProjectID() {
         return projectID;
@@ -54,6 +52,18 @@ public class BTOProject {
     }
     public void setAvailable3Room(int available3Room) {
         this.available3Room = available3Room;
+    }
+    public int getTwoRoomPrice() {
+        return twoRoomPrice;
+    }
+    public void setTwoRoomPrice(int twoRoomPrice) {
+        this.twoRoomPrice = twoRoomPrice;
+    }
+    public int getThreeRoomPrice() {
+        return threeRoomPrice;
+    }
+    public void setThreeRoomPrice(int threeRoomPrice) {
+        this.threeRoomPrice = threeRoomPrice;
     }
 
     public String getApplicationOpeningDate() {
@@ -107,10 +117,34 @@ public class BTOProject {
 
     @Override
     public String toString() {
-        return String.format(
-            "Project[ID=%d, Name=%s, Loc=%s, 2RM=%d, 3RM=%d]",
-            projectID, projectName, neighborhood,
-            available2Room, available3Room, visibility
+        return """
+               Project ID: %d
+               Project Name: %s
+               Location: %s
+               No. of 2 Rooms: %d (Price: $%d)
+               No. of 3 Rooms: %d (Price: $%d)
+               Application Open Date: %s
+               Application Close Date: %s
+               Officer Slots Available: %d
+               Visible: %b
+               Manager: %s
+               Pending Officers: %s
+               Approved Officers: %s
+               """.formatted(
+                projectID,
+                projectName,
+                neighborhood,
+                available2Room,
+                twoRoomPrice,
+                available3Room,
+                threeRoomPrice,
+                applicationOpeningDate,
+                applicationClosingDate,
+                availableOfficerSlots,
+                visibility,
+                manager,
+                pendingOfficer,
+                approvedOfficer
         );
     }
 }
