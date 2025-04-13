@@ -3,8 +3,9 @@ import models.enumerations.RegistrationStatus;
 
 public class OfficerApplication {
 
-	private HDBOfficer officer;
-	private BTOProject project;
+	private int officerApplicationID;
+	private String officerNRIC;
+	private int projectID;
 	private RegistrationStatus status;
 
 	/**

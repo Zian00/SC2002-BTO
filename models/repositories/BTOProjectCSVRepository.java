@@ -4,14 +4,12 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-
 import models.BTOProject;
 
 public class BTOProjectCSVRepository {
 
-    private static final String CSV_FILE = "assets/ProjectList.csv";
+    private static final String CSV_FILE = "assets/projectList.csv";
 
     /**
      * Reads a CSV with columns:
