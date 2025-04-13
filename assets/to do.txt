@@ -1,0 +1,32 @@
+to do:
+qiheng rate card
+
+cc1 revise (1hr)
+1008 assignments all in (1hr)
+1007 assignments all in (1hr+)
+1008 revision (2hr)
+2002 coding (2 hrs)
+
+sc2002:
+
+main: 
+Testcase 1: user able to login and view dashboard based on view /
+TC 2: able to detect invalid NRIC format
+TC 3: system deny INCORRECT password
+
+TC 4: password change: works but then i feel our display v cluttered since a lot of logic is in main?..
+
+aplicantview display menu done
+
+btoprojectctrl edited a lot
+btoapplicationctrl and btoapplication model edited a lot >  links to btoproject model
+
+
+edit enquiry controller ->  implement getter setter
+edited projectlist, main to include view available projects method
+
+T0114158E
+bryanpass
+applicant
+
+readprojectfromcsv -> instead of relying on 1 2 3 4 tags we used sth that tracks ID and stuff to get our details

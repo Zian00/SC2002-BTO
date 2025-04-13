@@ -1,22 +1,182 @@
+import java.util.Scanner;
+import java.util.regex.Pattern;
+
+import controllers.BTOProjectCTRL;
 import controllers.UserCTRL;
-import models.User;
+import models.enumerations.Role;
+import views.UserView;
+import views.ApplicantView;
+import views.OfficerView;
+import views.ManagerView;
 
 public class Main {
+    // must start with S or T, then 7 digits, then an uppercase letter
+    private static final Pattern NRIC_PATTERN = Pattern.compile("^[ST]\\d{7}[A-Z]$");
+
     public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
         UserCTRL userCTRL = new UserCTRL();
+        UserView userView = new UserView();  // Create a UserView instance
         userCTRL.loadUserData();
-        
-        if (userCTRL.getUserList() == null || userCTRL.getUserList().isEmpty()) {
-            System.out.println("No users loaded.");
-        } else {
-            for (User user : userCTRL.getUserList()) {
-                String filter = (user.getFilterSettings() == null || user.getFilterSettings().isEmpty()) ? "null" : user.getFilterSettings();
-                System.out.println("Name: " + user.getName() +
-                                   ", NRIC: " + user.getNRIC() +
-                                   ", Age: " + user.getAge() +
-                                   ", Marital Status: " + user.getMaritalStatus() +
-                                   ", Role: " + user.getRole() +
-                                   ", Filter Settings: " + filter);
+
+        while (true) {
+            // --- General Menu ---
+            System.out.println("\n=== HDB Hub ===");
+            System.out.println("1. Login");
+            System.out.println("2. Exit");
+            System.out.print("Select an option: ");
+            String choice = sc.nextLine().trim();
+
+            if (choice.equals("1")) {
+                if (userView.loginFlow(sc, userCTRL)) {
+                    displayRoleMenu(sc, userCTRL);
+                }
+            } else if (choice.equals("2")) {
+                System.out.println("Exiting... Goodbye!");
+                break;
+            } else {
+                System.out.println("Invalid choice, please try again.");
+            }
+        }
+
+        sc.close();
+    }
+
+    /**
+ * Prompt the user once for a new password and apply it.
+ */
+private static void handleChangePassword(Scanner sc, UserCTRL userCTRL) {
+    System.out.print("Enter new password: ");
+    String newPass = sc.nextLine().trim();
+    userCTRL.changePassword(newPass);
+}
+
+    
+
+    // private static boolean loginFlow(Scanner sc, UserCTRL userCTRL) {
+    //     UserView uv = new UserView();
+    //     uv.displayLogin();
+
+    //     System.out.print("NRIC (uppercase only): ");
+    //     String nric = sc.nextLine().trim();
+
+    //     // enforce uppercase
+    //     if (!nric.equals(nric.toUpperCase())) {
+    //         System.out.println("Error: NRIC must be in uppercase.");
+    //         return false;
+    //     }
+    //     // validate structure
+    //     if (!NRIC_PATTERN.matcher(nric).matches()) {
+    //         System.out.println("Invalid NRIC format. It must:");
+    //         System.out.println("- Start with 'S' or 'T'");
+    //         System.out.println("- Followed by exactly 7 digits");
+    //         System.out.println("- End with an uppercase letter");
+    //         return false;
+    //     }
+
+    //     System.out.print("Password: ");
+    //     String password = sc.nextLine().trim();
+
+    //     System.out.print("Role (APPLICANT, HDBOFFICER, HDBMANAGER): ");
+    //     String roleInput = sc.nextLine().trim().toUpperCase();
+    //     Role role;
+    //     try {
+    //         role = Role.valueOf(roleInput);
+    //     } catch (IllegalArgumentException e) {
+    //         System.out.println("Invalid role. Returning to main menu.");
+    //         return false;
+    //     }
+
+    //     if (userCTRL.login(nric, password, role)) {
+    //         System.out.println("Login successful! Welcome, " +
+    //                            userCTRL.getCurrentUser().getName());
+    //         return true;
+    //     } else {
+    //         System.out.println("Invalid credentials or role. Returning to main menu.");
+    //         return false;
+    //     }
+    // }
+
+    private static void displayRoleMenu(Scanner sc, UserCTRL userCTRL) {
+        Role role = userCTRL.getCurrentUser().getRole();
+        switch (role) {
+            case APPLICANT    -> runApplicantMenu(sc, userCTRL);
+            case HDBOFFICER   -> runOfficerMenu(sc, userCTRL);
+            case HDBMANAGER   -> runManagerMenu(sc, userCTRL);
+        }
+    }
+
+    private static void runApplicantMenu(Scanner sc, UserCTRL userCTRL) {
+        ApplicantView view = new ApplicantView();
+        BTOProjectCTRL projectCTRL = new BTOProjectCTRL(userCTRL.getCurrentUser());
+        // TODO: instantiate controllers (BTOProjectCTRL, BTOApplicationCTRL, EnquiryCTRL)
+
+        while (true) {
+            view.displayMenu();
+            String choice = sc.nextLine().trim();
+            switch (choice) {
+                // case "1": … implement View Available Projects …
+                case "1":
+                    projectCTRL.viewAvailableProjects();
+                    break;
+                case "7":  // or whatever option number
+                handleChangePassword(sc, userCTRL);
+                break;
+                // case "2": … implement Apply for Project …
+                // ...
+                case "9":  // Logout
+                    new UserView().displayLogout();
+                    return;
+                default:
+                    System.out.println("Invalid choice, try again.");
+            }
+        }
+    }
+
+    private static void runOfficerMenu(Scanner sc, UserCTRL userCTRL) {
+        OfficerView view = new OfficerView();
+        BTOProjectCTRL projectCTRL = new BTOProjectCTRL(userCTRL.getCurrentUser());
+        // … other controllers …
+    
+        while (true) {
+            view.displayMenu();
+            String choice = sc.nextLine().trim();
+            switch (choice) {
+                // … applicant options 1–9 …
+                case "10": // “View My Officer Projects”
+                    projectCTRL.viewOfficerProjects();
+                    break;
+                // … more officer actions …
+                case "15": // Logout
+                    new UserView().displayLogout();
+                    return;
+                default:
+                    System.out.println("Invalid choice, try again.");
+            }
+        }
+    }
+    
+    private static void runManagerMenu(Scanner sc, UserCTRL userCTRL) {
+        ManagerView view = new ManagerView();
+        BTOProjectCTRL projectCTRL = new BTOProjectCTRL(userCTRL.getCurrentUser());
+        // … other controllers …
+    
+        while (true) {
+            view.displayMenu();
+            String choice = sc.nextLine().trim();
+            switch (choice) {
+                case "5":  // View All Projects
+                    projectCTRL.viewAllProjects();
+                    break;
+                case "6":  // View My Created Projects
+                    projectCTRL.viewMyCreatedProjects();
+                    break;
+                // … other manager actions …
+                case "16": // Logout
+                    new UserView().displayLogout();
+                    return;
+                default:
+                    System.out.println("Invalid choice, try again.");
             }
         }
     }

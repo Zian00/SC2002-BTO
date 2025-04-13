@@ -11,49 +11,59 @@ public class UserCTRL {
     private User currentUser;
     private UserCSVRepository userRepo = new UserCSVRepository();
 
-    // Loads the user data from the CSV file into the userList
     public void loadUserData() {
         userList = userRepo.readUserFromCSV();
     }
 
-    // Persists the current user list back to the CSV file
     public void saveUserData() {
         userRepo.writeUserToCSV(userList);
     }
 
     /**
-     * (Currently not implemented)
-     * @param NRIC
-     * @param password
-     * @param role
+     * Login as before.
      */
     public boolean login(String NRIC, String password, Role role) {
-        // TODO - Implement login logic if needed
-        throw new UnsupportedOperationException();
+        if (userList == null) loadUserData();
+        for (User u : userList) {
+            if (u.getNRIC().equalsIgnoreCase(NRIC)
+             && u.getPassword().equals(password)
+             && u.getRole() == role) {
+                currentUser = u;
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
-     * Changes the password for the current user and immediately saves the update.
-     * @param newPassword
+     * Change password with verification of the old password.
+     * @param newPassword the desired new password
+     * @return true if the change succeeded, false otherwise
      */
+    /** 
+ * Change the current user’s password to newPassword, then persist to CSV.
+ */
     public void changePassword(String newPassword) {
-        if (currentUser != null) {
-            currentUser.setPassword(newPassword);
-            saveUserData();  // Save changes immediately
-        } else {
-            System.out.println("Login to change password.");
-        }
-    }
 
-	public List<User> getUserList() {
-        return userList;
+        if (newPassword == null || newPassword.trim().isEmpty())
+        {
+            System.out.println("Password cannot be blank");
+            return;
+        }
+        
+    if (currentUser != null) {
+        currentUser.setPassword(newPassword);
+        saveUserData();  // writes out assets/userList.csv
+        System.out.println("Password changed successfully.");
+    } else {
+        System.out.println("Error: no user is currently logged in.");
     }
+}
+
+
+    // getters/setters…
 
     public User getCurrentUser() {
         return currentUser;
-    }
-
-    public void setCurrentUser(User user) {
-        currentUser = user;
     }
 }
