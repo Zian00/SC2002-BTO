@@ -44,21 +44,19 @@ public class UserCTRL {
  * Change the current user’s password to newPassword, then persist to CSV.
  */
     public void changePassword(String newPassword) {
-
-        if (newPassword == null || newPassword.trim().isEmpty())
-        {
+        if (newPassword == null || newPassword.trim().isEmpty()){
             System.out.println("Password cannot be blank");
             return;
         }
         
-    if (currentUser != null) {
-        currentUser.setPassword(newPassword);
-        saveUserData();  // writes out assets/userList.csv
-        System.out.println("Password changed successfully.");
-    } else {
-        System.out.println("Error: no user is currently logged in.");
+        if (currentUser != null) {
+            currentUser.setPassword(newPassword);
+            saveUserData();  // writes out assets/userList.csv
+            System.out.println("Password changed successfully.");
+        } else {
+            System.out.println("Error: no user is currently logged in.");
+        }
     }
-}
 
 
     // getters/setters…

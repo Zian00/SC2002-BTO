@@ -1,12 +1,12 @@
 package views;
 
+import controllers.UserCTRL;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 import models.enumerations.Role;
 
-import controllers.UserCTRL;
-
 public class UserView {
+    // must start with S or T, then 7 digits, then an uppercase letter
     private static final Pattern NRIC_PATTERN = Pattern.compile("^[ST]\\d{7}[A-Z]$");
 
     public boolean loginFlow(Scanner sc, UserCTRL userCTRL) {

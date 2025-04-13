@@ -1,7 +1,6 @@
 import controllers.BTOProjectCTRL;
 import controllers.UserCTRL;
 import java.util.Scanner;
-import java.util.regex.Pattern;
 import models.enumerations.Role;
 import views.ApplicantView;
 import views.ManagerView;
@@ -9,46 +8,43 @@ import views.OfficerView;
 import views.UserView;
 
 public class Main {
-    // must start with S or T, then 7 digits, then an uppercase letter
-    private static final Pattern NRIC_PATTERN = Pattern.compile("^[ST]\\d{7}[A-Z]$");
-
     public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        UserCTRL userCTRL = new UserCTRL();
-        UserView userView = new UserView();  // Create a UserView instance
-        userCTRL.loadUserData();
-
-        while (true) {
-            // --- General Menu ---
-            System.out.println("\n=== HDB Hub ===");
-            System.out.println("1. Login");
-            System.out.println("2. Exit");
-            System.out.print("Select an option: ");
-            String choice = sc.nextLine().trim();
-
-            if (choice.equals("1")) {
-                if (userView.loginFlow(sc, userCTRL)) {
-                    displayRoleMenu(sc, userCTRL);
+        try (Scanner sc = new Scanner(System.in)) {
+            UserCTRL userCTRL = new UserCTRL();
+            UserView userView = new UserView();  // Create a UserView instance
+            userCTRL.loadUserData();
+            
+            OUTER:
+            while (true) {
+                System.out.println("\n=== HDB Hub ===");
+                System.out.println("1. Login");
+                System.out.println("2. Exit");
+                System.out.print("Select an option: ");
+                String choice = sc.nextLine().trim();
+                switch (choice) {
+                    case "1" -> {
+                        if (userView.loginFlow(sc, userCTRL)) {
+                            displayRoleMenu(sc, userCTRL);
+                        }
+                    }
+                    case "2" -> {
+                        System.out.println("Exiting... Goodbye!");
+                        break OUTER;
+                    }
+                    default -> System.out.println("Invalid choice, please try again.");
                 }
-            } else if (choice.equals("2")) {
-                System.out.println("Exiting... Goodbye!");
-                break;
-            } else {
-                System.out.println("Invalid choice, please try again.");
             }
         }
-
-        sc.close();
     }
 
     /**
- * Prompt the user once for a new password and apply it.
- */
-private static void handleChangePassword(Scanner sc, UserCTRL userCTRL) {
-    System.out.print("Enter new password: ");
-    String newPass = sc.nextLine().trim();
-    userCTRL.changePassword(newPass);
-}
+     * Prompt the user once for a new password and apply it.
+     */
+    private static void handleChangePassword(Scanner sc, UserCTRL userCTRL) {
+        System.out.print("Enter new password: ");
+        String newPass = sc.nextLine().trim();
+        userCTRL.changePassword(newPass);
+    }
 
     private static void displayRoleMenu(Scanner sc, UserCTRL userCTRL) {
         Role role = userCTRL.getCurrentUser().getRole();
