@@ -118,7 +118,7 @@ public class BTOProjectView {
 			return;
 		}
 		
-		System.out.println("=== Projects You’re Handling ===");
+		System.out.println("=== Projects You're Handling ===");
 		for (BTOProject p : projects) {
 			System.out.println(p);  // relies on your detailed toString()
 			System.out.println("-----------------------------------");
