@@ -1,6 +1,12 @@
+import controllers.BTOApplicationCTRL;
 import controllers.BTOProjectCTRL;
 import controllers.UserCTRL;
+
+import java.util.List;
 import java.util.Scanner;
+
+import models.BTOProject;
+import models.enumerations.FlatType;
 import models.enumerations.Role;
 import views.ApplicantView;
 import views.BTOApplicationView;
@@ -58,7 +64,7 @@ public class Main {
 
         // Instantiate Controllers
         BTOProjectCTRL projectCTRL = new BTOProjectCTRL(userCTRL.getCurrentUser());
-        // BTOApplicationCTRL applicationCTRL = new BTOApplicationCTRL(userCTRL.getCurrentUser());
+        BTOApplicationCTRL  applicationCTRL = new BTOApplicationCTRL(userCTRL.getCurrentUser());
         // EnquiryCTRL enquiryCTRL = new EnquiryCTRL(userCTRL.getCurrentUser());
         // OfficerApplicationCTRL officerApplicationCTRL = new OfficerApplicationCTRL(userCTRL.getCurrentUser());
 
@@ -69,7 +75,7 @@ public class Main {
 
             // --- Common options 1–4 ---
             switch (opt) {
-                case "1" -> runProjectMenu(sc, userCTRL, projectCTRL, projectView);
+                case "1" -> runProjectMenu(sc, userCTRL, projectCTRL, projectView, applicationCTRL);
                 // case "2" -> runApplicationMenu(sc, userCTRL, applicationCTRL, btoApplicationView);
                 // case "3" -> runEnquiryMenu(sc, userCTRL, enquiryCTRL, enquiryView);
                 case "4" -> { 
@@ -124,7 +130,7 @@ public class Main {
         userCTRL.changePassword(newPass);
     }
 
-    private static void runProjectMenu(Scanner sc, UserCTRL userCTRL, BTOProjectCTRL projectCTRL, BTOProjectView projectView) {
+    private static void runProjectMenu(Scanner sc, UserCTRL userCTRL, BTOProjectCTRL projectCTRL, BTOProjectView projectView, BTOApplicationCTRL applicationCTRL) {
         while (true) {
             switch (userCTRL.getCurrentUser().getRole()) {
                 case APPLICANT -> projectView.displayApplicantMenu();
@@ -138,10 +144,29 @@ public class Main {
                     projectView.displayAvailableForApplicant(
                         userCTRL.getCurrentUser(), filtered);
                 }
-                // case "2" -> {
-                //     var mine = projectCTRL.getMyCreatedProjects();
-                //     projectView.displayAllProject(mine);
-                // }
+                case "2" -> { // Apply for BTO
+                    // Show available projects
+                    List<BTOProject> availableProjects = projectCTRL.getFilteredProjects();
+                    projectView.displayAvailableForApplicant(userCTRL.getCurrentUser(),
+                    availableProjects);
+                    
+                    // Get project selection
+                    System.out.print("Enter project ID to apply: ");
+                    int projectId = Integer.parseInt(sc.nextLine());
+                    
+                    // Get flat type selection
+                    System.out.println("Select flat type:");
+                    System.out.println("1. 2-Room");
+                    System.out.println("2. 3-Room");
+                    int flatChoice = Integer.parseInt(sc.nextLine());
+                    FlatType flatType = (flatChoice == 1) ? FlatType.TWOROOM : FlatType.THREEROOM;
+                    
+                    // Submit application
+                    boolean ok = applicationCTRL.apply(projectId, flatType);
+                    if (ok) {
+                        System.out.println("Application submitted! Status: PENDING.");
+                    }
+                }
                 // case "3" -> {
                 //     int pid = projectView.promptProjectID(sc);
                 //     String res = new BTOApplicationCTRL(userCTRL.getCurrentUser())

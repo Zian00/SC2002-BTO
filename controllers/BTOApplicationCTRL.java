@@ -21,9 +21,11 @@ public class BTOApplicationCTRL {
 
     /** Load all applications and projects, keep track of the logged‑in user */
     public BTOApplicationCTRL(User currentUser) {
-        this.currentUser     = currentUser;
-        this.applicationList = appRepo.readApplicaitonFromCSV();
-        this.projects        = projRepo.readBTOProjectFromCSV();
+        this.currentUser = currentUser;
+        this.appRepo = new ApplicationCSVRepository();
+        this.projRepo = new BTOProjectCSVRepository();
+        this.applicationList = appRepo.readApplicationFromCSV();
+        this.projects = projRepo.readBTOProjectFromCSV();
     }
 
     /** 1) Show all applications by this user */
@@ -44,6 +46,7 @@ public class BTOApplicationCTRL {
      *    – only one application total
      *    – enforces flat‑type eligibility
      */
+
     public boolean apply(int projectId, FlatType flatType) {
         // already applied?
         boolean hasApplied = applicationList.stream()

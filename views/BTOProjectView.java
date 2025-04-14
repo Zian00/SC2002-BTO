@@ -9,7 +9,8 @@ public class BTOProjectView {
 	public void displayApplicantMenu() {
 		System.out.println("\n=== BTO Project Menu ===");
 		System.out.println("1. Display All Available Projects");
-		System.out.println("2. Back");
+		System.out.println("2. Apply for a Project");
+		System.out.println("4. Back");
 		System.out.print("Select an option: ");
 	}
 	public void displayOfficerMenu() {
