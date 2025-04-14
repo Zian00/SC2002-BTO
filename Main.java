@@ -139,7 +139,12 @@ public class Main {
             view.displayMenu();
             String choice = sc.nextLine().trim();
             switch (choice) {
-                case "1" -> {
+                case "1" -> { //special case 1 for manager
+                    // View all projects, regardless of visibility
+                    var allProjects = projectCTRL.getAllProjects();
+                    projectView.displayAllProject(allProjects);
+                }
+                case "2" -> { //made the filter into 2
                     // Filter projects (in the controller) and then have the view display them.
                     var filteredProjects = projectCTRL.getFilteredProjects();
                     projectView.displayAllProject(filteredProjects);

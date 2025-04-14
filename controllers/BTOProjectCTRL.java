@@ -35,9 +35,9 @@ public class BTOProjectCTRL {
                 if (ms == MaritalState.SINGLE && age >= 35) {
                     // Singles, 35 years old and above, can ONLY apply for 2-Room
                     filtered = projects.stream()
-                        .filter(BTOProject::isVisibility)
-                        .filter(p -> p.getAvailable2Room() > 0)
-                        .collect(Collectors.toList());
+                            .filter(BTOProject::isVisibility)
+                            .filter(p -> p.getAvailable2Room() > 0)
+                            .collect(Collectors.toList());
 
                 } else if (ms == MaritalState.MARRIED && age >= 21) {
                     // Married, 21 years old and above, can apply for any flat types
@@ -52,18 +52,23 @@ public class BTOProjectCTRL {
                 break;
             case HDBOFFICER:
                 filtered = projects.stream()
-                            .filter(BTOProject::isVisibility)
-                            .collect(Collectors.toList());
+                        .filter(BTOProject::isVisibility)
+                        .collect(Collectors.toList());
                 break;
             case HDBMANAGER:
                 filtered = projects.stream()
-                            .filter(p -> p.getManager().equalsIgnoreCase(currentUser.getNRIC()))
-                            .collect(Collectors.toList());
+                        .filter(p -> p.getManager().equalsIgnoreCase(currentUser.getNRIC()))
+                        .collect(Collectors.toList());
                 break;
             default:
                 filtered = new ArrayList<>();
         }
         return filtered;
+    }
+    
+    public List<BTOProject> getAllProjects() {
+        // return a copy so callers can’t edit the internal list
+        return new ArrayList<>(projects);
     }
 
     // stubs for edit/delete…
