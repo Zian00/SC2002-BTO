@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import models.BTOProject;
 import models.User;
+import models.enumerations.MaritalState;
 import models.enumerations.Role;
 import models.repositories.BTOProjectCSVRepository;
 
@@ -25,9 +26,30 @@ public class BTOProjectCTRL {
      */
     public List<BTOProject> getFilteredProjects() {
         Role role = currentUser.getRole();
-        List<BTOProject> filtered;
+        List<BTOProject> filtered = new ArrayList<>(); //initialise filtered to an empty list due to error
         switch (role) {
             case APPLICANT:
+                MaritalState ms = currentUser.getMaritalStatus();
+                int age = currentUser.getAge();
+
+                if (ms == MaritalState.SINGLE && age >= 35) {
+                    // Singles, 35 years old and above, can ONLY apply for 2-Room
+                    filtered = projects.stream()
+                        .filter(BTOProject::isVisibility)
+                        .filter(p -> p.getAvailable2Room() > 0)
+                        .collect(Collectors.toList());
+
+                } else if (ms == MaritalState.MARRIED && age >= 21) {
+                    // Married, 21 years old and above, can apply for any flat types
+                    // (2-Room or 3-Room)
+                    filtered = projects.stream()
+                            .filter(BTOProject::isVisibility)
+                            .filter(p -> p.getAvailable2Room() > 0
+                                    || p.getAvailable3Room() > 0)
+                            .collect(Collectors.toList());
+
+                }
+                break;
             case HDBOFFICER:
                 filtered = projects.stream()
                             .filter(BTOProject::isVisibility)
