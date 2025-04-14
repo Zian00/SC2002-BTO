@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import models.Enquiry;
 import models.User;
 import models.interfaces.IEnquiryResponse;
@@ -40,6 +41,17 @@ public class EnquiryCTRL implements IEnquiryResponse, IEnquirySubmission {
         return enquiries;
     }
     
+    // Returns a list of filtered enquiries by logged in user
+    public List<Enquiry> getFilteredEnquiriesByNRIC() {
+    if (enquiries == null) {
+        return new ArrayList<>();
+    }
+    String userNRIC = currentUser.getNRIC();
+    return enquiries.stream()
+            .filter(enquiry -> enquiry.getSubmittedByNRIC().equalsIgnoreCase(userNRIC))
+            .collect(Collectors.toList());
+}
+
     /**
      * Creates a new enquiry.
      * @param projectId the project ID this enquiry is associated with

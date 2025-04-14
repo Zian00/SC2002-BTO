@@ -1,5 +1,6 @@
 package views;
 
+import java.util.List;
 import java.util.Scanner;
 import models.Enquiry;
 
@@ -42,6 +43,25 @@ public class EnquiryView {
         System.out.println("Timestamp    : " + enquiry.getTimestamp());
         System.out.println("--------------------------------------------------");
     }
+
+	public void displayFilteredEnquiries(List<Enquiry> enquiries) {
+    if (enquiries == null || enquiries.isEmpty()) {
+        System.out.println("No enquiries found.");
+        return;
+    }
+    for (Enquiry enquiry : enquiries) {
+        System.out.println("--------------------------------------------------");
+        System.out.println("Enquiry ID   : " + enquiry.getEnquiryId());
+        System.out.println("Enquiry Text : " + enquiry.getEnquiryText());
+        System.out.println("Timestamp    : " + enquiry.getTimestamp());
+        if (enquiry.getResponse() != null && !enquiry.getResponse().isEmpty()) {
+            System.out.println("Response     : " + enquiry.getResponse());
+        }else{
+		    System.out.println("Response     : (No response yet)");	
+		}
+    }
+    System.out.println("--------------------------------------------------");
+}
 
 	/**
 	 * 

@@ -7,7 +7,6 @@ import models.Enquiry;
 import models.enumerations.FlatType;
 import models.enumerations.Role;
 import views.ApplicantView;
-import views.BTOApplicationView;
 import views.BTOProjectView;
 import views.EnquiryView;
 import views.ManagerView;
@@ -48,7 +47,6 @@ public class Main {
         }
     }
 
-
     // --------------------------------------------------------------------------------------------------
     // Central Menu: Navigation for Logged-in Users
     // --------------------------------------------------------------------------------------------------
@@ -62,7 +60,7 @@ public class Main {
             case HDBMANAGER -> new ManagerView();
         };
         BTOProjectView projectView = new BTOProjectView();
-        BTOApplicationView btoApplicationView = new BTOApplicationView();
+        // BTOApplicationView btoApplicationView = new BTOApplicationView();
         EnquiryView enquiryView = new EnquiryView();
 
         // Instantiate Controllers
@@ -80,7 +78,7 @@ public class Main {
             switch (opt) {
                 case "1" -> runProjectMenu(sc, userCTRL, projectCTRL, projectView, applicationCTRL, enquiryView, enquiryCTRL);
                 // case "2" -> runApplicationMenu(sc, userCTRL, applicationCTRL, btoApplicationView);
-                // case "3" -> runEnquiryMenu(sc, userCTRL, enquiryCTRL, enquiryView);
+                case "3" -> runEnquiryMenu(sc, userCTRL, enquiryView, enquiryCTRL);
                 case "4" -> { 
                     handleChangePassword(sc, userCTRL);
                     if (userCTRL.getCurrentUser() == null) return;  // back to login
@@ -205,6 +203,60 @@ public class Main {
                 case HDBMANAGER ->{
                     switch (c){
                         case "5" -> {
+                            return;  // back to central menu
+                        }
+                    }
+                }
+                default -> System.out.println("Invalid choice, try again.");
+            }
+        }
+    }
+
+    // --------------------------------------------------------------------------------------------------
+    // Enquiry Menu for Users
+    // --------------------------------------------------------------------------------------------------
+    private static void runEnquiryMenu(Scanner sc, UserCTRL userCTRL, 
+                                        EnquiryView enquiryView, EnquiryCTRL enquiryCTRL) {
+        while (true) {
+            Role role = userCTRL.getCurrentUser().getRole();
+            switch (role) {
+                case APPLICANT,HDBOFFICER -> enquiryView.displayApplicantMenu();
+                case HDBMANAGER -> enquiryView.displayAdminMenu();
+            }
+            
+            String c = sc.nextLine().trim();
+            switch (role) {
+                case APPLICANT -> {
+                    var userEnquiries = enquiryCTRL.getFilteredEnquiriesByNRIC();
+                    switch (c){
+                        case "1" -> { // Only display Enquiry by User
+                            enquiryView.displayFilteredEnquiries(userEnquiries);
+                        }
+                        case "2" -> { // Apply for BTO
+                            // Show enquiries by user
+                            // Select enquiry to edit
+                            // Show edit options
+                        }
+                        case "3" -> { // Delete Enquiry
+                            // Show enquiries by user
+                            // Select enquiry to delete
+                            // Confirm deletion 
+                        }
+                        case "4" -> {
+                            return;  // back to central menu
+                        }
+                    }
+                }
+                case HDBOFFICER -> {
+                    switch (c){
+                        case "4" -> {
+                            return;  // back to central menu
+                        }
+                    }
+                }
+                case HDBMANAGER ->{
+                    switch (c){
+                        case "2" -> {
                             return;  // back to central menu
                         }
                     }

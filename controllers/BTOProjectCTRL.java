@@ -28,7 +28,7 @@ public class BTOProjectCTRL {
         Role role = currentUser.getRole();
         List<BTOProject> filtered = new ArrayList<>(); //initialise filtered to an empty list due to error
         switch (role) {
-            case APPLICANT:
+            case APPLICANT -> {
                 MaritalState ms = currentUser.getMaritalStatus();
                 int age = currentUser.getAge();
                 System.out.println("Debug: MaritalState: " + ms + ", Age: " + age);
@@ -53,19 +53,14 @@ public class BTOProjectCTRL {
                     // Under age or does not match marital state's criteria – no available units to view.
                     filtered = new ArrayList<>();
                 }
-                break;
-            case HDBOFFICER:
-                filtered = projects.stream()
+            }
+            case HDBOFFICER -> filtered = projects.stream()
                         .filter(BTOProject::isVisibility)
                         .collect(Collectors.toList());
-                break;
-            case HDBMANAGER:
-                filtered = projects.stream()
+            case HDBMANAGER -> filtered = projects.stream()
                         .filter(p -> p.getManager().equalsIgnoreCase(currentUser.getNRIC()))
                         .collect(Collectors.toList());
-                break;
-            default:
-                filtered = new ArrayList<>();
+            default -> filtered = new ArrayList<>();
         }
         return filtered;
     }
