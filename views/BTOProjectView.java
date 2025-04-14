@@ -10,13 +10,23 @@ public class BTOProjectView {
 	}
 
 	/**
-	 * 
-	 * @param projects
-	 */
-	public void displayAllProject(List<BTOProject> projects) {
-		// TODO - implement BTOProjectView.displayAllProject
-		throw new UnsupportedOperationException();
-	}
+     * Displays all projects with divider lines.
+     * @param projects the list of BTOProject objects to display
+     */
+    public void displayAllProject(List<BTOProject> projects) {
+        System.out.println("===================================");
+        System.out.println("      Available Projects         ");
+        System.out.println("===================================");
+        if (projects == null || projects.isEmpty()) {
+            System.out.println("No available projects.");
+        } else {
+            for (BTOProject project : projects) {
+                System.out.println(project);
+                System.out.println("-----------------------------------");
+            }
+        }
+        System.out.println("===================================");
+    }
 
 	public BTOProject promptNewProject() {
 		// TODO - implement BTOProjectView.promptNewProject

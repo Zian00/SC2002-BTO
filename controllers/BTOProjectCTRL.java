@@ -1,5 +1,6 @@
 package controllers;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import models.BTOProject;
@@ -16,56 +17,31 @@ public class BTOProjectCTRL {
         this.currentUser = currentUser;
         this.projects    = new BTOProjectCSVRepository().readBTOProjectFromCSV();
     }
-
-    /** 1) Applicants: only visible projects */
-    public void viewAvailableProjects() {
-        projects.stream()
-            .filter(BTOProject::isVisibility)
-            .forEach(System.out::println);
-    }
-
-    /** 2) Officers: all projects they’re assigned to (approved), ignore visibility */
-    public void viewOfficerProjects() {
-        if (currentUser.getRole() != Role.HDBOFFICER) {
-            System.out.println("Not a HDB Officer.");
-            return;
+    
+    /**
+     * Filters projects based on the current user's role.
+     * For Applicants and HDB Officers, the logic is the same (only visible projects).
+     * For HDB Managers, only projects managed by the manager are returned.
+     */
+    public List<BTOProject> getFilteredProjects() {
+        Role role = currentUser.getRole();
+        List<BTOProject> filtered;
+        switch (role) {
+            case APPLICANT:
+            case HDBOFFICER:
+                filtered = projects.stream()
+                            .filter(BTOProject::isVisibility)
+                            .collect(Collectors.toList());
+                break;
+            case HDBMANAGER:
+                filtered = projects.stream()
+                            .filter(p -> p.getManager().equalsIgnoreCase(currentUser.getNRIC()))
+                            .collect(Collectors.toList());
+                break;
+            default:
+                filtered = new ArrayList<>();
         }
-        List<BTOProject> mine = projects.stream()
-            .filter(p -> p.getApprovedOfficer() != null
-                      && p.getApprovedOfficer().contains(currentUser.getName()))
-            .collect(Collectors.toList());
-
-        if (mine.isEmpty()) {
-            System.out.println("You are not assigned to any projects.");
-        } else {
-            mine.forEach(System.out::println);
-        }
-    }
-
-    /** 3) Managers: view every project, regardless of visibility */
-    public void viewAllProjects() {
-        if (currentUser.getRole() != Role.HDBMANAGER) {
-            System.out.println("Not a HDB Manager.");
-            return;
-        }
-        projects.forEach(System.out::println);
-    }
-
-    /** 4) Managers: view only projects they created */
-    public void viewMyCreatedProjects() {
-        if (currentUser.getRole() != Role.HDBMANAGER) {
-            System.out.println("Not a HDB Manager.");
-            return;
-        }
-        List<BTOProject> mine = projects.stream()
-            .filter(p -> p.getManager().equalsIgnoreCase(currentUser.getName()))
-            .collect(Collectors.toList());
-
-        if (mine.isEmpty()) {
-            System.out.println("You have not created any projects.");
-        } else {
-            mine.forEach(System.out::println);
-        }
+        return filtered;
     }
 
     // stubs for edit/delete…
