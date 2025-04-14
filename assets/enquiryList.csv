@@ -1,4 +1,4 @@
 ﻿enquiryID,NRIC,EnquiryText,ProjectID,Response,timestamp
-12345,T0114158E,Hi when is my flat coming??,1,,13-Apr-25
-21442,S3456789E,I love Yishun,2,,14-Apr-25
-333333,T1111111E,I am faker,1,,15-Apr-25
+1,T0114158E,Hi when is my flat coming??,1,,13-Apr-25
+2,S3456789E,I love Yishun,2,,14-Apr-25
+3,T1111111E,I am faker,1,,15-Apr-25
