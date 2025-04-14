@@ -8,26 +8,45 @@ public class BTOProjectView {
 
 	public void displayApplicantMenu() {
 		System.out.println("\n=== BTO Project Menu ===");
-		System.out.println("1. Display All Available Projects");
-		System.out.println("2. Apply for a Project");
+		System.out.println("1. Display All Available BTO Projects");
+		System.out.println("2. Apply for a BTO Project");
+		System.out.println("3. Submit Enquiry for a BTO project");
 		System.out.println("4. Back");
 		System.out.print("Select an option: ");
 	}
 	public void displayOfficerMenu() {
 		System.out.println("\n=== BTO Project Menu ===");
-		System.out.println("1. Display All Available Projects");
-		System.out.println("2. Apply for Officer BTO Projects ");
-		System.out.println("3. View my Enquiries");
-		System.out.println("4. Back");
-		System.out.print("Select an option: ");
+		System.out.println("1. Display All Available BTO Projects");
+		System.out.println("2. Apply for a BTO Project");
+		System.out.println("3. Submit Enquiry for a BTO project");
+		System.out.println("4. Register as HDB Officer of a BTO Projects ");
+		System.out.println("5. Display BTO Projects I'm handling");
+		System.out.println("6. Back");
+		System.out.println("Select an option: ");
 	}
 	public void displayManagerMenu() {
 		System.out.println("\n=== BTO Project Menu ===");
-		System.out.println("1. Display All Available Projects");
-		System.out.println("2. Change BTO Projects ");
-		System.out.println("3. Change Enquiries");
-		System.out.println("4. Back");
+		System.out.println("1. Display All BTO Projects");
+		System.out.println("2. Add BTO Project");
+		System.out.println("3. Edit BTO Project");
+		System.out.println("4. Delete BTO Project");
+		System.out.println("5. Back");
 		System.out.print("Select an option: ");
+	}
+	public void displayManageBTOProjectMenu() { // Menu only available to manager to create/edit/delete BTO Project Listings
+		System.out.println("\n=== BTO Project Editing Menu ===");
+		System.out.println("1. Edit Project Name");
+		System.out.println("2. Edit Neighborhood");
+		System.out.println("3. Edit Number of 2 Room Flats");
+		System.out.println("4. Edit 2 Room Flat Price");
+		System.out.println("5. Edit Number of 3 Room Flats");
+		System.out.println("6. Edit 3 Room Flat Price");
+		System.out.println("7. Edit Application Opening Date");
+		System.out.println("8. Edit Application Closing Date");
+		System.out.println("9. Edit HDB Manager in charge");
+		System.out.println("10. Edit Available HDB Officer SLots (Max10)");
+		System.out.println("11. Back");
+		System.out.print("Select an option to edit: ");
 	}
 
 	/**
