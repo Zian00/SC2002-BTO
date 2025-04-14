@@ -27,7 +27,7 @@ public class Main {
                 switch (choice) {
                     case "1" -> {
                         if (userView.loginFlow(sc, userCTRL)) {
-                            // 2) Logged‑in central menu
+                            // 2) Logged‑in Main menu
                             runCentralMenu(sc, userCTRL);
                         }
                     }
