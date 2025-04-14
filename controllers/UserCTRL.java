@@ -9,7 +9,7 @@ public class UserCTRL {
 
     private List<User> userList;
     private User currentUser;
-    private UserCSVRepository userRepo = new UserCSVRepository();
+    private final UserCSVRepository userRepo = new UserCSVRepository();
 
     public void loadUserData() {
         userList = userRepo.readUserFromCSV();

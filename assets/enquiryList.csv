@@ -1,4 +1,2 @@
-﻿enquiryID,NRIC,EnquiryText,ProjectID,Response,timestamp
-1,T0114158E,Hi when is my flat coming??,1,,13-Apr-25
-2,S3456789E,I love Yishun,2,,14-Apr-25
-3,T1111111E,I am faker,1,No you are gei,15-Apr-25
+EnquiryID,EnquiryText,SubmittedByNRIC,ProjectID,Response,Timestamp
+1,Why steve no job? I thought im the one with no job :(,T0000000G,5,,2025-04-15 05:28:48

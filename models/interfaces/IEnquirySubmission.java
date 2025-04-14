@@ -7,7 +7,7 @@ public interface IEnquirySubmission {
 	 * 
 	 * @param message
 	 */
-	void createEnquiry(String message);
+	Enquiry createEnquiry(int projectID, String message);
 
 	/**
 	 * 

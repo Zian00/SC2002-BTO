@@ -1,9 +1,9 @@
 import controllers.BTOApplicationCTRL;
 import controllers.BTOProjectCTRL;
+import controllers.EnquiryCTRL;
 import controllers.UserCTRL;
-import java.util.List;
 import java.util.Scanner;
-import models.BTOProject;
+import models.Enquiry;
 import models.enumerations.FlatType;
 import models.enumerations.Role;
 import views.ApplicantView;
@@ -23,6 +23,9 @@ public class Main {
             
             OUTER:
             while (true) {
+                // =====================================
+                // Main Menu Options
+                // =====================================
                 System.out.println("\n=== HDB Hub ===");
                 System.out.println("1. Login");
                 System.out.println("2. Exit");
@@ -46,7 +49,9 @@ public class Main {
     }
 
 
-
+    // --------------------------------------------------------------------------------------------------
+    // Central Menu: Navigation for Logged-in Users
+    // --------------------------------------------------------------------------------------------------
     private static void runCentralMenu(Scanner sc, UserCTRL userCTRL) {
         Role role = userCTRL.getCurrentUser().getRole();
 
@@ -63,7 +68,7 @@ public class Main {
         // Instantiate Controllers
         BTOProjectCTRL projectCTRL = new BTOProjectCTRL(userCTRL.getCurrentUser());
         BTOApplicationCTRL  applicationCTRL = new BTOApplicationCTRL(userCTRL.getCurrentUser());
-        // EnquiryCTRL enquiryCTRL = new EnquiryCTRL(userCTRL.getCurrentUser());
+        EnquiryCTRL enquiryCTRL = new EnquiryCTRL(userCTRL.getCurrentUser());
         // OfficerApplicationCTRL officerApplicationCTRL = new OfficerApplicationCTRL(userCTRL.getCurrentUser());
 
         while (true) {
@@ -73,7 +78,7 @@ public class Main {
 
             // --- Common options 1–4 ---
             switch (opt) {
-                case "1" -> runProjectMenu(sc, userCTRL, projectCTRL, projectView, applicationCTRL);
+                case "1" -> runProjectMenu(sc, userCTRL, projectCTRL, projectView, applicationCTRL, enquiryView, enquiryCTRL);
                 // case "2" -> runApplicationMenu(sc, userCTRL, applicationCTRL, btoApplicationView);
                 // case "3" -> runEnquiryMenu(sc, userCTRL, enquiryCTRL, enquiryView);
                 case "4" -> { 
@@ -119,16 +124,21 @@ public class Main {
         }
     }
 
-    /**
-     * Prompt the user once for a new password and apply it.
-     */
+    // --------------------------------------------------------------------------------------------------
+    // Change Password Handler
+    // --------------------------------------------------------------------------------------------------
     private static void handleChangePassword(Scanner sc, UserCTRL userCTRL) {
         System.out.print("Enter new password: ");
         String newPass = sc.nextLine().trim();
         userCTRL.changePassword(newPass);
     }
 
-    private static void runProjectMenu(Scanner sc, UserCTRL userCTRL, BTOProjectCTRL projectCTRL, BTOProjectView projectView, BTOApplicationCTRL applicationCTRL) {
+    // --------------------------------------------------------------------------------------------------
+    // Projects Menu for Users
+    // --------------------------------------------------------------------------------------------------
+    private static void runProjectMenu(Scanner sc, UserCTRL userCTRL, BTOProjectCTRL projectCTRL, 
+                                    BTOProjectView projectView, BTOApplicationCTRL applicationCTRL,
+                                    EnquiryView enquiryView, EnquiryCTRL enquiryCTRL) {
         while (true) {
             Role role = userCTRL.getCurrentUser().getRole();
             switch (role) {
@@ -139,17 +149,16 @@ public class Main {
             String c = sc.nextLine().trim();
             switch (role) {
                 case APPLICANT -> {
+                    var availableProjects = projectCTRL.getFilteredProjects();
                     switch (c){
-                        case "1" -> {
-                            var filtered = projectCTRL.getFilteredProjects();
+                        case "1" -> { // Only display projects User can apply
                             projectView.displayAvailableForApplicant(
-                                userCTRL.getCurrentUser(), filtered);
+                                userCTRL.getCurrentUser(), availableProjects);
                         }
                         case "2" -> { // Apply for BTO
                             // Show available projects
-                            List<BTOProject> availableProjects = projectCTRL.getFilteredProjects();
-                            projectView.displayAvailableForApplicant(userCTRL.getCurrentUser(),
-                            availableProjects);
+                            projectView.displayAvailableForApplicant(
+                                userCTRL.getCurrentUser(), availableProjects);
                             
                             // Get project selection
                             System.out.print("Enter project ID to apply: ");
@@ -168,12 +177,19 @@ public class Main {
                                 System.out.println("Application submitted! Status: PENDING.");
                             }
                         }
-                        // case "3" -> {
-                        //     int pid = projectView.promptProjectID(sc);
-                        //     String res = new BTOApplicationCTRL(userCTRL.getCurrentUser())
-                        //                      .applyForProject(pid);
-                        //     projectView.showMessage(res);
-                        // }
+                        case "3" -> { // Submit Enquiry for a project
+                            // Show available projects
+                            projectView.displayAvailableForApplicant(
+                                userCTRL.getCurrentUser(), availableProjects);
+                            
+                            // Get project selection
+                            System.out.print("Enter project ID to submit Enquiry: ");
+                            int projectId = Integer.parseInt(sc.nextLine());
+
+                            String enquiryText = enquiryView.promptEnquiryCreation(sc);
+                            Enquiry newEnquiry = enquiryCTRL.createEnquiry(projectId, enquiryText);
+                            enquiryView.displayEnquiryCreated(newEnquiry);
+                        }
                         case "4" -> {
                             return;  // back to central menu
                         }
