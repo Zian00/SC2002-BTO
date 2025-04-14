@@ -1,13 +1,11 @@
 import controllers.BTOProjectCTRL;
 import controllers.UserCTRL;
-
-import java.util.List;
 import java.util.Scanner;
-
-import models.BTOProject;
 import models.enumerations.Role;
 import views.ApplicantView;
+import views.BTOApplicationView;
 import views.BTOProjectView;
+import views.EnquiryView;
 import views.ManagerView;
 import views.OfficerView;
 import views.UserView;
@@ -29,7 +27,8 @@ public class Main {
                 switch (choice) {
                     case "1" -> {
                         if (userView.loginFlow(sc, userCTRL)) {
-                            displayRoleMenu(sc, userCTRL);
+                            // 2) Logged‑in central menu
+                            runCentralMenu(sc, userCTRL);
                         }
                     }
                     case "2" -> {
@@ -44,12 +43,75 @@ public class Main {
 
 
 
-    private static void displayRoleMenu(Scanner sc, UserCTRL userCTRL) {
+    private static void runCentralMenu(Scanner sc, UserCTRL userCTRL) {
         Role role = userCTRL.getCurrentUser().getRole();
-        switch (role) {
-            case APPLICANT    -> runApplicantMenu(sc, userCTRL);
-            case HDBOFFICER   -> runOfficerMenu(sc, userCTRL);
-            case HDBMANAGER   -> runManagerMenu(sc, userCTRL);
+
+        // Instantiate Views
+        UserView baseView = switch (role) {
+            case APPLICANT  -> new ApplicantView();
+            case HDBOFFICER -> new OfficerView();
+            case HDBMANAGER -> new ManagerView();
+        };
+        BTOProjectView projectView = new BTOProjectView();
+        BTOApplicationView btoApplicationView = new BTOApplicationView();
+        EnquiryView enquiryView = new EnquiryView();
+
+        // Instantiate Controllers
+        BTOProjectCTRL projectCTRL = new BTOProjectCTRL(userCTRL.getCurrentUser());
+        // BTOApplicationCTRL applicationCTRL = new BTOApplicationCTRL(userCTRL.getCurrentUser());
+        // EnquiryCTRL enquiryCTRL = new EnquiryCTRL(userCTRL.getCurrentUser());
+        // OfficerApplicationCTRL officerApplicationCTRL = new OfficerApplicationCTRL(userCTRL.getCurrentUser());
+
+        while (true) {
+            baseView.displayMenu();
+            System.out.print("Select an option: ");
+            String opt = sc.nextLine().trim();
+
+            // --- Common options 1–4 ---
+            switch (opt) {
+                case "1" -> runProjectMenu(sc, userCTRL, projectCTRL, projectView);
+                // case "2" -> runApplicationMenu(sc, userCTRL, applicationCTRL, btoApplicationView);
+                // case "3" -> runEnquiryMenu(sc, userCTRL, enquiryCTRL, enquiryView);
+                case "4" -> { 
+                    handleChangePassword(sc, userCTRL);
+                    if (userCTRL.getCurrentUser() == null) return;  // back to login
+                }
+            }
+
+            if (role != null) // --- Role‑specific extra options ---
+            switch (role) {
+                case APPLICANT:
+                    switch (opt){
+                        case "5" -> {
+                            // Logout
+                            userCTRL.setCurrentUser(null);
+                            baseView.displayLogout();
+                            return;
+                        }
+                    }
+                case HDBOFFICER:
+                    switch (opt) {
+                        // case "5" -> officerApplicationCTRL.
+                        case "6" -> {
+                            // Logout
+                            userCTRL.setCurrentUser(null);
+                            baseView.displayLogout();
+                            return;
+                        }
+                    }   break;
+                case HDBMANAGER:
+                    switch (opt) {
+                        // case "5" -> officerApplicationCTRL.
+                        case "6" -> {
+                            // Logout
+                            userCTRL.setCurrentUser(null);
+                            baseView.displayLogout();
+                            return;
+                        }
+                    }   break;
+                default:
+                    break;
+            }
         }
     }
 
@@ -62,121 +124,32 @@ public class Main {
         userCTRL.changePassword(newPass);
     }
 
-    private static void runApplicantMenu(Scanner sc, UserCTRL userCTRL) {
-        ApplicantView view = new ApplicantView();
-        BTOProjectCTRL projectCTRL = new BTOProjectCTRL(userCTRL.getCurrentUser());
-        BTOProjectView projectView = new BTOProjectView();
-        // BTOApplicationCTRL applicationCTRL = new BTOApplicationCTRL(userCTRL.getCurrentUser());
-        // EnquiryCTRL enquiryCTRL = new EnquiryCTRL(userCTRL.getCurrentUser());
-        // TODO: instantiate controllers (BTOProjectCTRL, BTOApplicationCTRL, EnquiryCTRL)
-
+    private static void runProjectMenu(Scanner sc, UserCTRL userCTRL, BTOProjectCTRL projectCTRL, BTOProjectView projectView) {
         while (true) {
-            view.displayMenu();
-            String choice = sc.nextLine().trim();
-            switch (choice) {
+            switch (userCTRL.getCurrentUser().getRole()) {
+                case APPLICANT -> projectView.displayApplicantMenu();
+                case HDBOFFICER -> projectView.displayOfficerMenu();
+                case HDBMANAGER -> projectView.displayManagerMenu();
+            }
+            String c = sc.nextLine().trim();
+            switch (c) {
                 case "1" -> {
-                    // 1) get filtered list
                     var filtered = projectCTRL.getFilteredProjects();
-                    // 2) delegate to your new view method
                     projectView.displayAvailableForApplicant(
-                        userCTRL.getCurrentUser(),
-                        filtered
-                    );
+                        userCTRL.getCurrentUser(), filtered);
                 }
-                // case "2" -> applicationCTRL.viewUserApplications();
-                // case "3" -> enquiryCTRL.displayEnquiries(choice);
+                // case "2" -> {
+                //     var mine = projectCTRL.getMyCreatedProjects();
+                //     projectView.displayAllProject(mine);
+                // }
+                // case "3" -> {
+                //     int pid = projectView.promptProjectID(sc);
+                //     String res = new BTOApplicationCTRL(userCTRL.getCurrentUser())
+                //                      .applyForProject(pid);
+                //     projectView.showMessage(res);
+                // }
                 case "4" -> {
-                    handleChangePassword(sc, userCTRL);
-                    if (userCTRL.getCurrentUser() == null) return;  // back to login
-                }
-                case "5" -> {
-                    // Logout
-                    userCTRL.setCurrentUser(null);
-                    view.displayLogout();
-                    return;
-                }
-                default -> System.out.println("Invalid choice, try again.");
-            }
-        }
-    }
-
-    private static void runOfficerMenu(Scanner sc, UserCTRL userCTRL) {
-        OfficerView view = new OfficerView();
-        BTOProjectCTRL projectCTRL = new BTOProjectCTRL(userCTRL.getCurrentUser());
-        BTOProjectView projectView = new BTOProjectView();
-        // OfficerApplicationCTRL officerApplicationCTRL = new OfficerApplicationCTRL(userCTRL.getCurrentUser());
-        // TODO: instantiate controllers (BTOProjectCTRL, BTOApplicationCTRL, EnquiryCTRL)
-        // … other controllers …
-    
-        while (true) {
-            view.displayMenu();
-            String choice = sc.nextLine().trim();
-            switch (choice) {
-                case "1" -> {
-                    // Filter projects (in the controller) and then have the view display them.
-                    var filteredProjects = projectCTRL.getFilteredProjects();
-                    projectView.displayAllProject(filteredProjects);
-                }
-                // case "2" -> applicationCTRL.viewUserApplications();
-                // case "3" -> enquiryCTRL.displayEnquiries(choice);
-                case "4" -> {
-                    handleChangePassword(sc, userCTRL);
-                    if (userCTRL.getCurrentUser() == null) return;  // back to login
-                }
-                // case "5" -> officerApplicationCTRL;
-                case "7" -> {
-
-                    // View projects I'm handling
-                    List<BTOProject> mine = projectCTRL.getHandledProjects();
-                    projectView.displayHandledProjects(mine);
-                    break;
-                } 
-                
-                case "10" -> {
-                    // Logout
-                    userCTRL.setCurrentUser(null);
-                    view.displayLogout();
-                    return;
-                }
-                default -> System.out.println("Invalid choice, try again.");
-            }
-        }
-    }
-    
-    private static void runManagerMenu(Scanner sc, UserCTRL userCTRL) {
-        ManagerView view = new ManagerView();
-        BTOProjectCTRL projectCTRL = new BTOProjectCTRL(userCTRL.getCurrentUser());
-        BTOProjectView projectView = new BTOProjectView();
-        // OfficerApplicationCTRL officerApplicationCTRL = new OfficerApplicationCTRL(userCTRL.getCurrentUser());
-        // TODO: instantiate controllers (BTOProjectCTRL, BTOApplicationCTRL, EnquiryCTRL)
-        // … other controllers …
-    
-        while (true) {
-            view.displayMenu();
-            String choice = sc.nextLine().trim();
-            switch (choice) {
-                case "1" -> { //special case 1 for manager
-                    // View all projects, regardless of visibility
-                    var allProjects = projectCTRL.getAllProjects();
-                    projectView.displayAllProject(allProjects);
-                }
-                case "2" -> { //made the filter into 2
-                    // Filter projects (in the controller) and then have the view display them.
-                    var filteredProjects = projectCTRL.getFilteredProjects();
-                    projectView.displayAllProject(filteredProjects);
-                }
-                // case "2" -> applicationCTRL.viewUserApplications();
-                // case "3" -> enquiryCTRL.displayEnquiries(choice);
-                case "4" -> {
-                    handleChangePassword(sc, userCTRL);
-                    if (userCTRL.getCurrentUser() == null) return;  // back to login
-                }
-                // case "5" -> officerApplicationCTRL;
-                case "6" -> {
-                    // Logout
-                    userCTRL.setCurrentUser(null);
-                    view.displayLogout();
-                    return;
+                    return;  // back to central menu
                 }
                 default -> System.out.println("Invalid choice, try again.");
             }

@@ -1,16 +1,32 @@
 package views;
 import java.util.List;
-import java.util.stream.Collectors;
-
 import models.BTOProject;
 import models.User;
 import models.enumerations.MaritalState;
 
 public class BTOProjectView {
 
-	public void displayMenu() {
-		// TODO - implement BTOProjectView.displayMenu
-		throw new UnsupportedOperationException();
+	public void displayApplicantMenu() {
+		System.out.println("\n=== BTO Project Menu ===");
+		System.out.println("1. Display All Available Projects");
+		System.out.println("2. Back");
+		System.out.print("Select an option: ");
+	}
+	public void displayOfficerMenu() {
+		System.out.println("\n=== BTO Project Menu ===");
+		System.out.println("1. Display All Available Projects");
+		System.out.println("2. Apply for Officer BTO Projects ");
+		System.out.println("3. View my Enquiries");
+		System.out.println("4. Back");
+		System.out.print("Select an option: ");
+	}
+	public void displayManagerMenu() {
+		System.out.println("\n=== BTO Project Menu ===");
+		System.out.println("1. Display All Available Projects");
+		System.out.println("2. Change BTO Projects ");
+		System.out.println("3. Change Enquiries");
+		System.out.println("4. Back");
+		System.out.print("Select an option: ");
 	}
 
 	/**
