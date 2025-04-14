@@ -31,7 +31,7 @@ public class BTOProjectCTRL {
             case APPLICANT:
                 MaritalState ms = currentUser.getMaritalStatus();
                 int age = currentUser.getAge();
-
+                System.out.println("Debug: MaritalState: " + ms + ", Age: " + age);
                 if (ms == MaritalState.SINGLE && age >= 35) {
                     // Singles, 35 years old and above, can ONLY apply for 2-Room
                     filtered = projects.stream()
@@ -48,6 +48,10 @@ public class BTOProjectCTRL {
                                     || p.getAvailable3Room() > 0)
                             .collect(Collectors.toList());
 
+                }
+                else {
+                    // Under age or does not match marital state's criteria – no available units to view.
+                    filtered = new ArrayList<>();
                 }
                 break;
             case HDBOFFICER:
@@ -69,6 +73,17 @@ public class BTOProjectCTRL {
     public List<BTOProject> getAllProjects() {
         // return a copy so callers can’t edit the internal list
         return new ArrayList<>(projects);
+    }
+
+    //HDBOfficer gethandled projects filter
+    //gets approvedofficer NRIC match and ignores visibility
+    public List<BTOProject> getHandledProjects() {
+        String me = currentUser.getNRIC();
+        return projects.stream()
+        .filter(p -> p.getApprovedOfficer() != null
+                  && p.getApprovedOfficer().stream()
+                        .anyMatch(nric -> nric.equalsIgnoreCase(me)))
+        .collect(Collectors.toList());
     }
 
     // stubs for edit/delete…

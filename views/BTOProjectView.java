@@ -1,5 +1,7 @@
 package views;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import models.BTOProject;
 
 public class BTOProjectView {
@@ -56,4 +58,17 @@ public class BTOProjectView {
 		throw new UnsupportedOperationException();
 	}
 
+	public void displayHandledProjects(List<BTOProject> projects) {
+		if (projects.isEmpty()) {
+			System.out.println("You have no approved officer assignments.");
+			return;
+		}
+		
+		System.out.println("=== Projects You’re Handling ===");
+		for (BTOProject p : projects) {
+			System.out.println(p);  // relies on your detailed toString()
+			System.out.println("-----------------------------------");
+		}
+	}
 }
+

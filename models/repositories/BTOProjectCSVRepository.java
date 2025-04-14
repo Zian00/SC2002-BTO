@@ -1,8 +1,11 @@
 package models.repositories;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import models.BTOProject;
@@ -40,7 +43,7 @@ public class BTOProjectCSVRepository {
                 if (line.isBlank()) continue;
     
                 // Split into 16 parts; empty trailing fields will be preserved.
-                String[] tokens = line.split(",", 16);
+                String[] tokens = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
     
                 int id = Integer.parseInt(tokens[0].trim());
                 String name = tokens[1].trim();
@@ -60,25 +63,26 @@ public class BTOProjectCSVRepository {
                 int officerSlots = Integer.parseInt(tokens[12].trim());
     
                 // Pending Officers (can be empty; if not, officers are split by comma)
-                String pendingRaw = tokens[13].trim();
+                // Update the officer parsing section to properly handle quoted fields
+                String pendingRaw = tokens[13].trim().replaceAll("^\"|\"$", "");
                 List<String> pending = new ArrayList<>();
                 if (!pendingRaw.isEmpty()) {
-                    String[] pendingArray = pendingRaw.split(",");
+                    String[] pendingArray = pendingRaw.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
                     for (String s : pendingArray) {
                         if (!s.isBlank()) {
-                            pending.add(s.trim());
+                            pending.add(s.trim().replace("\"", ""));
                         }
                     }
                 }
     
                 // Approved Officers (can be empty; if not, officers are split by comma)
-                String approvedRaw = tokens[14].trim();
+                String approvedRaw = tokens[14].trim().replaceAll("^\"|\"$", "");
                 List<String> approved = new ArrayList<>();
                 if (!approvedRaw.isEmpty()) {
-                    String[] approvedArray = approvedRaw.split(",");
+                    String[] approvedArray = approvedRaw.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
                     for (String s : approvedArray) {
                         if (!s.isBlank()) {
-                            approved.add(s.trim());
+                            approved.add(s.trim().replace("\"", ""));
                         }
                     }
                 }
@@ -113,5 +117,48 @@ public class BTOProjectCSVRepository {
         return list;
     }
     
-    // TODO: Implement writeBTOProjectToCSV if needed.
+    // TODO: Implement writeBTOProjectToCSV if needed. DEFINITELY NEED
+
+    public void writeBTOProjectToCSV(List<BTOProject> projects) {
+        try (PrintWriter pw = new PrintWriter(
+                new BufferedWriter(new FileWriter(CSV_FILE)))) {
+
+            // 1) Write header (match your CSV columns exactly)
+            pw.println(
+                "projectID,projectName,neighborhood," +
+                "available2Room,available3Room,twoRoomPrice,threeRoomPrice," +
+                "applicationOpeningDate,applicationClosingDate," +
+                "availableOfficerSlots,visibility,manager," +
+                "pendingOfficer,approvedOfficer"
+            );
+
+            // 2) Write each project
+            for (BTOProject p : projects) {
+                String pending = p.getPendingOfficer() == null
+                    ? "" : String.join(";", p.getPendingOfficer());
+                String approved = p.getApprovedOfficer() == null
+                    ? "" : String.join(";", p.getApprovedOfficer());
+
+                pw.printf(
+  "%d,%s,%s,%d,%d,%d,%d,%s,%s,%s,%d,%s,%s,%b%n",
+   p.getProjectID(),
+   p.getProjectName(),
+   p.getNeighborhood(),
+   p.getAvailable2Room(), p.getTwoRoomPrice(),
+   p.getAvailable3Room(), p.getThreeRoomPrice(),
+   p.getApplicationOpeningDate(),
+   p.getApplicationClosingDate(),
+   p.getManager(),
+   p.getAvailableOfficerSlots(),
+   String.join(";", p.getPendingOfficer()),
+   String.join(";", p.getApprovedOfficer()),
+   p.isVisibility()
+);
+            }
+
+        } catch (IOException e) {
+            System.out.println("Error writing ProjectList.csv (is it open elsewhere?)");
+            e.printStackTrace();
+        }
+    }
 }

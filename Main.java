@@ -1,6 +1,10 @@
 import controllers.BTOProjectCTRL;
 import controllers.UserCTRL;
+
+import java.util.List;
 import java.util.Scanner;
+
+import models.BTOProject;
 import models.enumerations.Role;
 import views.ApplicantView;
 import views.BTOProjectView;
@@ -116,7 +120,15 @@ public class Main {
                     if (userCTRL.getCurrentUser() == null) return;  // back to login
                 }
                 // case "5" -> officerApplicationCTRL;
-                case "6" -> {
+                case "7" -> {
+
+                    // View projects I'm handling
+                    List<BTOProject> mine = projectCTRL.getHandledProjects();
+                    projectView.displayHandledProjects(mine);
+                    break;
+                } 
+                
+                case "10" -> {
                     // Logout
                     userCTRL.setCurrentUser(null);
                     view.displayLogout();

@@ -33,8 +33,9 @@ public class BTOApplication {
     @Override
     public String toString() {
         return String.format(
-            "AppID:%d Project:%d Type:%s Status:%s Flat:%s",
-            applicationId, projectID, applicationType, status, flatType
-        );
+                "AppID:%d Project:%d Type:%s Status:%s Flat:%s",
+                applicationId, projectID, applicationType, status, flatType);
     }
+    
+    
 }
