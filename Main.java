@@ -75,9 +75,13 @@ public class Main {
             String choice = sc.nextLine().trim();
             switch (choice) {
                 case "1" -> {
-                    // Filter projects (in the controller) and then have the view display them.
-                    var filteredProjects = projectCTRL.getFilteredProjects();
-                    projectView.displayAllProject(filteredProjects);
+                    // 1) get filtered list
+                    var filtered = projectCTRL.getFilteredProjects();
+                    // 2) delegate to your new view method
+                    projectView.displayAvailableForApplicant(
+                        userCTRL.getCurrentUser(),
+                        filtered
+                    );
                 }
                 // case "2" -> applicationCTRL.viewUserApplications();
                 // case "3" -> enquiryCTRL.displayEnquiries(choice);

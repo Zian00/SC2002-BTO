@@ -3,6 +3,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import models.BTOProject;
+import models.User;
+import models.enumerations.MaritalState;
 
 public class BTOProjectView {
 
@@ -15,15 +17,67 @@ public class BTOProjectView {
      * Displays all projects with divider lines.
      * @param projects the list of BTOProject objects to display
      */
-    public void displayAllProject(List<BTOProject> projects) {
+	public void displayAllProject(List<BTOProject> projects) {
+		System.out.println("===================================");
+		System.out.println("      Available Projects         ");
+		System.out.println("===================================");
+		if (projects == null || projects.isEmpty()) {
+			System.out.println("No available projects.");
+		} else {
+			for (BTOProject project : projects) {
+				System.out.println(project);
+				System.out.println("-----------------------------------");
+			}
+		}
+		System.out.println("===================================");
+	}
+	
+	  /**
+     * Displays projects for an Applicant, showing only the room‑types
+     * they’re eligible to view:
+     *  - Singles ≥35 see only 2‑Room
+     *  - Married ≥21 see both 2‑Room & 3‑Room
+     *  - Everyone else sees a “not eligible” message
+     */
+    public void displayAvailableForApplicant(User user, List<BTOProject> projects) {
+        // Determine eligibility
+        boolean canSee2 = false, canSee3 = false;
+        MaritalState ms = user.getMaritalStatus();
+        int age = user.getAge();
+
+        if (ms == MaritalState.SINGLE && age >= 35) {
+            canSee2 = true;
+        } else if (ms == MaritalState.MARRIED && age >= 21) {
+            canSee2 = true;
+            canSee3 = true;
+        } else {
+            System.out.println("You are not eligible to view any projects.");
+            return;
+        }
+
+        // Header
         System.out.println("===================================");
         System.out.println("      Available Projects         ");
         System.out.println("===================================");
+
         if (projects == null || projects.isEmpty()) {
             System.out.println("No available projects.");
         } else {
-            for (BTOProject project : projects) {
-                System.out.println(project);
+            for (BTOProject p : projects) {
+                System.out.println("Project ID:   " + p.getProjectID());
+                System.out.println("Name:         " + p.getProjectName());
+                System.out.println("Neighborhood: " + p.getNeighborhood());
+
+                // Always show 2‑Room if allowed
+                if (canSee2) {
+                    System.out.printf("2-Room units: %d (Price: $%d)%n",
+                                      p.getAvailable2Room(), p.getTwoRoomPrice());
+                }
+                // Show 3‑Room only if allowed
+                if (canSee3) {
+                    System.out.printf("3-Room units: %d (Price: $%d)%n",
+                                      p.getAvailable3Room(), p.getThreeRoomPrice());
+                }
                 System.out.println("-----------------------------------");
             }
         }
