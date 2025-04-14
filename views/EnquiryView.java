@@ -2,6 +2,7 @@ package views;
 
 import java.util.List;
 import java.util.Scanner;
+import models.BTOProject;
 import models.Enquiry;
 
 public class EnquiryView {
@@ -44,7 +45,7 @@ public class EnquiryView {
         System.out.println("--------------------------------------------------");
     }
 
-	public void displayFilteredEnquiries(List<Enquiry> enquiries) {
+	public void displayFilteredEnquiries(List<BTOProject> projects, List<Enquiry> enquiries) {
     if (enquiries == null || enquiries.isEmpty()) {
         System.out.println("No enquiries found.");
         return;
@@ -52,9 +53,20 @@ public class EnquiryView {
     for (Enquiry enquiry : enquiries) {
         System.out.println("--------------------------------------------------");
         System.out.println("Enquiry ID   : " + enquiry.getEnquiryId());
-        System.out.println("Enquiry Text : " + enquiry.getEnquiryText());
+        
+        // Get project name by matching project id.
+        BTOProject matchingProject = projects.stream()
+            .filter(p -> p.getProjectID() == enquiry.getProjectId())
+            .findFirst()
+            .orElse(null);
+        String projectName = (matchingProject != null) 
+            ? matchingProject.getProjectName() 
+            : "Unknown Project";
+        System.out.println("BTO Project  : " + projectName);
+        
+		System.out.println("Enquiry Text : " + enquiry.getEnquiryText());
         System.out.println("Timestamp    : " + enquiry.getTimestamp());
-        if (enquiry.getResponse() != null && !enquiry.getResponse().isEmpty()) {
+		if (enquiry.getResponse() != null && !enquiry.getResponse().isEmpty()) {
             System.out.println("Response     : " + enquiry.getResponse());
         }else{
 		    System.out.println("Response     : (No response yet)");	

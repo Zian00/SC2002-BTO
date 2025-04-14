@@ -35,7 +35,7 @@ public class EnquiryCSVRepository {
                 if (line.isBlank()) continue;
                 
                 // Split into 6 parts; empty trailing fields will be preserved.
-                String[] tokens = line.split(",", -1);
+                String[] tokens = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
                 if (tokens.length < 6) {
                     System.out.println("Warning: insufficient tokens in line: " + line);
                     continue;
@@ -43,8 +43,8 @@ public class EnquiryCSVRepository {
                 
                 try {
                     int id = Integer.parseInt(tokens[0].trim());
-                    String submittedByNRIC = tokens[1].trim();
-                    String enquiryText = tokens[2].trim();
+                    String enquiryText = tokens[1].trim();
+                    String submittedByNRIC = tokens[2].trim();
                     int projectId = Integer.parseInt(tokens[3].trim());
                     String response = tokens[4].trim();
                     String timestamp = tokens[5].trim();

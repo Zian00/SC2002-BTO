@@ -35,6 +35,7 @@ public class EnquiryCTRL implements IEnquiryResponse, IEnquirySubmission {
     
     public EnquiryCTRL(User currentUser) {
         this.currentUser = currentUser;
+        loadEnquiryData();
     }
 
     public List<Enquiry> getEnquiries(String projName) {

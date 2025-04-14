@@ -78,7 +78,7 @@ public class Main {
             switch (opt) {
                 case "1" -> runProjectMenu(sc, userCTRL, projectCTRL, projectView, applicationCTRL, enquiryView, enquiryCTRL);
                 // case "2" -> runApplicationMenu(sc, userCTRL, applicationCTRL, btoApplicationView);
-                case "3" -> runEnquiryMenu(sc, userCTRL, enquiryView, enquiryCTRL);
+                case "3" -> runEnquiryMenu(sc, userCTRL, projectCTRL, enquiryView, enquiryCTRL);
                 case "4" -> { 
                     handleChangePassword(sc, userCTRL);
                     if (userCTRL.getCurrentUser() == null) return;  // back to login
@@ -215,7 +215,7 @@ public class Main {
     // --------------------------------------------------------------------------------------------------
     // Enquiry Menu for Users
     // --------------------------------------------------------------------------------------------------
-    private static void runEnquiryMenu(Scanner sc, UserCTRL userCTRL, 
+    private static void runEnquiryMenu(Scanner sc, UserCTRL userCTRL, BTOProjectCTRL projectCTRL,
                                         EnquiryView enquiryView, EnquiryCTRL enquiryCTRL) {
         while (true) {
             Role role = userCTRL.getCurrentUser().getRole();
@@ -230,7 +230,8 @@ public class Main {
                     var userEnquiries = enquiryCTRL.getFilteredEnquiriesByNRIC();
                     switch (c){
                         case "1" -> { // Only display Enquiry by User
-                            enquiryView.displayFilteredEnquiries(userEnquiries);
+                            var projectList = projectCTRL.getAllProjects();
+                            enquiryView.displayFilteredEnquiries(projectList, userEnquiries);
                         }
                         case "2" -> { // Apply for BTO
                             // Show enquiries by user
