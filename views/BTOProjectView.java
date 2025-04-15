@@ -4,9 +4,9 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 import models.BTOProject;
 import models.User;
-import java.util.Scanner; 
 import models.enumerations.MaritalState;
 
 public class BTOProjectView {
@@ -32,27 +32,28 @@ public class BTOProjectView {
 	public void displayManagerMenu() {
 		System.out.println("\n=== BTO Project Menu ===");
 		System.out.println("1. Display All BTO Projects");
-		System.out.println("2. Add BTO Project");
-		System.out.println("3. Edit BTO Project");
-		System.out.println("4. Delete BTO Project");
-		System.out.println("5. Back");
+		System.out.println("2. Display My BTO Projects");
+		System.out.println("3. Add BTO Project");
+		System.out.println("4. Edit BTO Project");
+		System.out.println("5. Delete BTO Project");
+		System.out.println("6. Back");
 		System.out.print("Select an option: ");
 	}
-	public void displayManageBTOProjectMenu() { // Menu only available to manager to create/edit/delete BTO Project Listings
-		System.out.println("\n=== BTO Project Editing Menu ===");
-		System.out.println("1. Edit Project Name");
-		System.out.println("2. Edit Neighborhood");
-		System.out.println("3. Edit Number of 2 Room Flats");
-		System.out.println("4. Edit 2 Room Flat Price");
-		System.out.println("5. Edit Number of 3 Room Flats");
-		System.out.println("6. Edit 3 Room Flat Price");
-		System.out.println("7. Edit Application Opening Date");
-		System.out.println("8. Edit Application Closing Date");
-		System.out.println("9. Edit HDB Manager in charge");
-		System.out.println("10. Edit Available HDB Officer SLots (Max10)");
-		System.out.println("11. Back");
-		System.out.print("Select an option to edit: ");
-	}
+	// public void displayManageBTOProjectMenu() { // Menu only available to manager to create/edit/delete BTO Project Listings
+	// 	System.out.println("\n=== BTO Project Editing Menu ===");
+	// 	System.out.println("1. Edit Project Name");
+	// 	System.out.println("2. Edit Neighborhood");
+	// 	System.out.println("3. Edit Number of 2 Room Flats");
+	// 	System.out.println("4. Edit 2 Room Flat Price");
+	// 	System.out.println("5. Edit Number of 3 Room Flats");
+	// 	System.out.println("6. Edit 3 Room Flat Price");
+	// 	System.out.println("7. Edit Application Opening Date");
+	// 	System.out.println("8. Edit Application Closing Date");
+	// 	System.out.println("9. Edit HDB Manager in charge");
+	// 	System.out.println("10. Edit Available HDB Officer SLots (Max10)");
+	// 	System.out.println("11. Back");
+	// 	System.out.print("Select an option to edit: ");
+	// }
 
 	/**
      * Displays all projects with divider lines.
