@@ -154,16 +154,21 @@ public void displayProjectIdNameList(List<BTOProject> projects) {
         while (true) {
             System.out.print(prompt);
             String in = sc.nextLine().trim();
-            if (!in.isEmpty()) return in;
+			if (!in.isEmpty())
+			{
+				return in;
+			}
+			
             System.out.println("Cannot be blank.");
         }
     }
 
-    /** Prompt for an int between min/max (inclusive). If defaultVal!=null and input blank, returns defaultVal. */
+    /** prompt for an int between min/max (inclusive). If defaultVal!=null and input blank, returns defaultVal. */
     private int promptIntInRange(Scanner sc, String prompt, int min, int max, Integer defaultVal) {
         while (true) {
             System.out.print(prompt);
-            String in = sc.nextLine().trim();
+			String in = sc.nextLine().trim();
+			//if user just presses enter, the doesnt edit at all
             if (in.isEmpty() && defaultVal != null) return defaultVal;
             try {
                 int v = Integer.parseInt(in);
