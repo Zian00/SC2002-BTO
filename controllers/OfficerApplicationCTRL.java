@@ -4,6 +4,9 @@ import models.OfficerApplication;
 import models.User;
 
 public class OfficerApplicationCTRL {
+	public static void main(String[] args) {
+		System.out.println("Testing Code...");
+	}
 
 	private List<OfficerApplication> officerApplicationList;
 
