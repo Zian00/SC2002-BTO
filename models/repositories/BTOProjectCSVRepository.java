@@ -120,45 +120,66 @@ public class BTOProjectCSVRepository {
     // TODO: Implement writeBTOProjectToCSV if needed. DEFINITELY NEED
 
     public void writeBTOProjectToCSV(List<BTOProject> projects) {
-        try (PrintWriter pw = new PrintWriter(
-                new BufferedWriter(new FileWriter(CSV_FILE)))) {
+        try (PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(CSV_FILE)))) {
+            // header (match your CSV columns exactly)
+             // 1) Write the exact original header
+        pw.println(
+            "ID,Project Name,Neighborhood,Type 1,Number of units for Type 1,"
+          + "Selling price for Type 1,Type 2,Number of units for Type 2,"
+          + "Selling price for Type 2,Application opening date,"
+          + "Application closing date,ManagerID,Officer Slot,"
+          + "Pending Officer by NRIC,Approved Officer by NRIC,Visibility"
+        );
 
-            // 1) Write header (match your CSV columns exactly)
-            pw.println(
-                "projectID,projectName,neighborhood," +
-                "available2Room,available3Room,twoRoomPrice,threeRoomPrice," +
-                "applicationOpeningDate,applicationClosingDate," +
-                "availableOfficerSlots,visibility,manager," +
-                "pendingOfficer,approvedOfficer"
+        // 2) Write each project in the 16‑column format
+        for (BTOProject p : projects) {
+            String pending  = p.getPendingOfficer() == null
+                              ? ""
+                              : String.join(",", p.getPendingOfficer());
+            String approved = p.getApprovedOfficer() == null
+                              ? ""
+                              : String.join(",", p.getApprovedOfficer());
+
+            pw.printf(
+                "%d,%s,%s,%s,%d,%d,%s,%d,%d,%s,%s,%s,%d,\"%s\",\"%s\",%s%n",
+                // 1. ID
+                p.getProjectID(),
+                // 2. Project Name
+                p.getProjectName(),
+                // 3. Neighborhood
+                p.getNeighborhood(),
+                // 4. Type 1 identifier
+                "2-Room",
+                // 5. Number of units for Type 1
+                p.getAvailable2Room(),
+                // 6. Price for Type 1
+                p.getTwoRoomPrice(),
+                // 7. Type 2 identifier
+                "3-Room",
+                // 8. Number of units for Type 2
+                p.getAvailable3Room(),
+                // 9. Price for Type 2
+                p.getThreeRoomPrice(),
+                // 10. Opening date
+                p.getApplicationOpeningDate(),
+                // 11. Closing date
+                p.getApplicationClosingDate(),
+                // 12. ManagerID
+                p.getManager(),
+                // 13. Officer Slot
+                p.getAvailableOfficerSlots(),
+                // 14. Pending Officer by NRIC (quoted comma‑list)
+                pending,
+                // 15. Approved Officer by NRIC (quoted comma‑list)
+                approved,
+                // 16. Visibility (uppercase)
+                String.valueOf(p.isVisibility()).toUpperCase()
             );
-
-            // 2) Write each project
-            for (BTOProject p : projects) {
-                String pending = p.getPendingOfficer() == null
-                    ? "" : String.join(";", p.getPendingOfficer());
-                String approved = p.getApprovedOfficer() == null
-                    ? "" : String.join(";", p.getApprovedOfficer());
-
-                pw.printf(
-  "%d,%s,%s,%d,%d,%d,%d,%s,%s,%s,%d,%s,%s,%b%n",
-   p.getProjectID(),
-   p.getProjectName(),
-   p.getNeighborhood(),
-   p.getAvailable2Room(), p.getTwoRoomPrice(),
-   p.getAvailable3Room(), p.getThreeRoomPrice(),
-   p.getApplicationOpeningDate(),
-   p.getApplicationClosingDate(),
-   p.getManager(),
-   p.getAvailableOfficerSlots(),
-   String.join(";", p.getPendingOfficer()),
-   String.join(";", p.getApprovedOfficer()),
-   p.isVisibility()
-);
-            }
-
-        } catch (IOException e) {
-            System.out.println("Error writing ProjectList.csv (is it open elsewhere?)");
-            e.printStackTrace();
         }
+
+    } catch (IOException e) {
+        System.err.println("Error writing ProjectList.csv: " + e.getMessage());
     }
+    }
+
 }

@@ -13,12 +13,62 @@ public class BTOProjectCTRL {
 
     private List<BTOProject> projects;
     private User currentUser;
-
+    private BTOProjectCSVRepository repo = new BTOProjectCSVRepository();
     public BTOProjectCTRL(User currentUser) {
         this.currentUser = currentUser;
-        this.projects    = new BTOProjectCSVRepository().readBTOProjectFromCSV();
+        this.projects = repo.readBTOProjectFromCSV();
     }
     
+    /** For manager: get any project by ID */
+    public BTOProject getProjectById(int id) {
+        return projects.stream()
+                .filter(p -> p.getProjectID() == id)
+                .findFirst()
+                .orElse(null);
+    }
+    
+    /** Returns max existing ID + 1 (dont need to manually key in)*/
+    public int getNextProjectID() {
+        return projects.stream()
+                   .mapToInt(BTOProject::getProjectID)
+                   .max()
+                   .orElse(0) + 1;
+    }
+
+    /** Create a new project */
+    public void createProject(BTOProject p) {
+        projects.add(p);
+        repo.writeBTOProjectToCSV(projects);
+    }
+
+     /** Edit an existing project: replace fields on the found object */
+     public boolean editProject(int projectId, BTOProject updated) {
+        BTOProject existing = getProjectById(projectId);
+        if (existing == null) return false;
+        
+        existing.setProjectName(updated.getProjectName());
+        existing.setNeighborhood(updated.getNeighborhood());
+        existing.setAvailable2Room(updated.getAvailable2Room());
+        existing.setTwoRoomPrice(updated.getTwoRoomPrice());
+        existing.setAvailable3Room(updated.getAvailable3Room());
+        existing.setThreeRoomPrice(updated.getThreeRoomPrice());
+        existing.setApplicationOpeningDate(updated.getApplicationOpeningDate());
+        existing.setApplicationClosingDate(updated.getApplicationClosingDate());
+        existing.setAvailableOfficerSlots(updated.getAvailableOfficerSlots());
+        existing.setVisibility(updated.isVisibility());
+        // manager, pending/approved lists typically left alone
+        repo.writeBTOProjectToCSV(projects);
+        return true;
+    }
+
+    /** Delete a project by ID */
+    public boolean deleteProject(int projectId) {
+        boolean removed = projects.removeIf(p -> p.getProjectID() == projectId);
+        if (removed) {
+            repo.writeBTOProjectToCSV(projects);
+        }
+        return removed;
+    }
     /**
      * Filters projects based on the current user's role.
      * For Applicants and HDB Officers, the logic is the same (only visible projects).

@@ -3,6 +3,8 @@ import controllers.BTOProjectCTRL;
 import controllers.EnquiryCTRL;
 import controllers.UserCTRL;
 import java.util.Scanner;
+
+import models.BTOProject;
 import models.Enquiry;
 import models.enumerations.FlatType;
 import models.enumerations.Role;
@@ -194,14 +196,55 @@ public class Main {
                     }
                 }
                 case HDBOFFICER -> {
-                    switch (c){
+                    switch (c) {
+                        
                         case "6" -> {
                             return;  // back to central menu
                         }
                     }
                 }
                 case HDBMANAGER ->{
-                    switch (c){
+                    switch (c) {
+                        case "1" ->
+                        {
+                            var allProjects = projectCTRL.getAllProjects();
+                            projectView.displayAllProject(allProjects);
+                        }
+                        //maybe implement filtered view case here? projects you have created
+                        case "2" ->
+                        {
+                            
+                            BTOProject newProj = projectView.promptNewProject(sc);
+                            //automatically set projectID
+                            int id = projectCTRL.getNextProjectID();
+                            newProj.setProjectID(id);
+                            newProj.setManager(userCTRL.getCurrentUser().getNRIC());
+                            projectCTRL.createProject(newProj);
+                            projectView.showMessage("Project created.");
+                        }
+                        case "3" -> { // Edit
+                            int id = projectView.promptProjectID(sc);
+                            BTOProject existing = projectCTRL.getProjectById(id);
+                            if (existing == null) {
+                                projectView.showMessage("Project not found.");
+                                break;
+                            }
+                            projectView.editProjectDetails(sc, existing);
+                            projectCTRL.editProject(id, existing);
+                            projectView.showMessage("Project updated.");
+                        }
+                        case "4" -> { // Delete
+                            //display a list of projects and ID for reference
+                            var allProjects = projectCTRL.getAllProjects();
+                            projectView.displayProjectIdNameList(allProjects);
+                            //which ID to delete
+                            int id = projectView.promptProjectID(sc);
+                            if (projectCTRL.deleteProject(id)) {
+                                projectView.showMessage("Project deleted.");
+                            } else {
+                                projectView.showMessage("Project not found.");
+                            }
+                        }
                         case "5" -> {
                             return;  // back to central menu
                         }

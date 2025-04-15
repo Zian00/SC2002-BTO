@@ -1,11 +1,16 @@
 package views;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
 import models.BTOProject;
 import models.User;
+import java.util.Scanner; 
 import models.enumerations.MaritalState;
 
 public class BTOProjectView {
-
+	private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 	public void displayApplicantMenu() {
 		System.out.println("\n=== BTO Project Menu ===");
 		System.out.println("1. Display All Available BTO Projects");
@@ -67,6 +72,21 @@ public class BTOProjectView {
 		}
 		System.out.println("===================================");
 	}
+
+	/**
+ * Displays only the project ID and name for each project.
+ */
+public void displayProjectIdNameList(List<BTOProject> projects) {
+    if (projects == null || projects.isEmpty()) {
+        System.out.println("No projects available.");
+        return;
+    }
+    System.out.println("\n=== Projects (choose ID to delete) ===");
+    for (BTOProject p : projects) {
+        System.out.printf("%d: %s%n", p.getProjectID(), p.getProjectName());
+    }
+    System.out.println("===============");
+}
 	
 	  /**
      * Displays projects for an Applicant, showing only the room‑types
@@ -75,77 +95,273 @@ public class BTOProjectView {
      *  - Married ≥21 see both 2‑Room & 3‑Room
      *  - Everyone else sees a “not eligible” message
      */
-    public void displayAvailableForApplicant(User user, List<BTOProject> projects) {
-        // Determine eligibility
-        boolean canSee2 = false, canSee3 = false;
-        MaritalState ms = user.getMaritalStatus();
-        int age = user.getAge();
+	public void displayAvailableForApplicant(User user, List<BTOProject> projects) {
+		// Determine eligibility
+		boolean canSee2 = false, canSee3 = false;
+		MaritalState ms = user.getMaritalStatus();
+		int age = user.getAge();
 
-        if (ms == MaritalState.SINGLE && age >= 35) {
-            canSee2 = true;
-        } else if (ms == MaritalState.MARRIED && age >= 21) {
-            canSee2 = true;
-            canSee3 = true;
-        } else {
-            System.out.println("You are not eligible to view any projects.");
-            return;
+		if (ms == MaritalState.SINGLE && age >= 35) {
+			canSee2 = true;
+		} else if (ms == MaritalState.MARRIED && age >= 21) {
+			canSee2 = true;
+			canSee3 = true;
+		} else {
+			System.out.println("You are not eligible to view any projects.");
+			return;
+		}
+
+		// Header
+		System.out.println("===================================");
+		System.out.println("      Available Projects         ");
+		System.out.println("===================================");
+
+		if (projects == null || projects.isEmpty()) {
+			System.out.println("No available projects.");
+		} else {
+			for (BTOProject p : projects) {
+				System.out.println("Project ID:   " + p.getProjectID());
+				System.out.println("Name:         " + p.getProjectName());
+				System.out.println("Neighborhood: " + p.getNeighborhood());
+
+				// Always show 2‑Room if allowed
+				if (canSee2) {
+					System.out.printf("2-Room units: %d (Price: $%d)%n",
+							p.getAvailable2Room(), p.getTwoRoomPrice());
+				}
+				// Show 3‑Room only if allowed
+				if (canSee3) {
+					System.out.printf("3-Room units: %d (Price: $%d)%n",
+							p.getAvailable3Room(), p.getThreeRoomPrice());
+				}
+				System.out.println("-----------------------------------");
+			}
+		}
+		System.out.println("===================================");
+	}
+
+	public int promptProjectID(Scanner sc) {
+		return promptIntInRange(
+			sc,
+			"Enter Project ID: ",
+			1,
+			Integer.MAX_VALUE,
+			null  // no default, must enter something
+		);
+	}
+	// Prompt until user enters a non‑empty line. must add for creation
+    private String promptNonEmpty(Scanner sc, String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String in = sc.nextLine().trim();
+            if (!in.isEmpty()) return in;
+            System.out.println("Cannot be blank.");
         }
-
-        // Header
-        System.out.println("===================================");
-        System.out.println("      Available Projects         ");
-        System.out.println("===================================");
-
-        if (projects == null || projects.isEmpty()) {
-            System.out.println("No available projects.");
-        } else {
-            for (BTOProject p : projects) {
-                System.out.println("Project ID:   " + p.getProjectID());
-                System.out.println("Name:         " + p.getProjectName());
-                System.out.println("Neighborhood: " + p.getNeighborhood());
-
-                // Always show 2‑Room if allowed
-                if (canSee2) {
-                    System.out.printf("2-Room units: %d (Price: $%d)%n",
-                                      p.getAvailable2Room(), p.getTwoRoomPrice());
-                }
-                // Show 3‑Room only if allowed
-                if (canSee3) {
-                    System.out.printf("3-Room units: %d (Price: $%d)%n",
-                                      p.getAvailable3Room(), p.getThreeRoomPrice());
-                }
-                System.out.println("-----------------------------------");
-            }
-        }
-        System.out.println("===================================");
     }
 
-	public BTOProject promptNewProject() {
-		// TODO - implement BTOProjectView.promptNewProject
-		throw new UnsupportedOperationException();
+    /** Prompt for an int between min/max (inclusive). If defaultVal!=null and input blank, returns defaultVal. */
+    private int promptIntInRange(Scanner sc, String prompt, int min, int max, Integer defaultVal) {
+        while (true) {
+            System.out.print(prompt);
+            String in = sc.nextLine().trim();
+            if (in.isEmpty() && defaultVal != null) return defaultVal;
+            try {
+                int v = Integer.parseInt(in);
+                if (v < min || v > max) {
+                    System.out.printf("Must be between %d and %d.%n", min, max);
+                } else {
+                    return v;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Please enter a whole number.");
+            }
+        }
+    }
+
+    /** Prompt for a date in dd/MM/yyyy. If defaultVal!=null and blank, returns defaultVal. */
+	private LocalDate promptDate(Scanner sc, String prompt, LocalDate defaultVal) {
+		while (true) {
+			System.out.print(prompt);
+			String in = sc.nextLine().trim();
+			if (in.isEmpty() && defaultVal != null)
+				return defaultVal;
+			try {
+				return LocalDate.parse(in, DATE_FMT);
+			} catch (DateTimeParseException e) {
+				System.out.println("Invalid date. Use dd/MM/yyyy.");
+			}
+		}
+	}
+	
+	//catch if the closing date is before opening
+	private LocalDate promptDateNotBefore(Scanner sc, String prompt, LocalDate minDate) {
+		while (true) {
+			System.out.print(prompt);
+			String in = sc.nextLine().trim();
+			try {
+				LocalDate d = LocalDate.parse(in, DATE_FMT);
+				if (d.isBefore(minDate)) {
+					System.out.println("Date must be on or after " + minDate.format(DATE_FMT));
+				} else {
+					return d;
+				}
+			} catch (DateTimeParseException e) {
+				System.out.println("Invalid date. Please use dd/MM/yyyy.");
+			}
+		}
 	}
 
-	public int promptProjectID() {
-		// TODO - implement BTOProjectView.promptProjectID
-		throw new UnsupportedOperationException();
-	}
+    /** Prompt for a boolean. If defaultVal!=null and blank, returns defaultVal. */
+    private boolean promptBoolean(Scanner sc, String prompt, Boolean defaultVal) {
+        while (true) {
+            System.out.print(prompt);
+            String in = sc.nextLine().trim().toLowerCase();
+            if (in.isEmpty() && defaultVal != null) return defaultVal;
+            if (in.equals("true") || in.equals("false")) {
+                return Boolean.parseBoolean(in);
+            }
+            System.out.println("Enter 'true' or 'false'.");
+        }
+    }
 
-	/**
-	 * 
-	 * @param proj
-	 */
-	public void editProjectDetails(BTOProject proj) {
-		// TODO - implement BTOProjectView.editProjectDetails
-		throw new UnsupportedOperationException();
-	}
+    //–– Create Flow ––//
+
+    public BTOProject promptNewProject(Scanner sc) {
+        BTOProject p = new BTOProject();
+
+        p.setProjectName(
+            promptNonEmpty(sc, "Name: ")
+        );
+        p.setNeighborhood(
+            promptNonEmpty(sc, "Neighborhood: ")
+        );
+        p.setAvailable2Room(
+            promptIntInRange(sc, "2-Room units: ", 0, Integer.MAX_VALUE, null)
+        );
+        p.setTwoRoomPrice(
+            promptIntInRange(sc, "2-Room price: ", 0, Integer.MAX_VALUE, null)
+        );
+        p.setAvailable3Room(
+            promptIntInRange(sc, "3-Room units: ", 0, Integer.MAX_VALUE, null)
+        );
+        p.setThreeRoomPrice(
+            promptIntInRange(sc, "3-Room price: ", 0, Integer.MAX_VALUE, null)
+        );
+
+        LocalDate open = promptDate(sc,
+    "Application opening date (dd/MM/yyyy): ", null);
+		p.setApplicationOpeningDate(open.format(DATE_FMT));
+
+		LocalDate close = promptDateNotBefore(sc,
+			"Application closing date (dd/MM/yyyy): ", open);
+		p.setApplicationClosingDate(close.format(DATE_FMT));
+
+
+        p.setAvailableOfficerSlots(
+            promptIntInRange(sc, "Officer slots (0-10): ", 0, 10, null)
+        );
+        p.setVisibility(
+            promptBoolean(sc, "Visible? (true/false): ", null)
+        );
+
+        // Safe defaults
+        p.setPendingOfficer(new ArrayList<>());
+        p.setApprovedOfficer(new ArrayList<>());
+
+        return p;
+    }
+
+    //–– Edit Flow ––//
+
+    public void editProjectDetails(Scanner sc, BTOProject p) {
+        System.out.println("Editing project " + p.getProjectID() + ". Leave blank to keep current.");
+
+        p.setProjectName(
+            promptNonEmpty(sc,
+                String.format("Name (%s): ", p.getProjectName())
+            )
+        );
+
+        p.setNeighborhood(
+            promptNonEmpty(sc,
+                String.format("Neighborhood (%s): ", p.getNeighborhood())
+            )
+        );
+
+        p.setAvailable2Room(
+            promptIntInRange(sc,
+                String.format("2-Room units (%d): ", p.getAvailable2Room()),
+                0, Integer.MAX_VALUE,
+                p.getAvailable2Room()
+            )
+        );
+        p.setTwoRoomPrice(
+            promptIntInRange(sc,
+                String.format("2-Room price (%d): ", p.getTwoRoomPrice()),
+                0, Integer.MAX_VALUE,
+                p.getTwoRoomPrice()
+            )
+        );
+        p.setAvailable3Room(
+            promptIntInRange(sc,
+                String.format("3-Room units (%d): ", p.getAvailable3Room()),
+                0, Integer.MAX_VALUE,
+                p.getAvailable3Room()
+            )
+        );
+        p.setThreeRoomPrice(
+            promptIntInRange(sc,
+                String.format("3-Room price (%d): ", p.getThreeRoomPrice()),
+                0, Integer.MAX_VALUE,
+                p.getThreeRoomPrice()
+            )
+        );
+
+        // parse the existing dates once
+		LocalDate openDefault  = LocalDate.parse(p.getApplicationOpeningDate(), DATE_FMT);
+		// LocalDate closeDefault = LocalDate.parse(p.getApplicationClosingDate(), DATE_FMT);
+
+		// Prompt for a new opening date, or blank to keep the old one
+		LocalDate open = promptDate(
+			sc,
+			String.format("Application opening date (%s): ", p.getApplicationOpeningDate()),
+			openDefault   
+		);
+		p.setApplicationOpeningDate(open.format(DATE_FMT));
+
+		// Prompt for a new closing date, but enforce >= opening date
+		LocalDate close = promptDateNotBefore(
+			sc,
+			String.format("Application closing date (%s): ", p.getApplicationClosingDate()),
+			open          // <-- use the newly chosen (or default) opening date
+		);
+		p.setApplicationClosingDate(close.format(DATE_FMT));
+
+
+        p.setAvailableOfficerSlots(
+            promptIntInRange(sc,
+                String.format("Officer slots (%d) [0-10]: ", p.getAvailableOfficerSlots()),
+                0, 10,
+                p.getAvailableOfficerSlots()
+            )
+        );
+
+        p.setVisibility(
+            promptBoolean(sc,
+                String.format("Visible? (%b): ", p.isVisibility()),
+                p.isVisibility()
+            )
+        );
+    }
+	
+	
 
 	/**
 	 * 
 	 * @param msg
 	 */
 	public void showMessage(String msg) {
-		// TODO - implement BTOProjectView.showMessage
-		throw new UnsupportedOperationException();
+		System.out.println(msg);
 	}
 
 	public void displayHandledProjects(List<BTOProject> projects) {
