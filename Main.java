@@ -8,6 +8,7 @@ import models.BTOProject;
 import models.Enquiry;
 import models.enumerations.FlatType;
 import models.enumerations.Role;
+import views.BTOApplicationView;
 import views.ApplicantView;
 import views.BTOProjectView;
 import views.EnquiryView;
@@ -61,7 +62,7 @@ public class Main {
             case HDBMANAGER -> new ManagerView();
         };
         BTOProjectView projectView = new BTOProjectView();
-        // BTOApplicationView btoApplicationView = new BTOApplicationView();
+        BTOApplicationView btoApplicationView = new BTOApplicationView();
         EnquiryView enquiryView = new EnquiryView();
 
         // Instantiate Controllers
@@ -73,15 +74,14 @@ public class Main {
 
         while (true) {
             baseView.displayMenu();
-            System.out.print("Select an option: ");
+
             String opt = sc.nextLine().trim();
 
             // --- Common options 1–4 ---
             switch (opt) {
                 case "1" ->
                     runProjectMenu(sc, userCTRL, projectCTRL, projectView, applicationCTRL, enquiryView, enquiryCTRL);
-                // case "2" -> runApplicationMenu(sc, userCTRL, applicationCTRL,
-                // btoApplicationView);
+                case "2" -> runApplicationMenu(sc, userCTRL, applicationCTRL, btoApplicationView);
                 case "3" -> runEnquiryMenu(sc, userCTRL, projectCTRL, enquiryView, enquiryCTRL);
                 case "4" -> {
                     handleChangePassword(sc, userCTRL);
@@ -316,6 +316,75 @@ public class Main {
                 case HDBMANAGER -> {
                     switch (c) {
                         case "2" -> {
+                            return; // back to central menu
+                        }
+                    }
+                }
+                default -> System.out.println("Invalid choice, try again.");
+            }
+        }
+    }
+
+    // --------------------------------------------------------------------------------------------------
+    // Application Menu for Users
+    // --------------------------------------------------------------------------------------------------
+    private static void runApplicationMenu(Scanner sc, UserCTRL userCTRL, BTOApplicationCTRL applicationCTRL,
+            BTOApplicationView btoApplicationView) {
+        while (true) {
+            Role role = userCTRL.getCurrentUser().getRole();
+            switch (role) {
+                case APPLICANT -> btoApplicationView.displayApplicantMenu();
+                case HDBOFFICER -> btoApplicationView.displayOfficerMenu();
+                case HDBMANAGER -> btoApplicationView.displayManagerMenu();
+            }
+
+            String c = sc.nextLine().trim();
+            switch (role) {
+                case APPLICANT -> {
+
+                    switch (c) {
+                        case "1" -> {
+
+                        }
+                        case "2" -> {
+                        }
+                        case "3" -> {
+                            return;// back to central menu
+                        }
+                    }
+                }
+                case HDBOFFICER -> {
+                    switch (c) {
+                        case "1" -> {
+
+                        }
+                        case "2" -> {
+                        }
+                        case "3" -> {
+
+                        }
+                        case "4" -> {
+                            return; // back to central menu
+                        }
+                    }
+                }
+                case HDBMANAGER -> {
+                    switch (c) {
+
+                        case "1" -> {
+                            // Display All Applications Handled By Me
+                            var managerApplications = applicationCTRL.getApplicationsHandledByManager();
+                            btoApplicationView.displayAllApplications(managerApplications);
+
+                        }
+                        case "2" -> {
+                            // Approval / Rejection for Application
+                        }
+                        case "3" -> {
+                            // Approval / Rejection for Withdrawal
+
+                        }
+                        case "4" -> {
                             return; // back to central menu
                         }
                     }

@@ -14,3 +14,4 @@ public class OfficerView extends ApplicantView {
         System.out.print("Select an option: ");
     }
 }
+	

@@ -1,5 +1,6 @@
 package controllers;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import models.BTOApplication;
@@ -31,8 +32,8 @@ public class BTOApplicationCTRL {
     /** 1) Show all applications by this user */
     public void viewUserApplications() {
         List<BTOApplication> mine = applicationList.stream()
-            .filter(a -> a.getApplicantNRIC().equals(currentUser.getNRIC()))
-            .collect(Collectors.toList());
+                .filter(a -> a.getApplicantNRIC().equals(currentUser.getNRIC()))
+                .collect(Collectors.toList());
 
         if (mine.isEmpty()) {
             System.out.println("You have no applications.");
@@ -43,14 +44,14 @@ public class BTOApplicationCTRL {
 
     /**
      * 2) Apply for a project
-     *    – only one application total
-     *    – enforces flat‑type eligibility
+     * – only one application total
+     * – enforces flat‑type eligibility
      */
 
     public boolean apply(int projectId, FlatType flatType) {
         // already applied?
         boolean hasApplied = applicationList.stream()
-            .anyMatch(a -> a.getApplicantNRIC().equals(currentUser.getNRIC()));
+                .anyMatch(a -> a.getApplicantNRIC().equals(currentUser.getNRIC()));
         if (hasApplied) {
             System.out.println("Cannot apply for more than one project.");
             return false;
@@ -58,9 +59,9 @@ public class BTOApplicationCTRL {
 
         // find project
         BTOProject proj = projects.stream()
-            .filter(p -> p.getProjectID() == projectId && p.isVisibility())
-            .findFirst()
-            .orElse(null);
+                .filter(p -> p.getProjectID() == projectId && p.isVisibility())
+                .findFirst()
+                .orElse(null);
         if (proj == null) {
             System.out.println("Project not found or not visible.");
             return false;
@@ -80,7 +81,7 @@ public class BTOApplicationCTRL {
 
         // create & persist
         BTOApplication app = new BTOApplication();
-        app.setApplicationId(nextId());
+        app.setApplicationId(getNextProjectID());
         app.setApplicantNRIC(currentUser.getNRIC());
         app.setProjectID(projectId);
         app.setApplicationType(ApplicationType.APPLICATION);
@@ -94,12 +95,12 @@ public class BTOApplicationCTRL {
 
     /**
      * 3) Withdraw an application
-     *    – only if it belongs to this user
+     * – only if it belongs to this user
      */
     public boolean withdraw(int applicationId) {
         for (BTOApplication a : applicationList) {
             if (a.getApplicationId() == applicationId
-             && a.getApplicantNRIC().equals(currentUser.getNRIC())) {
+                    && a.getApplicantNRIC().equals(currentUser.getNRIC())) {
                 a.setApplicationType(ApplicationType.WITHDRAWAL);
                 a.setStatus(ApplicationStatus.UNSUCCESSFUL);
                 appRepo.writeApplicationToCSV(applicationList);
@@ -111,12 +112,21 @@ public class BTOApplicationCTRL {
     }
 
     /** Utility to pick the next unique application ID */
-    private int nextId() {
+    private int getNextProjectID() {
         return applicationList.stream()
-            .mapToInt(BTOApplication::getApplicationId)
-            .max()
-            .orElse(0) + 1;
+                .mapToInt(BTOApplication::getApplicationId)
+                .max()
+                .orElse(0) + 1;
     }
 
-    // ... other stubs (generateFilteredList, updateFlatAvailability, approve/reject, generateReceipt) ...
+    public List<BTOApplication> getApplicationsHandledByManager() {
+        return applicationList.stream()
+                .filter(app -> projects.stream()
+                        .anyMatch(proj -> proj.getProjectID() == app.getProjectID() &&
+                                proj.getManager().equals(currentUser.getNRIC())))
+                .collect(Collectors.toList());
+    }
+
+    // ... other stubs (generateFilteredList, updateFlatAvailability,
+    // approve/reject, generateReceipt) ...
 }
