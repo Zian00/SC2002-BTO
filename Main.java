@@ -19,11 +19,10 @@ public class Main {
     public static void main(String[] args) {
         try (Scanner sc = new Scanner(System.in)) {
             UserCTRL userCTRL = new UserCTRL();
-            UserView userView = new UserView();  // Create a UserView instance
+            UserView userView = new UserView(); // Create a UserView instance
             userCTRL.loadUserData();
-            
-            OUTER:
-            while (true) {
+
+            OUTER: while (true) {
                 // =====================================
                 // Main Menu Options
                 // =====================================
@@ -57,7 +56,7 @@ public class Main {
 
         // Instantiate Views
         UserView baseView = switch (role) {
-            case APPLICANT  -> new ApplicantView();
+            case APPLICANT -> new ApplicantView();
             case HDBOFFICER -> new OfficerView();
             case HDBMANAGER -> new ManagerView();
         };
@@ -67,9 +66,10 @@ public class Main {
 
         // Instantiate Controllers
         BTOProjectCTRL projectCTRL = new BTOProjectCTRL(userCTRL.getCurrentUser());
-        BTOApplicationCTRL  applicationCTRL = new BTOApplicationCTRL(userCTRL.getCurrentUser());
+        BTOApplicationCTRL applicationCTRL = new BTOApplicationCTRL(userCTRL.getCurrentUser());
         EnquiryCTRL enquiryCTRL = new EnquiryCTRL(userCTRL.getCurrentUser());
-        // OfficerApplicationCTRL officerApplicationCTRL = new OfficerApplicationCTRL(userCTRL.getCurrentUser());
+        // OfficerApplicationCTRL officerApplicationCTRL = new
+        // OfficerApplicationCTRL(userCTRL.getCurrentUser());
 
         while (true) {
             baseView.displayMenu();
@@ -78,49 +78,54 @@ public class Main {
 
             // --- Common options 1–4 ---
             switch (opt) {
-                case "1" -> runProjectMenu(sc, userCTRL, projectCTRL, projectView, applicationCTRL, enquiryView, enquiryCTRL);
-                // case "2" -> runApplicationMenu(sc, userCTRL, applicationCTRL, btoApplicationView);
+                case "1" ->
+                    runProjectMenu(sc, userCTRL, projectCTRL, projectView, applicationCTRL, enquiryView, enquiryCTRL);
+                // case "2" -> runApplicationMenu(sc, userCTRL, applicationCTRL,
+                // btoApplicationView);
                 case "3" -> runEnquiryMenu(sc, userCTRL, projectCTRL, enquiryView, enquiryCTRL);
-                case "4" -> { 
+                case "4" -> {
                     handleChangePassword(sc, userCTRL);
-                    if (userCTRL.getCurrentUser() == null) return;  // back to login
+                    if (userCTRL.getCurrentUser() == null)
+                        return; // back to login
                 }
             }
 
             if (role != null) // --- Role‑specific extra options ---
-            switch (role) {
-                case APPLICANT:
-                    switch (opt){
-                        case "5" -> {
-                            // Logout
-                            userCTRL.setCurrentUser(null);
-                            baseView.displayLogout();
-                            return;
+                switch (role) {
+                    case APPLICANT:
+                        switch (opt) {
+                            case "5" -> {
+                                // Logout
+                                userCTRL.setCurrentUser(null);
+                                baseView.displayLogout();
+                                return;
+                            }
                         }
-                    }
-                case HDBOFFICER:
-                    switch (opt) {
-                        // case "5" -> officerApplicationCTRL.
-                        case "6" -> {
-                            // Logout
-                            userCTRL.setCurrentUser(null);
-                            baseView.displayLogout();
-                            return;
+                    case HDBOFFICER:
+                        switch (opt) {
+                            // case "5" -> officerApplicationCTRL.
+                            case "6" -> {
+                                // Logout
+                                userCTRL.setCurrentUser(null);
+                                baseView.displayLogout();
+                                return;
+                            }
                         }
-                    }   break;
-                case HDBMANAGER:
-                    switch (opt) {
-                        // case "5" -> officerApplicationCTRL.
-                        case "6" -> {
-                            // Logout
-                            userCTRL.setCurrentUser(null);
-                            baseView.displayLogout();
-                            return;
+                        break;
+                    case HDBMANAGER:
+                        switch (opt) {
+                            // case "5" -> officerApplicationCTRL.
+                            case "6" -> {
+                                // Logout
+                                userCTRL.setCurrentUser(null);
+                                baseView.displayLogout();
+                                return;
+                            }
                         }
-                    }   break;
-                default:
-                    break;
-            }
+                        break;
+                    default:
+                        break;
+                }
         }
     }
 
@@ -136,9 +141,9 @@ public class Main {
     // --------------------------------------------------------------------------------------------------
     // Projects Menu for Users
     // --------------------------------------------------------------------------------------------------
-    private static void runProjectMenu(Scanner sc, UserCTRL userCTRL, BTOProjectCTRL projectCTRL, 
-                                    BTOProjectView projectView, BTOApplicationCTRL applicationCTRL,
-                                    EnquiryView enquiryView, EnquiryCTRL enquiryCTRL) {
+    private static void runProjectMenu(Scanner sc, UserCTRL userCTRL, BTOProjectCTRL projectCTRL,
+            BTOProjectView projectView, BTOApplicationCTRL applicationCTRL,
+            EnquiryView enquiryView, EnquiryCTRL enquiryCTRL) {
         while (true) {
             Role role = userCTRL.getCurrentUser().getRole();
             switch (role) {
@@ -150,27 +155,27 @@ public class Main {
             switch (role) {
                 case APPLICANT -> {
                     var availableProjects = projectCTRL.getFilteredProjects();
-                    switch (c){
+                    switch (c) {
                         case "1" -> { // Only display projects User can apply
                             projectView.displayAvailableForApplicant(
-                                userCTRL.getCurrentUser(), availableProjects);
+                                    userCTRL.getCurrentUser(), availableProjects);
                         }
                         case "2" -> { // Apply for BTO
                             // Show available projects
                             projectView.displayAvailableForApplicant(
-                                userCTRL.getCurrentUser(), availableProjects);
-                            
+                                    userCTRL.getCurrentUser(), availableProjects);
+
                             // Get project selection
                             System.out.print("Enter project ID to apply: ");
                             int projectId = Integer.parseInt(sc.nextLine());
-                            
+
                             // Get flat type selection
                             System.out.println("Select flat type:");
                             System.out.println("1. 2-Room");
                             System.out.println("2. 3-Room");
                             int flatChoice = Integer.parseInt(sc.nextLine());
                             FlatType flatType = (flatChoice == 1) ? FlatType.TWOROOM : FlatType.THREEROOM;
-                            
+
                             // Submit application
                             boolean ok = applicationCTRL.apply(projectId, flatType);
                             if (ok) {
@@ -180,8 +185,8 @@ public class Main {
                         case "3" -> { // Submit Enquiry for a project
                             // Show available projects
                             projectView.displayAvailableForApplicant(
-                                userCTRL.getCurrentUser(), availableProjects);
-                            
+                                    userCTRL.getCurrentUser(), availableProjects);
+
                             // Get project selection
                             System.out.print("Enter project ID to submit Enquiry: ");
                             int projectId = Integer.parseInt(sc.nextLine());
@@ -191,38 +196,48 @@ public class Main {
                             enquiryView.displayEnquiryCreated(newEnquiry);
                         }
                         case "4" -> {
-                            return;  // back to central menu
+                            return; // back to central menu
                         }
                     }
                 }
                 case HDBOFFICER -> {
                     switch (c) {
-                        
+
                         case "6" -> {
-                            return;  // back to central menu
+                            return; // back to central menu
                         }
                     }
                 }
-                    case HDBMANAGER ->{
-                        switch (c) {
-                            case "1" ->
-                            {
-                                var allProjects = projectCTRL.getAllProjects();
-                                projectView.displayAllProject(allProjects);
+                case HDBMANAGER -> {
+                    switch (c) {
+                        case "1" -> {
+                            var allProjects = projectCTRL.getAllProjects();
+                            projectView.displayAllProject(allProjects);
+                        }
+                        case "2" -> {
+                            // Manager views his own projects
+                            var allProjects = projectCTRL.getAllProjects();
+                            var managerNRIC = userCTRL.getCurrentUser().getNRIC();
+                            var myProjects = allProjects.stream()
+                                    .filter(project -> project.getManager().equals(managerNRIC))
+                                    .toList();
+                            if (myProjects.isEmpty()) {
+                                projectView.showMessage("No projects found for you.");
+                            } else {
+                                projectView.displayManagerProjects(myProjects);
                             }
-                            //maybe implement filtered view case here? projects you have created
-                            case "2" ->
-                            {
-                                
-                                BTOProject newProj = projectView.promptNewProject(sc);
-                                //automatically set projectID
-                                int id = projectCTRL.getNextProjectID();
-                                newProj.setProjectID(id);
-                                newProj.setManager(userCTRL.getCurrentUser().getNRIC());
-                                projectCTRL.createProject(newProj);
-                                projectView.showMessage("Project created.");
-                            }
-                        case "3" -> { // Edit
+                        }
+
+                        case "3" -> {
+                            BTOProject newProj = projectView.promptNewProject(sc);
+                            // automatically set projectID
+                            int id = projectCTRL.getNextProjectID();
+                            newProj.setProjectID(id);
+                            newProj.setManager(userCTRL.getCurrentUser().getNRIC());
+                            projectCTRL.createProject(newProj);
+                            projectView.showMessage("Project created.");
+                        }
+                        case "4" -> { // Edit
                             int id = projectView.promptProjectID(sc);
                             BTOProject existing = projectCTRL.getProjectById(id);
                             if (existing == null) {
@@ -233,11 +248,11 @@ public class Main {
                             projectCTRL.editProject(id, existing);
                             projectView.showMessage("Project updated.");
                         }
-                        case "4" -> { // Delete
-                            //display a list of projects and ID for reference
+                        case "5" -> { // Delete
+                            // display a list of projects and ID for reference
                             var allProjects = projectCTRL.getAllProjects();
                             projectView.displayProjectIdNameList(allProjects);
-                            //which ID to delete
+                            // which ID to delete
                             int id = projectView.promptProjectID(sc);
                             if (projectCTRL.deleteProject(id)) {
                                 projectView.showMessage("Project deleted.");
@@ -245,8 +260,8 @@ public class Main {
                                 projectView.showMessage("Project not found.");
                             }
                         }
-                        case "5" -> {
-                            return;  // back to central menu
+                        case "6" -> {
+                            return; // back to central menu
                         }
                     }
                 }
@@ -259,19 +274,19 @@ public class Main {
     // Enquiry Menu for Users
     // --------------------------------------------------------------------------------------------------
     private static void runEnquiryMenu(Scanner sc, UserCTRL userCTRL, BTOProjectCTRL projectCTRL,
-                                        EnquiryView enquiryView, EnquiryCTRL enquiryCTRL) {
+            EnquiryView enquiryView, EnquiryCTRL enquiryCTRL) {
         while (true) {
             Role role = userCTRL.getCurrentUser().getRole();
             switch (role) {
-                case APPLICANT,HDBOFFICER -> enquiryView.displayApplicantMenu();
+                case APPLICANT, HDBOFFICER -> enquiryView.displayApplicantMenu();
                 case HDBMANAGER -> enquiryView.displayAdminMenu();
             }
-            
+
             String c = sc.nextLine().trim();
             switch (role) {
                 case APPLICANT -> {
                     var userEnquiries = enquiryCTRL.getFilteredEnquiriesByNRIC();
-                    switch (c){
+                    switch (c) {
                         case "1" -> { // Only display Enquiry by User
                             var projectList = projectCTRL.getAllProjects();
                             enquiryView.displayFilteredEnquiries(projectList, userEnquiries);
@@ -284,24 +299,24 @@ public class Main {
                         case "3" -> { // Delete Enquiry
                             // Show enquiries by user
                             // Select enquiry to delete
-                            // Confirm deletion 
+                            // Confirm deletion
                         }
                         case "4" -> {
-                            return;  // back to central menu
+                            return; // back to central menu
                         }
                     }
                 }
                 case HDBOFFICER -> {
-                    switch (c){
+                    switch (c) {
                         case "4" -> {
-                            return;  // back to central menu
+                            return; // back to central menu
                         }
                     }
                 }
-                case HDBMANAGER ->{
-                    switch (c){
+                case HDBMANAGER -> {
+                    switch (c) {
                         case "2" -> {
-                            return;  // back to central menu
+                            return; // back to central menu
                         }
                     }
                 }
