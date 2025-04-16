@@ -450,8 +450,69 @@ public class Main {
                             }
                         }
 
-                        case "3" -> { // Approval / Rejection for Withdrawal
+                        case "3" -> { // Approval for Withdrawal of BTO Application (no need for rejection)
+                            try {  // withdrawal application has to be in pending status in order to approve
+                                var pendingWithdrawals = applicationCTRL.getApplicationsHandledByManager().stream()
+                                        .filter(app -> app.getApplicationType() == ApplicationType.WITHDRAWAL
+                                                && app.getStatus() == ApplicationStatus.PENDING)
+                                        .collect(Collectors.toList());
 
+                                if (pendingWithdrawals.isEmpty()) {
+                                    System.out.println("No pending withdrawal applications available for approval.");
+                                    break;
+                                }
+
+                                // Create a project controller instance to fetch project details.
+                                BTOProjectCTRL projectCTRL = new BTOProjectCTRL(userCTRL.getCurrentUser());
+
+                                System.out.println("\n=== Pending Withdrawal Applications ===");
+                                for (BTOApplication app : pendingWithdrawals) {
+                                    System.out.println("Application ID: " + app.getApplicationId()
+                                            + " | Applicant: " + app.getApplicantNRIC()
+                                            + " | Flat Type: " + app.getFlatType()
+                                            + " | Status: " + app.getStatus());
+
+                                    BTOProject project = projectCTRL.getProjectById(app.getProjectID());
+                                    if (project != null) {
+                                        System.out.println("   -> Project Details: ID: " + project.getProjectID()
+                                                + ", Manager: " + project.getManager()
+                                                + ", Available 2-Room: " + project.getAvailable2Room()
+                                                + ", Available 3-Room: " + project.getAvailable3Room() + "\n");
+                                    } else {
+                                        System.out.println("   -> Project details not found for Project ID: "
+                                                + app.getProjectID());
+                                    }
+                                }
+
+                                System.out.print("Enter Withdrawal Application ID to approve: ");
+                                String input = sc.nextLine().trim();
+                                int appId;
+                                try {
+                                    appId = Integer.parseInt(input);
+                                } catch (NumberFormatException e) {
+                                    System.out.println("Invalid application ID entered. Please enter a valid number.");
+                                    break;
+                                }
+
+                                var selectedWithdrawal = pendingWithdrawals.stream()
+                                        .filter(app -> app.getApplicationId() == appId)
+                                        .findFirst();
+                                if (selectedWithdrawal.isEmpty()) {
+                                    System.out.println("Withdrawal application not found or not pending.");
+                                    break;
+                                }
+
+                                // Approving the withdrawal simply means updating its status to UNSUCCESSFUL
+                                boolean success = applicationCTRL.updateApplicationStatus(appId, "UNSUCCESSFUL");
+                                if (success) {
+                                    System.out.println("Withdrawal approved. Application marked as UNSUCCESSFUL.");
+                                } else {
+                                    System.out.println("Failed to update the withdrawal application status.");
+                                }
+                            } catch (Exception e) {
+                                System.out.println(
+                                        "An error occurred while processing the withdrawal: " + e.getMessage());
+                            }
                         }
                         case "4" -> {
                             return; // back to central menu
