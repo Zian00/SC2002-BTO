@@ -353,7 +353,8 @@ public class Main {
                                 var projects = applicationCTRL.getProjects(); // retrieve projects list
                                 btoApplicationView.displayUserApplication(apps, userCTRL.getCurrentUser(), projects);
                             } catch (Exception e) {
-                                System.out.println("An error occurred while retrieving your applications: " + e.getMessage());
+                                System.out.println(
+                                        "An error occurred while retrieving your applications: " + e.getMessage());
                             }
                         }
                         case "2" -> { // Withdraw my application
@@ -390,13 +391,73 @@ public class Main {
                 }
                 case HDBOFFICER -> {
                     switch (c) {
-                        case "1" -> {
+                        case "1" -> { // Display All My Applications
+                            try {
+                                var apps = applicationCTRL.viewUserApplications();
+                                var projects = applicationCTRL.getProjects(); // retrieve projects list
+                                btoApplicationView.displayUserApplication(apps, userCTRL.getCurrentUser(), projects);
+                            } catch (Exception e) {
+                                System.out.println(
+                                        "An error occurred while retrieving your applications: " + e.getMessage());
+                            }
 
                         }
-                        case "2" -> {
-                        }
-                        case "3" -> {
+                        case "2" -> { // Withdraw my application
+                            try {
+                                var userApps = applicationCTRL.viewUserApplications();
+                                var projects = applicationCTRL.getProjects(); // retrieve projects list
+                                // Use the view method to display available pending applications
+                                if (!btoApplicationView.displayPendingApplications(userApps, projects)) {
+                                    break;
+                                }
 
+                                // Prompt the user for the application ID to withdraw
+                                System.out.print("Enter Application ID to withdraw: ");
+                                int appId = Integer.parseInt(sc.nextLine().trim());
+                                boolean success = applicationCTRL.withdraw(appId);
+                                if (success) {
+                                    System.out.println(
+                                            "Application withdrawn successfully. Status updated to PENDING.");
+                                } else {
+                                    System.out.println(
+                                            "Withdrawal failed. Please ensure the application exists and belongs to you.");
+                                }
+                            } catch (NumberFormatException nfe) {
+                                System.out.println("Invalid application ID. Please enter a valid number.");
+                            } catch (Exception e) {
+                                System.out.println(
+                                        "An error occurred while withdrawing your application: " + e.getMessage());
+                            }
+                        }
+                        case "3" -> { // Booking for successful applicant
+                            try {
+                                // Get successful applications handled by this officer.
+                                var officerApps = applicationCTRL.getApplicationsHandledByOfficer();
+                                // Retrieve all projects
+                                var projects = applicationCTRL.getProjects();
+                                // Use the view helper to display successful applications
+                                if (!btoApplicationView.displaySuccessfulApplications(officerApps, projects)) {
+                                    break;
+                                }
+
+                                System.out.print("Enter Application ID to book: ");
+                                int appId = Integer.parseInt(sc.nextLine().trim());
+                                
+                                // Create a project controller instance to update project data.
+                                BTOProjectCTRL projectCTRL = new BTOProjectCTRL(userCTRL.getCurrentUser());
+                                boolean booked = applicationCTRL.bookApplication(appId, projectCTRL);
+                                if (booked) {
+                                    System.out.println(
+                                            "Booking confirmed. Application status updated to BOOKED and project flat count adjusted.");
+                                } else {
+                                    System.out.println(
+                                            "Booking failed. Please check the application details or flat availability.");
+                                }
+                            } catch (NumberFormatException nfe) {
+                                System.out.println("Invalid application ID. Please enter a valid number.");
+                            } catch (Exception e) {
+                                System.out.println("An error occurred while processing booking: " + e.getMessage());
+                            }
                         }
                         case "4" -> {
                             return; // back to central menu

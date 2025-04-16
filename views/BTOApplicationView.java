@@ -23,8 +23,6 @@ public class BTOApplicationView {
 		System.out.println("\n=== BTO Application Menu ===");
 		System.out.println("1. Display All My Applications");
 		System.out.println("2. Withdraw my application");
-		// case 3 needs two checks, 1 for applicants they manage
-		// another for status = Successful
 		System.out.println("3. Booking for successful applicant");
 		System.out.println("4. Back");
 		System.out.print("Select an option: ");
@@ -101,7 +99,8 @@ public class BTOApplicationView {
 	 */
 	public boolean displayPendingApplications(List<BTOApplication> applications, List<BTOProject> projects) {
 		var pendingApps = applications.stream()
-				.filter(app -> app.getStatus() != ApplicationStatus.UNSUCCESSFUL && app.getApplicationType() == ApplicationType.APPLICATION )
+				.filter(app -> app.getStatus() != ApplicationStatus.UNSUCCESSFUL
+						&& app.getApplicationType() == ApplicationType.APPLICATION)
 				.collect(Collectors.toList());
 		if (pendingApps.isEmpty()) {
 			System.out.println("No active applications available for withdrawal.");
@@ -123,9 +122,43 @@ public class BTOApplicationView {
 				var project = matchedProject.get();
 				System.out.println("   =>Project Name: " + project.getProjectName());
 				System.out.println("   =>Project Neighbourhood: " + project.getNeighborhood());
-				System.out.println("-----------------------------------------------------------------------------------------------------------------------");
+				System.out.println(
+						"-----------------------------------------------------------------------------------------------------------------------");
 			} else {
 				System.out.println("    Project details not found.");
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Displays successful applications (with status SUCCESSFUL) along with project
+	 * details.
+	 * Returns true if there is at least one application to display.
+	 */
+	public boolean displaySuccessfulApplications(List<BTOApplication> applications, List<BTOProject> projects) {
+		var successfulApps = applications.stream()
+				.filter(app -> app.getStatus() == ApplicationStatus.SUCCESSFUL)
+				.collect(Collectors.toList());
+		if (successfulApps.isEmpty()) {
+			System.out.println("No successful applications available for booking.");
+			return false;
+		}
+		System.out.println("\n=== Successful Applications ===");
+		for (BTOApplication app : successfulApps) {
+			System.out.println("Application ID: " + app.getApplicationId()
+					+ " | Applicant NRIC: " + app.getApplicantNRIC()
+					+ " | Flat Type: " + app.getFlatType());
+			// Lookup project details for this application
+			var matchedProj = projects.stream()
+					.filter(p -> p.getProjectID() == app.getProjectID())
+					.findFirst();
+			if (matchedProj.isPresent()) {
+				var proj = matchedProj.get();
+				System.out.println("   => Project Name: " + proj.getProjectName()
+						+ ", Neighbourhood: " + proj.getNeighborhood());
+			} else {
+				System.out.println("   => Project details not found.");
 			}
 		}
 		return true;

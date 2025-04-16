@@ -90,6 +90,12 @@ public class BTOApplicationCTRL {
     /**
      * 3) Withdraw an application
      * – only if it belongs to this user
+     * 
+     * An application is considered withdrawn if:
+     * - its status is UNSUCCESSFUL and its application type is WITHDRAWAL.
+     * 
+     * If the application type is WITHDRAWAL but the status is PENDING,
+     * then withdrawal is still processing.
      */
     public boolean withdraw(int applicationId) {
         try {
@@ -102,9 +108,15 @@ public class BTOApplicationCTRL {
                 return false;
             }
             BTOApplication app = appOpt.get();
-            if (app.getStatus() == ApplicationStatus.UNSUCCESSFUL) {
-                System.out.println("Application is already withdrawn.");
-                return false;
+            // Check if application is already withdrawn
+            if (app.getApplicationType() == ApplicationType.WITHDRAWAL) {
+                if (app.getStatus() == ApplicationStatus.UNSUCCESSFUL) {
+                    System.out.println("Application is already withdrawn.");
+                    return false;
+                } else if (app.getStatus() == ApplicationStatus.PENDING) {
+                    System.out.println("Withdrawal is already processing.");
+                    return false;
+                }
             }
             // Set type to WITHDRAWAL and update status
             app.setApplicationType(ApplicationType.WITHDRAWAL);
@@ -134,6 +146,22 @@ public class BTOApplicationCTRL {
                 .filter(app -> projects.stream()
                         .anyMatch(proj -> proj.getProjectID() == app.getProjectID() &&
                                 proj.getManager().equals(currentUser.getNRIC())))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Retrieves all applications for which the associated project's approved
+     * officer list
+     * contains the current officer's NRIC.
+     */
+    public List<BTOApplication> getApplicationsHandledByOfficer() {
+        String officerNRIC = currentUser.getNRIC();
+        return applicationList.stream()
+                .filter(app -> projects.stream()
+                        .filter(proj -> proj.getProjectID() == app.getProjectID()
+                                && proj.getApprovedOfficer() != null)
+                        .anyMatch(proj -> proj.getApprovedOfficer().stream()
+                                .anyMatch(nric -> nric.equalsIgnoreCase(officerNRIC))))
                 .collect(Collectors.toList());
     }
 
@@ -227,9 +255,55 @@ public class BTOApplicationCTRL {
         return false;
     }
 
+    public boolean bookApplication(int applicationId, BTOProjectCTRL projectCTRL) {
+        // Retrieve the application
+        var appOpt = applicationList.stream()
+                .filter(app -> app.getApplicationId() == applicationId)
+                .findFirst();
+        if (appOpt.isEmpty()) {
+            System.out.println("Application not found.");
+            return false;
+        }
+        BTOApplication app = appOpt.get();
+        // Check that the application is marked as SUCCESSFUL
+        if (app.getStatus() != ApplicationStatus.SUCCESSFUL) {
+            System.out.println("Application is not marked as SUCCESSFUL. Cannot book.");
+            return false;
+        }
+        // Retrieve the associated project
+        BTOProject proj = projectCTRL.getProjectById(app.getProjectID());
+        if (proj == null) {
+            System.out.println("Associated project not found.");
+            return false;
+        }
+        // Update available flats as per chosen flat type
+        if (app.getFlatType().equalsIgnoreCase("TWOROOM")) {
+            if (proj.getAvailable2Room() <= 0) {
+                System.out.println("No 2-Room flats remaining.");
+                return false;
+            }
+            proj.setAvailable2Room(proj.getAvailable2Room() - 1);
+        } else if (app.getFlatType().equalsIgnoreCase("THREEROOM")) {
+            if (proj.getAvailable3Room() <= 0) {
+                System.out.println("No 3-Room flats remaining.");
+                return false;
+            }
+            proj.setAvailable3Room(proj.getAvailable3Room() - 1);
+        } else {
+            System.out.println("Invalid flat type in application.");
+            return false;
+        }
+        // Update the application status to BOOKED
+        app.setStatus(ApplicationStatus.BOOKED);
+        // Persist application changes
+        appRepo.writeApplicationToCSV(applicationList);
+        // Persist updated project data
+        projectCTRL.saveProjects();
+        return true;
+    }
+
     public List<BTOProject> getProjects() {
         return projects;
     }
-
 
 }

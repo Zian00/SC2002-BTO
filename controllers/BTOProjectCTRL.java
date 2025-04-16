@@ -145,4 +145,8 @@ public class BTOProjectCTRL {
     public void deleteProject() {
         throw new UnsupportedOperationException();
     }
+
+    public void saveProjects() {
+        repo.writeBTOProjectToCSV(projects);
+    }
 }
