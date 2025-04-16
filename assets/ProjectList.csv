@@ -1,13 +1,13 @@
 ID,Project Name,Neighborhood,Type 1,Number of units for Type 1,Selling price for Type 1,Type 2,Number of units for Type 2,Selling price for Type 2,Application opening date,Application closing date,ManagerID,Officer Slot,Pending Officer by NRIC,Approved Officer by NRIC,Visibility
 1,Acacia Breeze,Fishun,2-Room,2,350000,3-Room,3,450000,15/2/2025,20/3/2025,S5678901G,8,"S6543210I,T1234567D,T1115566E,T7654321RE","T2109876H,S6543210I",TRUE
-2,Acacia Tree,Chua Chu Kai,2-Room,5,350000,3-Room,1,670000,16/2/2025,21/3/2025,T0000000G,10,"S6543210I","",TRUE
-3,Birch Logging,Orchid,2-Room,1,350000,3-Room,9,400000,17/2/2025,22/3/2025,T2345678D,10,"S6543210I","",FALSE
-4,Oak Supping,Howgang,2-Room,7,450000,3-Room,0,0,18/2/2025,23/3/2025,S5678901G,0,"","S2224567I",TRUE
-5,Steve No Job,Jalan Baby,2-Room,0,0,3-Room,6,750000,19/2/2025,24/3/2025,T0114158E,1,"","S6543210I",TRUE
-6,East Coast Plan,Pasir Rizz,2-Room,1,450000,3-Room,4,990000,20/2/2025,25/3/2025,T8765432F,10,"","S6543210I",FALSE
-7,Bryan Dabao NTU,Pulau Tekong,2-Room,1,10000,3-Room,1,50000,21/2/2025,26/3/2025,T8765432F,1,"","T0114158E",FALSE
-8,bry cooking village,yishun,2-Room,5,2000,3-Room,50,30,25/4/2025,27/4/2025,T0114158E,5,"","",TRUE
-10,GuangZhou,china,2-Room,2,200,3-Room,3,300,25/07/2025,27/07/2025,T0114158E,5,"","",TRUE
-11,Gotham city,gotham,2-Room,500,1,3-Room,300,1,15/04/2025,17/04/2025,T0114158E,11,"","",TRUE
-12,bryan batman,gotham,2-Room,1,1,3-Room,1,1,25/04/2025,26/04/2025,T0114158E,2,"","",TRUE
-13,testing,testing,2-Room,3,1,3-Room,3,1,25/04/2025,26/04/2025,T0000000G,2,"","",TRUE
+2,Acacia Tree,Chua Chu Kai,2-Room,5,350000,3-Room,1,670000,16/2/2025,21/3/2025,T0000000G,10,S6543210I,,TRUE
+3,Birch Logging,Orchid,2-Room,1,350000,3-Room,9,400000,17/2/2025,22/3/2025,T2345678D,10,S6543210I,,FALSE
+4,Oak Supping,Howgang,2-Room,7,450000,3-Room,0,0,18/2/2025,23/3/2025,S5678901G,0,,S2224567I,TRUE
+5,Steve No Job,Jalan Baby,2-Room,0,0,3-Room,6,750000,19/2/2025,24/3/2025,T0114158E,1,,S6543210I,TRUE
+6,East Coast Plan,Pasir Rizz,2-Room,1,450000,3-Room,4,990000,20/2/2025,25/3/2025,T8765432F,10,,S6543210I,FALSE
+7,Bryan Dabao NTU,Pulau Tekong,2-Room,1,10000,3-Room,1,50000,21/2/2025,26/3/2025,T8765432F,1,,T0114158E,FALSE
+8,bry cooking village,yishun,2-Room,5,2000,3-Room,50,30,25/4/2025,27/4/2025,T0114158E,5,,,TRUE
+10,GuangZhou,china,2-Room,2,200,3-Room,3,300,25/7/2025,27/7/2025,T0114158E,5,,,TRUE
+11,Gotham city,gotham,2-Room,500,1,3-Room,300,1,15/4/2025,17/4/2025,T0114158E,11,,,TRUE
+12,bryan batman,gotham,2-Room,1,1,3-Room,1,1,25/4/2025,26/4/2025,T0114158E,2,,,TRUE
+13,testing,testing,2-Room,3,1,3-Room,3,1,25/4/2025,26/4/2025,T0000000G,2,,,TRUE

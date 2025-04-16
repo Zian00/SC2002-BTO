@@ -1,7 +1,7 @@
 package controllers;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import models.BTOApplication;
 import models.BTOProject;
@@ -119,6 +119,10 @@ public class BTOApplicationCTRL {
                 .orElse(0) + 1;
     }
 
+    /*
+     * Manager menu -> BTO Application Menu -> 1) Display All Applications Handled
+     * By You
+     */
     public List<BTOApplication> getApplicationsHandledByManager() {
         return applicationList.stream()
                 .filter(app -> projects.stream()
@@ -127,6 +131,93 @@ public class BTOApplicationCTRL {
                 .collect(Collectors.toList());
     }
 
-    // ... other stubs (generateFilteredList, updateFlatAvailability,
-    // approve/reject, generateReceipt) ...
+    /**
+     * Manager menu -> BTO Application Menu -> 2) Approval / Rejection for
+     * Application
+     * 
+     * @param applicationId The ID of the application to update.
+     * @param newStatus     The new status (e.g., "SUCCESSFUL" or "UNSUCCESSFUL").
+     * @return true if updated successfully, false otherwise.
+     */
+    public boolean updateApplicationStatus(int applicationId, String newStatus) {
+
+        // Parse the input string to its corresponding enum, for instance:
+        ApplicationStatus statusToSet;
+        if (newStatus.equalsIgnoreCase("SUCCESSFUL")) {
+            statusToSet = ApplicationStatus.SUCCESSFUL;
+        } else if (newStatus.equalsIgnoreCase("UNSUCCESSFUL")) {
+            statusToSet = ApplicationStatus.UNSUCCESSFUL;
+        } else {
+            System.out.println("Invalid status provided.");
+            return false;
+        }
+
+        for (BTOApplication app : applicationList) {
+            if (app.getApplicationId() == applicationId && app.getStatus() == ApplicationStatus.PENDING) {
+                app.setStatus(statusToSet);
+
+                appRepo.writeApplicationToCSV(applicationList);
+                return true;
+            }
+        }
+        return false;
+
+        // ... other stubs (generateFilteredList, updateFlatAvailability,
+        // approve/reject, generateReceipt) ...
+    }
+
+    public boolean processApplicationDecision(int appId, String decision, BTOProjectCTRL projectCTRL) {
+        // Retrieve the application from applicationList
+        Optional<BTOApplication> optApp = applicationList.stream()
+                .filter(app -> app.getApplicationId() == appId && app.getStatus() == ApplicationStatus.PENDING)
+                .findFirst();
+        if (optApp.isEmpty()) {
+            System.out.println("Application not found or not pending.");
+            return false;
+        }
+        BTOApplication selectedApp = optApp.get();
+        if (decision.equalsIgnoreCase("A")) {
+            // Approval: check project supply
+            BTOProject project = projectCTRL.getProjectById(selectedApp.getProjectID());
+            if (project == null) {
+                System.out.println("Associated project not found.");
+                return false;
+            }
+            String flatType = selectedApp.getFlatType();
+            boolean supplyAvailable = false;
+            if (flatType.equalsIgnoreCase("TWOROOM")) {
+                if (project.getAvailable2Room() > 0) {
+                    supplyAvailable = true;
+                    project.setAvailable2Room(project.getAvailable2Room() - 1);
+                } else {
+                    System.out.println("No 2-Room flats remaining for approval.");
+                }
+            } else if (flatType.equalsIgnoreCase("THREEROOM")) {
+                if (project.getAvailable3Room() > 0) {
+                    supplyAvailable = true;
+                    project.setAvailable3Room(project.getAvailable3Room() - 1);
+                } else {
+                    System.out.println("No 3-Room flats remaining for approval.");
+                }
+            } else {
+                System.out.println("Invalid flat type in application: " + flatType);
+            }
+
+            if (supplyAvailable) {
+                // Update project details first.
+                if (projectCTRL.editProject(project.getProjectID(), project)) {
+                    // Now update application status.
+                    return updateApplicationStatus(appId, "SUCCESSFUL");
+                } else {
+                    System.out.println("Failed to update project data with the reduced flat supply.");
+                    return false;
+                }
+            }
+        } else if (decision.equalsIgnoreCase("R")) {
+            return updateApplicationStatus(appId, "UNSUCCESSFUL");
+        } else {
+            System.out.println("Invalid decision input. Please enter 'A' for approve or 'R' for reject.");
+        }
+        return false;
+    }
 }

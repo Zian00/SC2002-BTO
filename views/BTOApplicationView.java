@@ -43,7 +43,6 @@ public class BTOApplicationView {
 		}
 		
 		System.out.println("\n=== Applications Handled By You ===");
-		System.out.println(applications);
 		for (BTOApplication app : applications) {
 			System.out.println("Application ID: " + app.getApplicationId());
 			System.out.println("Applicant: " + app.getApplicantNRIC());

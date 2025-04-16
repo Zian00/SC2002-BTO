@@ -3,9 +3,13 @@ import controllers.BTOProjectCTRL;
 import controllers.EnquiryCTRL;
 import controllers.UserCTRL;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
+import models.BTOApplication;
 import models.BTOProject;
 import models.Enquiry;
+import models.enumerations.ApplicationStatus;
+import models.enumerations.ApplicationType;
 import models.enumerations.FlatType;
 import models.enumerations.Role;
 import views.BTOApplicationView;
@@ -371,17 +375,82 @@ public class Main {
                 case HDBMANAGER -> {
                     switch (c) {
 
-                        case "1" -> {
-                            // Display All Applications Handled By Me
-                            var managerApplications = applicationCTRL.getApplicationsHandledByManager();
-                            btoApplicationView.displayAllApplications(managerApplications);
+                        case "1" -> { // Display All Applications Handled By Me
+                            try {
 
+                                var managerApplications = applicationCTRL.getApplicationsHandledByManager();
+                                if (managerApplications == null || managerApplications.isEmpty()) {
+                                    System.out.println("No applications were found under your management.");
+                                } else {
+                                    btoApplicationView.displayAllApplications(managerApplications);
+                                }
+                            } catch (Exception e) {
+                                System.out
+                                        .println("An error occurred while retrieving applications: " + e.getMessage());
+                            }
                         }
-                        case "2" -> {
-                            // Approval / Rejection for Application
+                        case "2" -> { // Approval / Rejection for Application
+                            try {
+                                var pendingApps = applicationCTRL.getApplicationsHandledByManager().stream()
+                                        .filter(app -> app.getApplicationType() == ApplicationType.APPLICATION
+                                                && app.getStatus() == ApplicationStatus.PENDING)
+                                        .collect(Collectors.toList());
+
+                                if (pendingApps.isEmpty()) {
+                                    System.out.println("No pending applications available for approval or rejection.");
+                                    break;
+                                }
+
+                                // Create a project controller instance to fetch project details.
+                                BTOProjectCTRL projectCTRL = new BTOProjectCTRL(userCTRL.getCurrentUser());
+
+                                System.out.println("\n=== Pending Applications for Approval/Rejection ===");
+                                for (BTOApplication app : pendingApps) {
+                                    System.out.println("Application ID: " + app.getApplicationId()
+                                            + " | Applicant: " + app.getApplicantNRIC()
+                                            + " | Flat Type Applying for: " + app.getFlatType()
+                                            + " | Status: " + app.getStatus());
+
+                                    BTOProject project = projectCTRL.getProjectById(app.getProjectID());
+                                    if (project != null) {
+                                        System.out.println("   -> Project Details: ID: " + project.getProjectID()
+                                                + ", Manager: " + project.getManager()
+                                                + ", Available 2-Room: " + project.getAvailable2Room()
+                                                + ", Available 3-Room: " + project.getAvailable3Room() + "\n");
+                                    } else {
+                                        System.out.println("   -> Project details not found for Project ID: "
+                                                + app.getProjectID());
+                                    }
+                                }
+
+                                System.out.print("Enter Application ID to process: ");
+                                String input = sc.nextLine().trim();
+                                int appId;
+                                try {
+                                    appId = Integer.parseInt(input);
+                                } catch (NumberFormatException e) {
+                                    System.out.println("Invalid application ID entered. Please enter a valid number.");
+                                    break;
+                                }
+
+                                System.out.print("Approve (A) or Reject (R) the application? ");
+                                String decision = sc.nextLine().trim();
+
+                                // Delegate the decision processing to the controller.
+                                boolean success = applicationCTRL.processApplicationDecision(appId, decision,
+                                        projectCTRL);
+                                if (success) {
+                                    System.out.println("Application decision processed successfully.");
+                                } else {
+                                    System.out.println("Application decision processing failed.");
+                                }
+                            } catch (Exception e) {
+                                System.out.println(
+                                        "An error occurred while processing the application: " + e.getMessage());
+                            }
                         }
-                        case "3" -> {
-                            // Approval / Rejection for Withdrawal
+
+                        case "3" -> { // Approval / Rejection for Withdrawal
 
                         }
                         case "4" -> {
