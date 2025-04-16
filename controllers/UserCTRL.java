@@ -70,4 +70,14 @@ public class UserCTRL {
     public void setCurrentUser(User user) {
         currentUser = user;
     }
+
+    public User getUserByNRIC(String nric) {
+        if (userList != null) {
+            for (User u : userList) {
+                if (u.getNRIC().equalsIgnoreCase(nric))
+                    return u;
+            }
+        }
+        return null;
+    }
 }

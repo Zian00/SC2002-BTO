@@ -5,12 +5,14 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import models.BTOApplication;
 import models.BTOProject;
+import models.Receipt;
 import models.User;
 import models.enumerations.ApplicationStatus;
 import models.enumerations.ApplicationType;
 import models.enumerations.FlatType;
 import models.repositories.ApplicationCSVRepository;
 import models.repositories.BTOProjectCSVRepository;
+import models.repositories.ReceiptCSVRepository;
 
 public class BTOApplicationCTRL {
 
@@ -302,8 +304,56 @@ public class BTOApplicationCTRL {
         return true;
     }
 
+    public BTOApplication getApplicationById(int applicationId) {
+        return applicationList.stream()
+                .filter(app -> app.getApplicationId() == applicationId)
+                .findFirst()
+                .orElse(null);
+    }
+
     public List<BTOProject> getProjects() {
         return projects;
+    }
+
+    public boolean bookAndGenerateReceipt(int appId, BTOProjectCTRL projectCTRL, UserCTRL userCTRL) {
+        try {
+            // Book the application as before.
+            boolean booked = bookApplication(appId, projectCTRL);
+            if (!booked) {
+                return false;
+            }
+            // Retrieve application and project details.
+            BTOApplication bookedApp = getApplicationById(appId);
+            if (bookedApp == null) {
+                throw new Exception("Booked application details not found.");
+            }
+            BTOProject bookedProject = projectCTRL.getProjectById(bookedApp.getProjectID());
+            if (bookedProject == null) {
+                throw new Exception("Associated project details not found.");
+            }
+            // Create and populate the receipt.
+            ReceiptCSVRepository receiptRepo = new ReceiptCSVRepository();
+            Receipt receipt = new Receipt();
+            User applicant = userCTRL.getUserByNRIC(bookedApp.getApplicantNRIC());
+            receipt.setReceiptID(receiptRepo.getNextReceiptID());
+            receipt.setNRIC(bookedApp.getApplicantNRIC());
+            receipt.setApplicantName(applicant.getName());
+            receipt.setAge(applicant.getAge());
+            receipt.setMaritalStatus(applicant.getMaritalStatus());
+            receipt.setFlatType(bookedApp.getFlatType());
+            receipt.setProjectID(bookedProject.getProjectID());
+            receipt.setProjectName(bookedProject.getProjectName());
+            receipt.setNeighborhood(bookedProject.getNeighborhood());
+            receipt.setApplicationOpeningDate(bookedProject.getApplicationOpeningDate());
+            receipt.setApplicationClosingDate(bookedProject.getApplicationClosingDate());
+            receipt.setManager(bookedProject.getManager());
+            // Write the receipt to CSV.
+            receiptRepo.writeReceiptCSV(receipt);
+            return true;
+        } catch (Exception ex) {
+            System.out.println("Error in booking and receipt generation: " + ex.getMessage());
+            return false;
+        }
     }
 
 }

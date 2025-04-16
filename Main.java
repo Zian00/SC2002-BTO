@@ -5,7 +5,10 @@ import controllers.UserCTRL;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
+import models.repositories.ReceiptCSVRepository;
 import models.BTOApplication;
+import models.Receipt;
+import models.User;
 import models.BTOProject;
 import models.Enquiry;
 import models.enumerations.ApplicationStatus;
@@ -85,7 +88,7 @@ public class Main {
             switch (opt) {
                 case "1" ->
                     runProjectMenu(sc, userCTRL, projectCTRL, projectView, applicationCTRL, enquiryView, enquiryCTRL);
-                case "2" -> runApplicationMenu(sc, userCTRL, applicationCTRL, btoApplicationView);
+                case "2" -> runApplicationMenu(sc, userCTRL, projectCTRL, applicationCTRL, btoApplicationView);
                 case "3" -> runEnquiryMenu(sc, userCTRL, projectCTRL, enquiryView, enquiryCTRL);
                 case "4" -> {
                     handleChangePassword(sc, userCTRL);
@@ -332,7 +335,8 @@ public class Main {
     // --------------------------------------------------------------------------------------------------
     // Application Menu for Users
     // --------------------------------------------------------------------------------------------------
-    private static void runApplicationMenu(Scanner sc, UserCTRL userCTRL, BTOApplicationCTRL applicationCTRL,
+    private static void runApplicationMenu(Scanner sc, UserCTRL userCTRL, BTOProjectCTRL projectCTRL,
+            BTOApplicationCTRL applicationCTRL,
             BTOApplicationView btoApplicationView) {
         while (true) {
             Role role = userCTRL.getCurrentUser().getRole();
@@ -433,22 +437,20 @@ public class Main {
                             try {
                                 // Get successful applications handled by this officer.
                                 var officerApps = applicationCTRL.getApplicationsHandledByOfficer();
-                                // Retrieve all projects
+                                // Retrieve all projects.
                                 var projects = applicationCTRL.getProjects();
-                                // Use the view helper to display successful applications
+                                // Use view helper to display successful applications.
                                 if (!btoApplicationView.displaySuccessfulApplications(officerApps, projects)) {
                                     break;
                                 }
 
                                 System.out.print("Enter Application ID to book: ");
                                 int appId = Integer.parseInt(sc.nextLine().trim());
-                                
-                                // Create a project controller instance to update project data.
-                                BTOProjectCTRL projectCTRL = new BTOProjectCTRL(userCTRL.getCurrentUser());
-                                boolean booked = applicationCTRL.bookApplication(appId, projectCTRL);
+
+                                // Book and generate receipt.
+                                boolean booked = applicationCTRL.bookAndGenerateReceipt(appId, projectCTRL, userCTRL);
                                 if (booked) {
-                                    System.out.println(
-                                            "Booking confirmed. Application status updated to BOOKED and project flat count adjusted.");
+                                    System.out.println("Booking confirmed and receipt generated successfully.");
                                 } else {
                                     System.out.println(
                                             "Booking failed. Please check the application details or flat availability.");
@@ -466,7 +468,6 @@ public class Main {
                 }
                 case HDBMANAGER -> {
                     switch (c) {
-
                         case "1" -> { // Display All Applications Handled By Me
                             try {
 
@@ -493,9 +494,6 @@ public class Main {
                                     System.out.println("No pending applications available for approval or rejection.");
                                     break;
                                 }
-
-                                // Create a project controller instance to fetch project details.
-                                BTOProjectCTRL projectCTRL = new BTOProjectCTRL(userCTRL.getCurrentUser());
 
                                 System.out.println("\n=== Pending Applications for Approval/Rejection ===");
                                 for (BTOApplication app : pendingApps) {
@@ -554,9 +552,6 @@ public class Main {
                                     System.out.println("No pending withdrawal applications available for approval.");
                                     break;
                                 }
-
-                                // Create a project controller instance to fetch project details.
-                                BTOProjectCTRL projectCTRL = new BTOProjectCTRL(userCTRL.getCurrentUser());
 
                                 System.out.println("\n=== Pending Withdrawal Applications ===");
                                 for (BTOApplication app : pendingWithdrawals) {
