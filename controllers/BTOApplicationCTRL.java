@@ -30,16 +30,10 @@ public class BTOApplicationCTRL {
     }
 
     /** 1) Show all applications by this user */
-    public void viewUserApplications() {
-        List<BTOApplication> mine = applicationList.stream()
+    public List<BTOApplication> viewUserApplications() {
+        return applicationList.stream()
                 .filter(a -> a.getApplicantNRIC().equals(currentUser.getNRIC()))
                 .collect(Collectors.toList());
-
-        if (mine.isEmpty()) {
-            System.out.println("You have no applications.");
-        } else {
-            mine.forEach(System.out::println);
-        }
     }
 
     /**
@@ -98,17 +92,29 @@ public class BTOApplicationCTRL {
      * – only if it belongs to this user
      */
     public boolean withdraw(int applicationId) {
-        for (BTOApplication a : applicationList) {
-            if (a.getApplicationId() == applicationId
-                    && a.getApplicantNRIC().equals(currentUser.getNRIC())) {
-                a.setApplicationType(ApplicationType.WITHDRAWAL);
-                a.setStatus(ApplicationStatus.UNSUCCESSFUL);
-                appRepo.writeApplicationToCSV(applicationList);
-                return true;
+        try {
+            var appOpt = applicationList.stream()
+                    .filter(a -> a.getApplicationId() == applicationId
+                            && a.getApplicantNRIC().equals(currentUser.getNRIC()))
+                    .findFirst();
+            if (appOpt.isEmpty()) {
+                System.out.println("Application not found or not owned by you.");
+                return false;
             }
+            BTOApplication app = appOpt.get();
+            if (app.getStatus() == ApplicationStatus.UNSUCCESSFUL) {
+                System.out.println("Application is already withdrawn.");
+                return false;
+            }
+            // Set type to WITHDRAWAL and update status
+            app.setApplicationType(ApplicationType.WITHDRAWAL);
+            app.setStatus(ApplicationStatus.PENDING);
+            appRepo.writeApplicationToCSV(applicationList);
+            return true;
+        } catch (Exception e) {
+            System.out.println("An error occurred while processing withdrawal: " + e.getMessage());
+            return false;
         }
-        System.out.println("Application not found or not yours.");
-        return false;
     }
 
     /** Utility to pick the next unique application ID */
@@ -220,4 +226,10 @@ public class BTOApplicationCTRL {
         }
         return false;
     }
+
+    public List<BTOProject> getProjects() {
+        return projects;
+    }
+
+
 }

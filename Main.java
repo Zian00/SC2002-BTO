@@ -347,10 +347,41 @@ public class Main {
                 case APPLICANT -> {
 
                     switch (c) {
-                        case "1" -> {
-
+                        case "1" -> { // Display All My Applications
+                            try {
+                                var apps = applicationCTRL.viewUserApplications();
+                                var projects = applicationCTRL.getProjects(); // retrieve projects list
+                                btoApplicationView.displayUserApplication(apps, userCTRL.getCurrentUser(), projects);
+                            } catch (Exception e) {
+                                System.out.println("An error occurred while retrieving your applications: " + e.getMessage());
+                            }
                         }
-                        case "2" -> {
+                        case "2" -> { // Withdraw my application
+                            try {
+                                var userApps = applicationCTRL.viewUserApplications();
+                                var projects = applicationCTRL.getProjects(); // retrieve projects list
+                                // Use the view method to display available pending applications
+                                if (!btoApplicationView.displayPendingApplications(userApps, projects)) {
+                                    break;
+                                }
+
+                                // Now prompt user for the application ID to withdraw
+                                System.out.print("Enter Application ID to withdraw: ");
+                                int appId = Integer.parseInt(sc.nextLine().trim());
+                                boolean success = applicationCTRL.withdraw(appId);
+                                if (success) {
+                                    System.out.println(
+                                            "Application withdrawn successfully. Status updated to PENDING.");
+                                } else {
+                                    System.out.println(
+                                            "Withdrawal failed. Please ensure the application exists and belongs to you.");
+                                }
+                            } catch (NumberFormatException nfe) {
+                                System.out.println("Invalid application ID. Please enter a valid number.");
+                            } catch (Exception e) {
+                                System.out.println(
+                                        "An error occurred while withdrawing your application: " + e.getMessage());
+                            }
                         }
                         case "3" -> {
                             return;// back to central menu
@@ -386,7 +417,8 @@ public class Main {
                                 }
                             } catch (Exception e) {
                                 System.out
-                                        .println("An error occurred while retrieving applications: " + e.getMessage());
+                                        .println("An error occurred while retrieving applications handled by manager: "
+                                                + e.getMessage());
                             }
                         }
                         case "2" -> { // Approval / Rejection for Application
@@ -451,7 +483,7 @@ public class Main {
                         }
 
                         case "3" -> { // Approval for Withdrawal of BTO Application (no need for rejection)
-                            try {  // withdrawal application has to be in pending status in order to approve
+                            try { // withdrawal application has to be in pending status in order to approve
                                 var pendingWithdrawals = applicationCTRL.getApplicationsHandledByManager().stream()
                                         .filter(app -> app.getApplicationType() == ApplicationType.WITHDRAWAL
                                                 && app.getStatus() == ApplicationStatus.PENDING)
