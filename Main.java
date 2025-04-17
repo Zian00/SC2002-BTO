@@ -79,10 +79,9 @@ public class Main {
         BTOProjectCTRL projectCTRL = new BTOProjectCTRL(userCTRL.getCurrentUser());
         BTOApplicationCTRL applicationCTRL = new BTOApplicationCTRL(userCTRL.getCurrentUser());
         EnquiryCTRL enquiryCTRL = new EnquiryCTRL(userCTRL.getCurrentUser());
-        //added this used for offical application viewing - bryan
+        // added this used for offical application viewing - bryan
         OfficerApplicationCTRL OfficerAppCTRL = new OfficerApplicationCTRL(userCTRL.getCurrentUser());
-        OfficerApplicationView  officerAppView  = new OfficerApplicationView();
-        
+        OfficerApplicationView officerAppView = new OfficerApplicationView();
 
         while (true) {
             baseView.displayMenu();
@@ -117,10 +116,9 @@ public class Main {
                         switch (opt) {
                             // case "5" Enter Officer Application Menu
 
-                            case "5" -> 
-                                {
-                                    runOfficerApplicationMenu(sc, OfficerAppCTRL, officerAppView, projectCTRL);
-                                }
+                            case "5" -> {
+                                runOfficerApplicationMenu(sc, OfficerAppCTRL, officerAppView, projectCTRL);
+                            }
                             case "6" -> {
                                 // Logout
                                 userCTRL.setCurrentUser(null);
@@ -155,50 +153,47 @@ public class Main {
         userCTRL.changePassword(newPass);
     }
 
-    //OFFICER APPLICATION VIEW MENU 
-    //===========================
+    // OFFICER APPLICATION VIEW MENU
+    // ===========================
     private static void runOfficerApplicationMenu(Scanner sc,
-                                              OfficerApplicationCTRL offAppCTRL,
-                                              OfficerApplicationView view,
-                                              BTOProjectCTRL projectCTRL) {
-    while (true) {
-        view.displayOfficerMenu();   // 1–4 + Back
-        String choice = sc.nextLine().trim();
-        switch (choice) {
-            case "1" -> {
-                // 1) View all *your* officer applications
-                var mine = offAppCTRL.viewUserOfficerApplications();
-                view.displayOfficerApplications(mine);
+            OfficerApplicationCTRL offAppCTRL,
+            OfficerApplicationView view,
+            BTOProjectCTRL projectCTRL) {
+        while (true) {
+            view.displayOfficerMenu(); // 1–4 + Back
+            String choice = sc.nextLine().trim();
+            switch (choice) {
+                case "1" -> {
+                    // 1) View all *your* officer applications
+                    var mine = offAppCTRL.viewUserOfficerApplications();
+                    view.displayOfficerApplications(mine);
+                }
+                case "2" -> {
+                    // 2) Check registration status (i.e. show only PENDING if you like)
+                    var mine = offAppCTRL.viewUserOfficerApplications()
+                            .stream()
+                            .filter(a -> a.getStatus() == RegistrationStatus.PENDING)
+                            .collect(Collectors.toList());
+                    view.displayOfficerApplications(mine);
+                }
+                case "3" -> {
+                    // 3) Register as officer
+                    var elig = offAppCTRL.getEligibleOfficerProjects();
+                    view.displayEligibleProjects(elig);
+                    System.out.print("Enter Project ID to register: ");
+                    int pid = Integer.parseInt(sc.nextLine().trim());
+                    boolean ok = offAppCTRL.registerAsOfficer(pid);
+                    System.out.println(ok
+                            ? "Registration submitted (status PENDING)."
+                            : "Registration failed.");
+                }
+                case "4" -> {
+                    return; // Back to the officer’s main menu
+                }
+                default -> System.out.println("Invalid choice, try again.");
             }
-            case "2" -> {
-                // 2) Check registration status (i.e. show only PENDING if you like)
-                var mine = offAppCTRL.viewUserOfficerApplications()
-                                     .stream()
-                                     .filter(a -> a.getStatus() == RegistrationStatus.PENDING)
-                                     .collect(Collectors.toList());
-                view.displayOfficerApplications(mine);
-            }
-            case "3" -> {
-                // 3) Register as officer
-                var elig = offAppCTRL.getEligibleOfficerProjects();
-                view.displayEligibleProjects(elig);
-                System.out.print("Enter Project ID to register: ");
-                int pid = Integer.parseInt(sc.nextLine().trim());
-                boolean ok = offAppCTRL.registerAsOfficer(pid);
-                System.out.println(ok
-                    ? "Registration submitted (status PENDING)."
-                    : "Registration failed.");
-            }
-            case "4" -> {
-                return;  // Back to the officer’s main menu
-            }
-            default -> System.out.println("Invalid choice, try again.");
         }
     }
-}
-
-
-
 
     // --------------------------------------------------------------------------------------------------
     // Projects Menu for Users
@@ -257,8 +252,8 @@ public class Main {
                             Enquiry newEnquiry = enquiryCTRL.createEnquiry(projectId, enquiryText);
                             enquiryView.displayEnquiryCreated(newEnquiry);
                         }
-                        case "4" -> {
-                            return; // back to central menu
+                        case "4" -> { // back to central menu
+                            return; 
                         }
                     }
                 }
@@ -276,12 +271,12 @@ public class Main {
                 }
                 case HDBMANAGER -> {
                     switch (c) {
-                        case "1" -> {
+                        case "1" -> { //Display All BTO Projects
                             var allProjects = projectCTRL.getAllProjects();
                             projectView.displayAllProject(allProjects);
                         }
-                        case "2" -> {
-                            // Manager views his own projects
+                        case "2" -> { // Manager views his own projects
+                            
                             var allProjects = projectCTRL.getAllProjects();
                             var managerNRIC = userCTRL.getCurrentUser().getNRIC();
                             var myProjects = allProjects.stream()
@@ -294,7 +289,7 @@ public class Main {
                             }
                         }
 
-                        case "3" -> {
+                        case "3" -> { // Add BTO Project
                             BTOProject newProj = projectView.promptNewProject(sc);
                             // automatically set projectID
                             int id = projectCTRL.getNextProjectID();
@@ -303,7 +298,7 @@ public class Main {
                             projectCTRL.createProject(newProj);
                             projectView.showMessage("Project created.");
                         }
-                        case "4" -> { // Edit
+                        case "4" -> { // Edit BTO Project
                             int id = projectView.promptProjectID(sc);
                             BTOProject existing = projectCTRL.getProjectById(id);
                             if (existing == null) {
@@ -314,7 +309,7 @@ public class Main {
                             projectCTRL.editProject(id, existing);
                             projectView.showMessage("Project updated.");
                         }
-                        case "5" -> { // Delete
+                        case "5" -> { // Delete BTO Project
                             // display a list of projects and ID for reference
                             var allProjects = projectCTRL.getAllProjects();
                             projectView.displayProjectIdNameList(allProjects);
@@ -326,8 +321,8 @@ public class Main {
                                 projectView.showMessage("Project not found.");
                             }
                         }
-                        case "6" -> {
-                            return; // back to central menu
+                        case "6" -> { // back to central menu
+                            return; 
                         }
                     }
                 }
@@ -510,7 +505,7 @@ public class Main {
                                 boolean booked = applicationCTRL.bookAndGenerateReceipt(appId, projectCTRL, userCTRL);
                                 if (booked) {
                                     System.out.println("Booking confirmed and receipt generated successfully.");
-                                    
+
                                 } else {
                                     System.out.println(
                                             "Booking failed. Please check the application details or flat availability.");
