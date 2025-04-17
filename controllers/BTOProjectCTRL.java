@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import models.BTOApplication;
 import models.BTOProject;
 import models.User;
+import models.HDBManager;
 import models.enumerations.MaritalState;
 import models.enumerations.Role;
 import models.repositories.BTOProjectCSVRepository;
@@ -24,11 +25,17 @@ public class BTOProjectCTRL {
 
     /** For manager: get any project by ID */
     public BTOProject getProjectById(int id) {
+        // If current user is a manager, use their method (for possible future logic)
+        if (currentUser instanceof HDBManager manager) {
+            return manager.getProjectById(projects, id);
+        }
+        // Otherwise, just search the list
         return projects.stream()
                 .filter(p -> p.getProjectID() == id)
                 .findFirst()
                 .orElse(null);
     }
+
 
     /** Returns max existing ID + 1 (dont need to manually key in) */
     public int getNextProjectID() {
@@ -46,7 +53,11 @@ public class BTOProjectCTRL {
 
     /** Edit an existing project: replace fields on the found object */
     public boolean editProject(int projectId, BTOProject updated) {
-        BTOProject existing = getProjectById(projectId);
+        BTOProject existing = null;
+        // only manager can edit project          
+        if (currentUser instanceof HDBManager manager) {
+            existing = manager.getProjectById(projects, projectId);
+        }
         if (existing == null)
             return false;
 
