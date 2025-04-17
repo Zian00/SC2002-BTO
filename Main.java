@@ -79,7 +79,7 @@ public class Main {
         BTOProjectCTRL projectCTRL = new BTOProjectCTRL(userCTRL.getCurrentUser());
         BTOApplicationCTRL applicationCTRL = new BTOApplicationCTRL(userCTRL.getCurrentUser());
         EnquiryCTRL enquiryCTRL = new EnquiryCTRL(userCTRL.getCurrentUser());
-        //added this , used for offical application viewing - bryan
+        //added this used for offical application viewing - bryan
         OfficerApplicationCTRL OfficerAppCTRL = new OfficerApplicationCTRL(userCTRL.getCurrentUser());
         OfficerApplicationView  officerAppView  = new OfficerApplicationView();
         
