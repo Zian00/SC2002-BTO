@@ -14,7 +14,7 @@ public class UserView {
 
         // Uncomment for actual run, for now use this user for testing
         // Change accordingly
-        String nric = "T0000000G";
+        String nric = "T1111111E";
         String password = "aaa";
         Role role = Role.valueOf("HDBOFFICER");
 
