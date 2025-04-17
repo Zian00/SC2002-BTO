@@ -348,24 +348,24 @@ public class BTOApplicationCTRL {
                     .filter(a -> a.getApplicationId() == appId && a.getStatus() == ApplicationStatus.SUCCESSFUL)
                     .findFirst();
             if (appOpt.isEmpty()) {
-                System.out.println("Error: Application not found, not successful, or not handled by you.");
+                System.out.println("Application not found, not successful, or not handled by you.");
                 return false;
             }
             // Book the application as before.
             boolean booked = bookApplication(appId, projectCTRL);
             if (!booked) {
-                System.out.println("Error: Booking failed. Please check application status and flat availability.");
+                System.out.println("Booking failed. Please check application status and flat availability.");
                 return false;
             }
             // Retrieve application and project details.
             BTOApplication bookedApp = getApplicationById(appId);
             if (bookedApp == null) {
-                System.out.println("Error: Booked application details not found.");
+                System.out.println("Booked application details not found.");
                 return false;
             }
             BTOProject bookedProject = projectCTRL.getProjectById(bookedApp.getProjectID());
             if (bookedProject == null) {
-                System.out.println("Error: Associated project details not found.");
+                System.out.println("Associated project details not found.");
                 return false;
             }
             // Create and populate the receipt.
@@ -373,7 +373,7 @@ public class BTOApplicationCTRL {
             Receipt receipt = new Receipt();
             User applicant = userCTRL.getUserByNRIC(bookedApp.getApplicantNRIC());
             if (applicant == null) {
-                System.out.println("Error: Applicant details not found.");
+                System.out.println("Applicant details not found.");
                 return false;
             }
             receipt.setReceiptID(receiptRepo.getNextReceiptID());
@@ -387,7 +387,11 @@ public class BTOApplicationCTRL {
             receipt.setNeighborhood(bookedProject.getNeighborhood());
             receipt.setApplicationOpeningDate(bookedProject.getApplicationOpeningDate());
             receipt.setApplicationClosingDate(bookedProject.getApplicationClosingDate());
-            receipt.setManager(bookedProject.getManager());
+
+            // Get manager's name
+            User manager = userCTRL.getUserByNRIC(bookedProject.getManager());
+            String managerName = (manager != null) ? manager.getName() : bookedProject.getManager();
+            receipt.setManager(managerName);
 
             // Write the receipt to CSV.
             receiptRepo.writeReceiptCSV(receipt);

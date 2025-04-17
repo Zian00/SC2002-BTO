@@ -495,7 +495,7 @@ public class Main {
                                 boolean success = applicationCTRL.withdraw(appId);
                                 if (success) {
                                     System.out.println(
-                                            "Application withdrawn successfully. Status updated to PENDING.");
+                                            "Application withdrawn successfully. Application type updated to WITHDRAWAL and Status updated to PENDING.");
                                 } else {
                                     System.out.println(
                                             "Withdrawal failed. Please ensure the application exists and belongs to you.");
@@ -540,7 +540,7 @@ public class Main {
                                 boolean success = applicationCTRL.withdraw(appId);
                                 if (success) {
                                     System.out.println(
-                                            "Application withdrawn successfully. Status updated to PENDING.");
+                                            "Application withdrawn successfully. Application type updated to WITHDRAWAL and Status updated to PENDING.");
                                 } else {
                                     System.out.println(
                                             "Withdrawal failed. Please ensure the application exists and belongs to you.");
@@ -573,7 +573,7 @@ public class Main {
 
                                 } else {
                                     System.out.println(
-                                            "Booking failed. Please check the application details or flat availability.");
+                                            "Booking failed: Please check the application details or flat availability.");
                                 }
                             } catch (NumberFormatException nfe) {
                                 System.out.println("Invalid application ID. Please enter a valid number.");
