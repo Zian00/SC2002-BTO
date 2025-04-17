@@ -166,6 +166,7 @@ public class BTOApplicationView {
 
 	public void generateReport() {
 		// TODO - implement BTOApplicationView.generateReport
+		// print 
 
 	}
 

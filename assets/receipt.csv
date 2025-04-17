@@ -5,3 +5,4 @@ receiptID,NRIC,applicantName,age,maritalStatus,flatType,projectID,projectName,ne
 4,T0000000G,Kaibao,21,MARRIED,TWOROOM,12,bryan batman,gotham,25/4/2025,26/4/2025,T0114158E
 5,S1234567A,John,35,SINGLE,TWOROOM,1,Acacia Breeze,Fishun,15/2/2025,20/3/2025,S5678901G
 6,T9876543B,paimon,21,SINGLE,TWOROOM,2,Acacia Tree,Chua Chu Kai,16/2/2025,21/3/2025,T0000000G
+7,T0000000G,Kaibao,21,MARRIED,THREEROOM,13,testing,testing,25/4/2025,26/4/2025,T0000000G

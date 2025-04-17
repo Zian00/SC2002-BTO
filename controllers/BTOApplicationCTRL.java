@@ -349,6 +349,23 @@ public class BTOApplicationCTRL {
             receipt.setManager(bookedProject.getManager());
             // Write the receipt to CSV.
             receiptRepo.writeReceiptCSV(receipt);
+
+            // Print the generated receipt to the terminal.
+            System.out.println("\n=== Generated Receipt ===");
+            System.out.println("Receipt ID            : " + receipt.getReceiptID());
+            System.out.println("Applicant NRIC        : " + receipt.getNRIC());
+            System.out.println("Applicant Name        : " + receipt.getApplicantName());
+            System.out.println("Applicant Age         : " + receipt.getAge());
+            System.out.println("Marital Status        : " + receipt.getMaritalStatus());
+            System.out.println("Flat Type             : " + receipt.getFlatType());
+            System.out.println("Project ID            : " + receipt.getProjectID());
+            System.out.println("Project Name          : " + receipt.getProjectName());
+            System.out.println("Neighborhood          : " + receipt.getNeighborhood());
+            System.out.println("Application Open Date : " + receipt.getApplicationOpeningDate());
+            System.out.println("Application Close Date: " + receipt.getApplicationClosingDate());
+            System.out.println("Manager               : " + receipt.getManager());
+            System.out.println("==========================\n");
+
             return true;
         } catch (Exception ex) {
             System.out.println("Error in booking and receipt generation: " + ex.getMessage());

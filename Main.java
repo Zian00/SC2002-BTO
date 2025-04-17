@@ -451,6 +451,7 @@ public class Main {
                                 boolean booked = applicationCTRL.bookAndGenerateReceipt(appId, projectCTRL, userCTRL);
                                 if (booked) {
                                     System.out.println("Booking confirmed and receipt generated successfully.");
+                                    
                                 } else {
                                     System.out.println(
                                             "Booking failed. Please check the application details or flat availability.");
