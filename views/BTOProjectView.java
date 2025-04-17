@@ -214,18 +214,17 @@ public class BTOProjectView {
 	 * defaultVal.
 	 */
 	private LocalDate promptDate(Scanner sc, String prompt, LocalDate defaultVal) {
-		while (true) {
-			System.out.print(prompt);
-			String in = sc.nextLine().trim();
-			if (in.isEmpty() && defaultVal != null)
-				return defaultVal;
-			try {
-				return LocalDate.parse(in, DATE_FMT);
-			} catch (DateTimeParseException e) {
-				System.out.println("Invalid date. Use dd/MM/yyyy.");
-			}
-		}
-	}
+        while (true) {
+            System.out.print(prompt);
+            String in = sc.nextLine().trim();
+            if (in.isEmpty() && defaultVal != null) return defaultVal;
+            try {
+                return LocalDate.parse(in, DATE_FMT);
+            } catch (DateTimeParseException e) {
+                System.out.println("Invalid date. Use dd/MM/yyyy.");
+            }
+        }
+    }
 
 	// catch if the closing date is before opening
 	private LocalDate promptDateNotBefore(Scanner sc, String prompt, LocalDate minDate) {
@@ -240,7 +239,7 @@ public class BTOProjectView {
 					return d;
 				}
 			} catch (DateTimeParseException e) {
-				System.out.println("Invalid date. Please use dd/MM/yyyy.");
+				System.out.println("Invalid date. Use dd/MM/yyyy.");
 			}
 		}
 	}
@@ -276,14 +275,17 @@ public class BTOProjectView {
 				promptIntInRange(sc, "3-Room units: ", 0, Integer.MAX_VALUE, null));
 		p.setThreeRoomPrice(
 				promptIntInRange(sc, "3-Room price: ", 0, Integer.MAX_VALUE, null));
-
-		LocalDate open = promptDate(sc,
-				"Application opening date (dd/MM/yyyy): ", null);
-		p.setApplicationOpeningDate(open.format(DATE_FMT));
-
-		LocalDate close = promptDateNotBefore(sc,
-				"Application closing date (dd/MM/yyyy): ", open);
-		p.setApplicationClosingDate(close.format(DATE_FMT));
+		 // Ask for the opening date (must not be blank)
+		 LocalDate open = promptDate(sc, "Application opening date (dd/MM/yyyy): ", null);
+		 p.setApplicationOpeningDate(open.format(DATE_FMT));
+		 
+		 // Use promptDateNotBefore to enforce:
+		 // 1. Input is not blank
+		 // 2. The date is on or after the opening date
+		 LocalDate close = promptDateNotBefore(sc,
+			 String.format("Application closing date (dd/MM/yyyy) [>= %s]: ", open.format(DATE_FMT)),
+			 open);
+		 p.setApplicationClosingDate(close.format(DATE_FMT));
 
 		p.setAvailableOfficerSlots(
 				promptIntInRange(sc, "Officer slots (0-10): ", 0, 10, null));
@@ -302,13 +304,19 @@ public class BTOProjectView {
 	public void editProjectDetails(Scanner sc, BTOProject p) {
 		System.out.println("Editing project " + p.getProjectID() + ". Leave blank to keep current.");
 
-		p.setProjectName(
-				promptNonEmpty(sc,
-						String.format("Name (%s): ", p.getProjectName())));
-
-		p.setNeighborhood(
-				promptNonEmpty(sc,
-						String.format("Neighborhood (%s): ", p.getNeighborhood())));
+		 // For name prompt input, if it's blank, keep the current name.
+		 System.out.print(String.format("Name (%s): ", p.getProjectName()));
+		 String nameInput = sc.nextLine().trim();
+		 if (!nameInput.isEmpty()) {
+			 p.setProjectName(nameInput);
+		 }
+	 
+		 // same for neighborhood
+		 System.out.print(String.format("Neighborhood (%s): ", p.getNeighborhood()));
+		 String nbInput = sc.nextLine().trim();
+		 if (!nbInput.isEmpty()) {
+			 p.setNeighborhood(nbInput);
+		 }
 
 		p.setAvailable2Room(
 				promptIntInRange(sc,
@@ -344,10 +352,11 @@ public class BTOProjectView {
 		p.setApplicationOpeningDate(open.format(DATE_FMT));
 
 		// Prompt for a new closing date, but enforce >= opening date
+		// now ask for closing date, must be on or after the opening date
 		LocalDate close = promptDateNotBefore(
-				sc,
-				String.format("Application closing date (%s): ", p.getApplicationClosingDate()),
-				open // <-- use the newly chosen (or default) opening date
+			sc,
+			String.format("Application closing date (%s): ", p.getApplicationClosingDate()),
+			open
 		);
 		p.setApplicationClosingDate(close.format(DATE_FMT));
 
