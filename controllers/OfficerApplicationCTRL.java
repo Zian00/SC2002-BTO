@@ -56,12 +56,12 @@ public class OfficerApplicationCTRL {
     public boolean registerAsOfficer(int projectId) {
         // Find the project
         BTOProject project = projects.stream()
-                .filter(p -> p.getProjectID() == projectId && p.isVisibility())
+                .filter(p -> p.getProjectID() == projectId )
                 .findFirst()
                 .orElse(null);
                 
         if (project == null) {
-            System.out.println("Project not found or not visible.");
+            System.out.println("Project not found.");
             return false;
         }
         
