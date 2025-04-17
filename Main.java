@@ -253,7 +253,7 @@ public class Main {
                             enquiryView.displayEnquiryCreated(newEnquiry);
                         }
                         case "4" -> { // back to central menu
-                            return; 
+                            return;
                         }
                     }
                 }
@@ -271,12 +271,12 @@ public class Main {
                 }
                 case HDBMANAGER -> {
                     switch (c) {
-                        case "1" -> { //Display All BTO Projects
+                        case "1" -> { // Display All BTO Projects
                             var allProjects = projectCTRL.getAllProjects();
                             projectView.displayAllProject(allProjects);
                         }
                         case "2" -> { // Manager views his own projects
-                            
+
                             var allProjects = projectCTRL.getAllProjects();
                             var managerNRIC = userCTRL.getCurrentUser().getNRIC();
                             var myProjects = allProjects.stream()
@@ -295,6 +295,31 @@ public class Main {
                             int id = projectCTRL.getNextProjectID();
                             newProj.setProjectID(id);
                             newProj.setManager(userCTRL.getCurrentUser().getNRIC());
+
+                            // --- Overlap check: prevent overlapping application periods for same manager
+                            var managerNRIC = userCTRL.getCurrentUser().getNRIC();
+                            var myProjects = projectCTRL.getAllProjects().stream()
+                                    .filter(project -> project.getManager().equals(managerNRIC))
+                                    .toList();
+
+                            // Parse dates for new project
+                            String newOpen = newProj.getApplicationOpeningDate();
+                            String newClose = newProj.getApplicationClosingDate();
+
+                            boolean overlaps = myProjects.stream().anyMatch(existing -> {
+                                String existOpen = existing.getApplicationOpeningDate();
+                                String existClose = existing.getApplicationClosingDate();
+
+                                // not (existClose < newOpen || newClose < existOpen)
+                                return !(existClose.compareTo(newOpen) < 0 || newClose.compareTo(existOpen) < 0);
+                            });
+
+                            if (overlaps) {
+                                projectView.showMessage(
+                                        "Error: The new project's application period overlaps with an existing project you manage. Please choose a different period.");
+                                break;
+                            }
+
                             projectCTRL.createProject(newProj);
                             projectView.showMessage("Project created.");
                         }
@@ -305,7 +330,41 @@ public class Main {
                                 projectView.showMessage("Project not found.");
                                 break;
                             }
+                            // Store old dates for comparison
+                            String oldOpen = existing.getApplicationOpeningDate();
+                            String oldClose = existing.getApplicationClosingDate();
+
+                            // Let manager edit details (including dates)
                             projectView.editProjectDetails(sc, existing);
+
+                            // If application period changed, check for overlap
+                            String newOpen = existing.getApplicationOpeningDate();
+                            String newClose = existing.getApplicationClosingDate();
+
+                            if (!oldOpen.equals(newOpen) || !oldClose.equals(newClose)) {
+                                var managerNRIC = userCTRL.getCurrentUser().getNRIC();
+                                var myProjects = projectCTRL.getAllProjects().stream()
+                                        .filter(project -> project.getManager().equals(managerNRIC)
+                                                && project.getProjectID() != id)
+                                        .toList();
+
+                                boolean overlaps = myProjects.stream().anyMatch(other -> {
+                                    String existOpen = other.getApplicationOpeningDate();
+                                    String existClose = other.getApplicationClosingDate();
+                                    // not (existClose < newOpen || newClose < existOpen)
+                                    return !(existClose.compareTo(newOpen) < 0 || newClose.compareTo(existOpen) < 0);
+                                });
+
+                                if (overlaps) {
+                                    projectView.showMessage(
+                                            "Error: The new application period overlaps with another project you manage. Edit cancelled.");
+                                    // Revert to old dates
+                                    existing.setApplicationOpeningDate(oldOpen);
+                                    existing.setApplicationClosingDate(oldClose);
+                                    break;
+                                }
+                            }
+
                             projectCTRL.editProject(id, existing);
                             projectView.showMessage("Project updated.");
                         }
@@ -322,7 +381,7 @@ public class Main {
                             }
                         }
                         case "6" -> { // back to central menu
-                            return; 
+                            return;
                         }
                     }
                 }
