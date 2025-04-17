@@ -330,7 +330,7 @@ public class Main {
                                 projectView.showMessage("Project not found.");
                                 break;
                             }
-                             // prevent manager from editing other people projects - bryan
+                            // prevent manager from editing other people projects - bryan
                             String mgrNRIC = userCTRL.getCurrentUser().getNRIC();
                             if (!existing.getManager().equals(mgrNRIC)) {
                                 projectView.showMessage("Error: You do not manage that project.");
@@ -507,8 +507,8 @@ public class Main {
                                         "An error occurred while withdrawing your application: " + e.getMessage());
                             }
                         }
-                        case "3" -> {
-                            return;// back to central menu
+                        case "3" -> { // back to central menu
+                            return;
                         }
                     }
                 }
@@ -690,9 +690,10 @@ public class Main {
                                         System.out.println("   -> Project details not found for Project ID: "
                                                 + app.getProjectID());
                                     }
+                                    System.out.println("------------------------------");
                                 }
 
-                                System.out.print("Enter Withdrawal Application ID to approve: ");
+                                System.out.print("Enter Application ID for withdrawal approve: ");
                                 String input = sc.nextLine().trim();
                                 int appId;
                                 try {
@@ -710,10 +711,10 @@ public class Main {
                                     break;
                                 }
 
-                                // Approving the withdrawal simply means updating its status to UNSUCCESSFUL
-                                boolean success = applicationCTRL.updateApplicationStatus(appId, "UNSUCCESSFUL");
+                                // Approving the withdrawal simply means updating its status to SUCCESSFUL
+                                boolean success = applicationCTRL.updateApplicationStatus(appId, "SUCCESSFUL");
                                 if (success) {
-                                    System.out.println("Withdrawal approved. Application marked as UNSUCCESSFUL.");
+                                    System.out.println("Withdrawal approved. Application marked as SUCCESSFUL.");
                                 } else {
                                     System.out.println("Failed to update the withdrawal application status.");
                                 }
