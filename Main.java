@@ -105,8 +105,7 @@ public class Main {
                 switch (role) {
                     case APPLICANT:
                         switch (opt) {
-                            case "5" -> {
-                                // Logout
+                            case "5" -> { // Logout
                                 userCTRL.setCurrentUser(null);
                                 baseView.displayLogout();
                                 return;
@@ -114,13 +113,12 @@ public class Main {
                         }
                     case HDBOFFICER:
                         switch (opt) {
-                            // case "5" Enter Officer Application Menu
+                            
 
-                            case "5" -> {
+                            case "5" -> { // case "5" Enter Officer Application Menu
                                 runOfficerApplicationMenu(sc, OfficerAppCTRL, officerAppView, projectCTRL);
                             }
-                            case "6" -> {
-                                // Logout
+                            case "6" -> { // Logout
                                 userCTRL.setCurrentUser(null);
                                 baseView.displayLogout();
                                 return;
@@ -130,6 +128,7 @@ public class Main {
                     case HDBMANAGER:
                         switch (opt) {
                             // case "5" -> officerApplicationCTRL.
+                            case "5" -> {}
                             case "6" -> {
                                 // Logout
                                 userCTRL.setCurrentUser(null);
