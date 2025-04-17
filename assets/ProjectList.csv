@@ -9,5 +9,5 @@ ID,Project Name,Neighborhood,Type 1,Number of units for Type 1,Selling price for
 8,bry cooking village,yishun,2-Room,3,2000,3-Room,3,30,25/4/2025,27/4/2025,T0114158E,5,"","T0000000G",TRUE
 10,GuangZhou,china,2-Room,3,200,3-Room,3,300,25/7/2025,27/7/2025,T0114158E,5,"","T0000000G",TRUE
 11,Gotham city,gotham,2-Room,3,1,3-Room,3,1,15/4/2025,17/4/2025,T0114158E,11,"","T0000000G",TRUE
-12,bryan batman,gotham,2-Room,3,1,3-Room,3,1,25/4/2025,26/4/2025,T0114158E,2,"","T0000000G",TRUE
+12,bryan batman,gotham,2-Room,3,1,3-Room,3,1,25/4/2025,26/4/2025,T0114158E,2,"T1111111E","T0000000G",TRUE
 13,testing,testing,2-Room,3,1,3-Room,3,1,25/4/2025,26/4/2025,T0000000G,2,"","T0000000G",TRUE
