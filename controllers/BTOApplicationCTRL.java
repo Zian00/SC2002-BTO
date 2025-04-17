@@ -258,20 +258,38 @@ public class BTOApplicationCTRL {
     }
 
     public boolean bookApplication(int applicationId, BTOProjectCTRL projectCTRL) {
+
         // Retrieve the application
-        var appOpt = applicationList.stream()
+        var appOption = applicationList.stream()
                 .filter(app -> app.getApplicationId() == applicationId)
                 .findFirst();
-        if (appOpt.isEmpty()) {
+        if (appOption.isEmpty()) {
             System.out.println("Application not found.");
             return false;
         }
-        BTOApplication app = appOpt.get();
-        // Check that the application is marked as SUCCESSFUL
-        if (app.getStatus() != ApplicationStatus.SUCCESSFUL) {
-            System.out.println("Application is not marked as SUCCESSFUL. Cannot book.");
+        BTOApplication app = appOption.get();
+
+        // NEW: Check if the applicant already has a booked flat
+        boolean alreadyBooked = applicationList.stream()
+                .filter(a -> a.getApplicantNRIC().equalsIgnoreCase(app.getApplicantNRIC()))
+                .anyMatch(a -> a.getStatus() == ApplicationStatus.BOOKED);
+
+        if (alreadyBooked) {
+            System.out.println(
+                    "Applicant " + app.getApplicantNRIC() + " has already booked a flat. Cannot book another.");
             return false;
         }
+
+        // === GUARD CLAUSE: Check if application is not in SUCCESSFUL state
+        if (app.getStatus() != ApplicationStatus.SUCCESSFUL) {
+            if (app.getStatus() == ApplicationStatus.BOOKED) {
+                System.out.println("Application ID " + applicationId + " has already been booked.");
+            } else {
+                System.out.println("Application ID " + applicationId + " is not marked as SUCCESSFUL. Cannot book.");
+            }
+            return false;
+        }
+        
         // Retrieve the associated project
         BTOProject proj = projectCTRL.getProjectById(app.getProjectID());
         if (proj == null) {
@@ -281,13 +299,13 @@ public class BTOApplicationCTRL {
         // Update available flats as per chosen flat type
         if (app.getFlatType().equalsIgnoreCase("TWOROOM")) {
             if (proj.getAvailable2Room() <= 0) {
-                System.out.println("No 2-Room flats remaining.");
+                System.out.println("No 2-Room flats remaining for booking.");
                 return false;
             }
             proj.setAvailable2Room(proj.getAvailable2Room() - 1);
         } else if (app.getFlatType().equalsIgnoreCase("THREEROOM")) {
             if (proj.getAvailable3Room() <= 0) {
-                System.out.println("No 3-Room flats remaining.");
+                System.out.println("No 3-Room flats remaining for booking.");
                 return false;
             }
             proj.setAvailable3Room(proj.getAvailable3Room() - 1);
@@ -301,6 +319,8 @@ public class BTOApplicationCTRL {
         appRepo.writeApplicationToCSV(applicationList);
         // Persist updated project data
         projectCTRL.saveProjects();
+        // Confirmation message
+        System.out.println("Application ID " + applicationId + " successfully booked. Status updated to BOOKED.");
         return true;
     }
 
