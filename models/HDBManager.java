@@ -12,10 +12,13 @@ public class HDBManager extends User {
 
 	private List<Integer> BTOProjectIDList;
 
-	public List<Integer> getBTOProjectID() {
-		// TODO - implement HDBManager.getBTOProjectID
-		throw new UnsupportedOperationException();
-	}
+	public BTOProject getProjectById(List<BTOProject> projects, int id) {
+        if (projects == null) return null;
+        return projects.stream()
+                .filter(p -> p.getProjectID() == id)
+                .findFirst()
+                .orElse(null);
+    }
 
 	/**
 	 * 

@@ -95,7 +95,6 @@ public class BTOApplicationCTRL {
      * 
      * An application is considered withdrawn if:
      * - its status is UNSUCCESSFUL and its application type is WITHDRAWAL.
-     * 
      * If the application type is WITHDRAWAL but the status is PENDING,
      * then withdrawal is still processing.
      */
@@ -198,8 +197,6 @@ public class BTOApplicationCTRL {
         }
         return false;
 
-        // ... other stubs (generateFilteredList, updateFlatAvailability,
-        // approve/reject, generateReceipt) ...
     }
 
     public boolean processApplicationDecision(int appId, String decision, BTOProjectCTRL projectCTRL) {
@@ -208,11 +205,13 @@ public class BTOApplicationCTRL {
                 .filter(app -> app.getApplicationId() == appId && app.getStatus() == ApplicationStatus.PENDING)
                 .findFirst();
         if (optApp.isEmpty()) {
-            System.out.println("Application not found or not pending.");
+            System.out.println("Application not found or not in pending.");
             return false;
         }
         BTOApplication selectedApp = optApp.get();
+        
         if (decision.equalsIgnoreCase("A")) {
+
             // Approval: check project supply
             BTOProject project = projectCTRL.getProjectById(selectedApp.getProjectID());
             if (project == null) {
@@ -289,9 +288,10 @@ public class BTOApplicationCTRL {
             }
             return false;
         }
-        
+
         // Retrieve the associated project
         BTOProject proj = projectCTRL.getProjectById(app.getProjectID());
+
         if (proj == null) {
             System.out.println("Associated project not found.");
             return false;
