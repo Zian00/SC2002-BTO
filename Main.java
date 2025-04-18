@@ -6,10 +6,7 @@ import controllers.UserCTRL;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
-import models.repositories.ReceiptCSVRepository;
 import models.BTOApplication;
-import models.Receipt;
-import models.User;
 import models.BTOProject;
 import models.Enquiry;
 import models.FilterSettings;
@@ -107,8 +104,7 @@ public class Main {
                 switch (role) {
                     case APPLICANT:
                         switch (opt) {
-                            case "5" -> {
-                                // Logout
+                            case "5" -> { // Logout
                                 userCTRL.setCurrentUser(null);
                                 baseView.displayLogout();
                                 return;

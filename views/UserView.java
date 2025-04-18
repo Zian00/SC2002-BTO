@@ -51,6 +51,7 @@ public class UserView {
 
         if (userCTRL.login(nric, password, role)) {
             System.out.println("Login successful! Welcome, " + userCTRL.getCurrentUser().getName() + " [" + userCTRL.getCurrentUser().getRole()  +"]");
+            System.out.println("Login successful! Welcome, " + userCTRL.getCurrentUser().getName() + " [" + userCTRL.getCurrentUser().getRole()  +"]");
             return true;
         } else {
             System.out.println("Invalid credentials or role. Returning to main menu.");

@@ -57,6 +57,7 @@ public class BTOProjectCTRL {
     public boolean editProject(int projectId, BTOProject updated) {
         BTOProject existing = null;
         // only manager can edit project
+        // only manager can edit project
         if (currentUser instanceof HDBManager manager) {
             existing = manager.getProjectById(projects, projectId);
         }
@@ -73,6 +74,7 @@ public class BTOProjectCTRL {
         existing.setApplicationClosingDate(updated.getApplicationClosingDate());
         existing.setAvailableOfficerSlots(updated.getAvailableOfficerSlots());
         existing.setVisibility(updated.isVisibility());
+
         
         // manager, pending/approved lists typically left alone
         repo.writeBTOProjectToCSV(projects);
@@ -151,6 +153,26 @@ public class BTOProjectCTRL {
                 .collect(Collectors.toList());
     }
 
+    // get eligible projects for officer application
+    public List<BTOProject> getEligibleProjectsForOfficerApplication(String officerNRIC, MaritalState ms, int age) {
+        return projects.stream()
+                .filter(p -> {
+                    var pending = p.getPendingOfficer();
+                    var approved = p.getApprovedOfficer();
+                    boolean notPending = pending == null
+                            || pending.stream().noneMatch(nric -> nric.equalsIgnoreCase(officerNRIC));
+                    boolean notApproved = approved == null
+                            || approved.stream().noneMatch(nric -> nric.equalsIgnoreCase(officerNRIC));
+                    boolean flatEligible = false;
+                    if (ms == MaritalState.SINGLE && age >= 35) {
+                        flatEligible = p.getAvailable2Room() > 0;
+                    } else if (ms == MaritalState.MARRIED && age >= 21) {
+                        flatEligible = p.getAvailable2Room() > 0 || p.getAvailable3Room() > 0;
+                    }
+                    return notPending && notApproved && flatEligible;
+                })
+                .collect(Collectors.toList());
+    }
     //FILTER SETTINGS
      /** apply both “visibility + eligibility” _and_ the user’s custom price/room filters */
     public List<BTOProject> getFilteredProjectsForUser(User user) {

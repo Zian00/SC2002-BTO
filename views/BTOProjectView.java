@@ -70,6 +70,21 @@ public class BTOProjectView {
 			}
 		} catch (Exception e) {
 			System.out.println("An error occurred while displaying projects: " + e.getMessage());
+		try {
+			if (projects == null || projects.isEmpty()) {
+				System.out.println("No available projects in system.");
+			} else {
+				for (BTOProject project : projects) {
+					if (project == null) {
+						System.out.println("Encountered a null project entry.");
+						continue;
+					}
+					System.out.println(project);
+					System.out.println("-----------------------------------");
+				}
+			}
+		} catch (Exception e) {
+			System.out.println("An error occurred while displaying projects: " + e.getMessage());
 		}
 		System.out.println("===================================");
 	}
@@ -512,4 +527,40 @@ public class BTOProjectView {
             System.out.println("-----------------------------------");
         }
     }
+
+	// print outs for eligible projects for officer
+	public void displayEligibleProjectsForOfficer(List<BTOProject> projects, MaritalState ms, int age) {
+		System.out.println("=== Eligible BTO Projects for Application ===");
+		if (projects == null || projects.isEmpty()) {
+			System.out.println("No eligible projects available.");
+			return;
+		}
+
+		boolean canSee2 = false, canSee3 = false;
+		if (ms == MaritalState.SINGLE && age >= 35) {
+			canSee2 = true;
+		} else if (ms == MaritalState.MARRIED && age >= 21) {
+			canSee2 = true;
+			canSee3 = true;
+		} else {
+			System.out.println("You are not eligible to view any projects.");
+			return;
+		}
+
+		for (BTOProject p : projects) {
+			System.out.println("Project ID:   " + p.getProjectID());
+			System.out.println("Name:         " + p.getProjectName());
+			System.out.println("Neighborhood: " + p.getNeighborhood());
+
+			if (canSee2) {
+				System.out.printf("2-Room units: %d (Price: $%d)%n",
+						p.getAvailable2Room(), p.getTwoRoomPrice());
+			}
+			if (canSee3) {
+				System.out.printf("3-Room units: %d (Price: $%d)%n",
+						p.getAvailable3Room(), p.getThreeRoomPrice());
+			}
+			System.out.println("-----------------------------------");
+		}
+	}
 }
