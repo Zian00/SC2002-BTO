@@ -125,6 +125,7 @@ public class Main {
                         switch (opt) {
                             // case "5" -> officerApplicationCTRL.
                             case "5" -> {
+                                runOfficerApplicationMenu(sc, OfficerAppCTRL, officerAppView, projectCTRL);
                             }
                             case "6" -> {
                                 // Logout
@@ -152,44 +153,117 @@ public class Main {
     // OFFICER APPLICATION SUB MENU (option 5)
     // ===========================
     private static void runOfficerApplicationMenu(Scanner sc,
-            OfficerApplicationCTRL offAppCTRL,
-            OfficerApplicationView view,
-            BTOProjectCTRL projectCTRL) {
-        while (true) {
-            view.displayOfficerMenu(); // 1–4 + Back
-            String choice = sc.nextLine().trim();
-            switch (choice) {
-                case "1" -> {
-                    // 1) View all *your* officer applications
-                    var mine = offAppCTRL.viewUserOfficerApplications();
-                    view.displayOfficerApplications(mine);
+                                             OfficerApplicationCTRL offAppCTRL,
+                                             OfficerApplicationView view,
+                                             BTOProjectCTRL projectCTRL
+                                             ) {
+    // Determine user role
+    Role userRole = offAppCTRL.getCurrentUserRole(); // Assuming User class has a getRole() method
+    
+    switch (userRole) {
+        case HDBOFFICER -> {
+            // Officer role menu
+            while (true) {
+                view.displayOfficerMenu(); // 1-4 + Back
+                String choice = sc.nextLine().trim();
+                switch (choice) {
+                    case "1" -> {
+                        // 1) View all *your* officer applications
+                        var mine = offAppCTRL.viewUserOfficerApplications();
+                        view.displayOfficerApplications(mine);
+                    }
+                    case "2" -> {
+                        // 2) Check registration status (i.e. show only PENDING if you like)
+                        var mine = offAppCTRL.viewUserOfficerApplications()
+                                .stream()
+                                .filter(a -> a.getStatus() == RegistrationStatus.PENDING || a.getStatus() == RegistrationStatus.APPROVED)
+                                .collect(Collectors.toList());
+                        view.displayOfficerApplications(mine);
+                    }
+                    case "3" -> {
+                        // 3) Register as officer
+                        var elig = offAppCTRL.getEligibleOfficerProjects();
+                        view.displayEligibleProjects(elig);
+                    
+                        if (elig.isEmpty()) {
+                            System.out.println("No eligible projects to register for.");
+                            break;
+                        }
+                    
+                        System.out.print("Enter Project ID to register: ");
+                        try {
+                            int pid = Integer.parseInt(sc.nextLine().trim());
+                    
+                            // Check if input PID is in the list of eligible project IDs
+                            boolean isValidProject = elig.stream().anyMatch(p -> p.getProjectID() == pid);
+                    
+                            if (!isValidProject) {
+                                System.out.println("Invalid Project ID. Returning to menu.");
+                                break;
+                            }
+                    
+                            boolean ok = offAppCTRL.registerAsOfficer(pid);
+                            System.out.println(ok
+                                ? "Registration submitted (status PENDING)."
+                                : "Registration failed.");
+                        } catch (NumberFormatException e) {
+                            System.out.println("Invalid input. Please enter a valid number. Returning to menu.");
+                        }
+                    }
+                    case "4" -> {
+                        return; // Back to the officer's main menu
+                    }
+                    default -> System.out.println("Invalid choice, try again.");
                 }
-                case "2" -> {
-                    // 2) Check registration status (i.e. show only PENDING)
-                    var mine = offAppCTRL.viewUserOfficerApplications()
-                            .stream()
-                            .filter(a -> a.getStatus() == RegistrationStatus.PENDING)
-                            .collect(Collectors.toList());
-                    view.displayOfficerApplications(mine);
-                }
-                case "3" -> {
-                    // 3) Register as officer
-                    var elig = offAppCTRL.getEligibleOfficerProjects();
-                    view.displayEligibleProjects(elig);
-                    System.out.print("Enter Project ID to register: ");
-                    int pid = Integer.parseInt(sc.nextLine().trim());
-                    boolean ok = offAppCTRL.registerAsOfficer(pid);
-                    System.out.println(ok
-                            ? "Registration submitted (status PENDING)."
-                            : "Registration failed.");
-                }
-                case "4" -> {
-                    return; // Back to the officer’s main menu
-                }
-                default -> System.out.println("Invalid choice, try again.");
             }
         }
+        case HDBMANAGER -> {
+            // Manager role menu
+            while (true) {
+                view.displayManagerMenu(); // 1-3 + Back
+                String choice = sc.nextLine().trim();
+                switch (choice) {
+                    case "1" -> {
+                        // 1) Display All Applications Handled By You
+                        var pendingApps = offAppCTRL.getPendingAndSuccessfullOfficerApplicationsForManager();
+                        view.displayManagerPendingApplications(pendingApps, projectCTRL.getAllProjects());
+
+                    }
+                    case "2" -> {
+                        // 2) Approval / Rejection for Application
+                        var pendingApps = offAppCTRL.getPendingOfficerApplicationsForManager();
+                        if (pendingApps.isEmpty()) {
+                            System.out.println("No pending applications to process.");
+                            continue;
+                        }
+                        view.displayManagerPendingApplications(pendingApps, projectCTRL.getAllProjects());
+                        
+                        System.out.print("Enter Application ID to process: ");
+                        int appId = Integer.parseInt(sc.nextLine().trim());
+                        System.out.print("Enter decision (A for Approve, R for Reject): ");
+                        String decision = sc.nextLine().trim();
+                        
+                        boolean success = offAppCTRL.processOfficerApplicationDecision(appId, decision);
+                        System.out.println(success 
+                                ? "Application processed successfully." 
+                                : "Failed to process application.");
+                    }
+
+                    
+                    case "3" -> {
+                        return; // Back to the manager's main menu
+                    }
+                    default -> System.out.println("Invalid choice, try again.");
+                }
+            }
+        }
+        default -> {
+            System.out.println("You don't have permission to access this menu.");
+            return;
+        }
     }
+}
+
 
     // --------------------------------------------------------------------------------------------------
     // Projects Menu for Users
