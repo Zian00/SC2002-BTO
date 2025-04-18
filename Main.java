@@ -110,7 +110,6 @@ public class Main {
                         }
                     case HDBOFFICER:
                         switch (opt) {
-
                             case "5" -> { // case "5" Enter Officer Application Menu
                                 runOfficerApplicationMenu(sc, OfficerAppCTRL, officerAppView, projectCTRL);
                             }
@@ -255,7 +254,15 @@ public class Main {
                 }
                 case HDBOFFICER -> {
                     switch (c) {
+                        case "1" -> {
+                        }
+                        case "2" -> {
+                        }
+                        case "3" -> {
+                        }
+                        case "4" -> {
 
+                        }
                         case "5" ->
                             {
 
@@ -663,12 +670,12 @@ public class Main {
                                         .filter(app -> app.getApplicationType() == ApplicationType.WITHDRAWAL
                                                 && app.getStatus() == ApplicationStatus.PENDING)
                                         .collect(Collectors.toList());
-                        
+
                                 if (pendingWithdrawals.isEmpty()) {
                                     System.out.println("No pending withdrawal applications available for approval.");
                                     break;
                                 }
-                        
+
                                 System.out.println("\n=== Pending Withdrawal Applications ===");
                                 for (BTOApplication app : pendingWithdrawals) {
                                     System.out.println("Application ID: " + app.getApplicationId()
@@ -677,7 +684,7 @@ public class Main {
                                             + " | Status: " + app.getStatus());
                                     System.out.println("--------------------------------------");
                                 }
-                        
+
                                 System.out.print("Enter Application ID for withdrawal approve: ");
                                 String input = sc.nextLine().trim();
                                 int appId;
@@ -687,13 +694,14 @@ public class Main {
                                     System.out.println("Invalid application ID entered. Please enter a valid number.");
                                     break;
                                 }
-                        
+
                                 boolean success = applicationCTRL.approveWithdrawalApplication(appId, projectCTRL);
                                 if (!success) {
                                     System.out.println("Withdrawal approval failed.");
                                 }
                             } catch (Exception e) {
-                                System.out.println("An error occurred while processing the withdrawal: " + e.getMessage());
+                                System.out.println(
+                                        "An error occurred while processing the withdrawal: " + e.getMessage());
                             }
                         }
                         case "4" -> {
