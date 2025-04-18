@@ -3,6 +3,7 @@ package controllers;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 import models.Enquiry;
@@ -11,10 +12,10 @@ import models.interfaces.IEnquiryResponse;
 import models.interfaces.IEnquirySubmission;
 import models.repositories.EnquiryCSVRepository;
 
-public class EnquiryCTRL implements IEnquiryResponse, IEnquirySubmission {
+public final class EnquiryCTRL implements IEnquiryResponse, IEnquirySubmission {
 
     private List<Enquiry> enquiries;
-    private User currentUser;
+    private final User currentUser;
     private final EnquiryCSVRepository enquiryRepo = new EnquiryCSVRepository();
     
     public void loadEnquiryData() {
@@ -42,6 +43,14 @@ public class EnquiryCTRL implements IEnquiryResponse, IEnquirySubmission {
         return enquiries;
     }
     
+    // Returns selected Enquiry
+    public Enquiry findEnquiryById(List<Enquiry> enquiries, int selectedId) {
+        return enquiries.stream()
+                .filter(e -> e.getEnquiryId() == selectedId)
+                .findFirst()
+                .orElse(null);
+    }
+
     // Returns a list of filtered enquiries by logged in user
     public List<Enquiry> getFilteredEnquiriesByNRIC() {
     if (enquiries == null) {
@@ -51,7 +60,19 @@ public class EnquiryCTRL implements IEnquiryResponse, IEnquirySubmission {
     return enquiries.stream()
             .filter(enquiry -> enquiry.getSubmittedByNRIC().equalsIgnoreCase(userNRIC))
             .collect(Collectors.toList());
-}
+    }
+
+    // Returns a list of filtered enquiries by logged in user and that it has not been responded yet
+    public List<Enquiry> getEditableEnquiriesByNRIC() {
+        if (enquiries == null) {
+            return new ArrayList<>();
+        }
+        String userNRIC = currentUser.getNRIC();
+        return enquiries.stream()
+                .filter(e -> e.getSubmittedByNRIC().equalsIgnoreCase(userNRIC)
+                          && (e.getResponse() == null || e.getResponse().isEmpty()))
+                .collect(Collectors.toList());
+    }
 
     /**
      * Creates a new enquiry.
@@ -99,16 +120,47 @@ public class EnquiryCTRL implements IEnquiryResponse, IEnquirySubmission {
         }
     }
 
+    // Update existing enquiry with new enquiry text
     @Override
-    public void editEnquiry(Enquiry enquiry, String newText) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'editEnquiry'");
+    public boolean editEnquiry(Enquiry enquiry, String newText) {
+        if(enquiries != null){
+            for(Enquiry en : enquiries){
+                if (en.getEnquiryId() == enquiry.getEnquiryId()) {
+                    try {
+                        // Get current time
+                        LocalDateTime now = LocalDateTime.now();
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                        // Update new Enquiry Text with latest edited date & time
+                        en.setEnquiryText(newText + " [Edited as of: " + now.format(formatter) + "]");
+
+                        // Persist changes.
+                        saveEnquiryData();
+                        return true;
+                    }catch (Exception e) {
+                        System.err.println("Error editing enquiry: " + e.getMessage());
+                        return false;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
+    // Delete existing enquiry
     @Override
-    public void deleteEnquiry(Enquiry enquiry) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'deleteEnquiry'");
+    public boolean deleteEnquiry(Enquiry enquiry) {
+        if (enquiries != null) {
+            Iterator<Enquiry> iterator = enquiries.iterator();
+            while (iterator.hasNext()) {
+                Enquiry en = iterator.next();
+                if (en.getEnquiryId() == enquiry.getEnquiryId()) {
+                    iterator.remove();  // safely remove enquiry
+                    saveEnquiryData();  // persist changes
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override
