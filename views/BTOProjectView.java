@@ -39,11 +39,12 @@ public class BTOProjectView {
 	public void displayManagerMenu() {
 		System.out.println("\n=== BTO Project Menu ===");
 		System.out.println("1. Display All BTO Projects");
-		System.out.println("2. Display My BTO Projects");
-		System.out.println("3. Add BTO Project");
-		System.out.println("4. Edit BTO Project");
-		System.out.println("5. Delete BTO Project");
-		System.out.println("6. Back");
+		System.out.println("2. Display filtered BTO Projects");
+		System.out.println("3. Display My BTO Projects");
+		System.out.println("4. Add BTO Project");
+		System.out.println("5. Edit BTO Project");
+		System.out.println("6. Delete BTO Project");
+		System.out.println("7. Back");
 		System.out.print("Select an option: ");
 	}
 

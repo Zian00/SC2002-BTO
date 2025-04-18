@@ -285,9 +285,7 @@ public class Main {
                             projectView.displayAvailableForApplicantNoFilter(
                                 userCTRL.getCurrentUser(), eligible);
                         }
-
-                        // display all bto projects by filter
-                        case "2" -> {
+                        case "2" -> { // display all bto projects by filter
                             // 1) prompt & save
                             FilterSettings fs = projectView.promptFilterSettings(userCTRL.getCurrentUser(), sc);
                             projectCTRL.updateUserFilterSettings(userCTRL.getCurrentUser(), fs);
@@ -355,25 +353,24 @@ public class Main {
                             var allProjects = projectCTRL.getAllProjects();
                             projectView.displayAllProject(allProjects);
                         }
-                        case "2" -> {
-                            //exactly the same view as applicant
-                                    // 1) prompt & save
-                                FilterSettings fs = projectView.promptFilterSettings(userCTRL.getCurrentUser(), sc);
-                                projectCTRL.updateUserFilterSettings(userCTRL.getCurrentUser(), fs);
-                                userCTRL.saveUserData();
-                                // convert to the single CSV string
-                                String filterCsv = fs.toCsv();
-                            
-                                // store it on the user
-                                userCTRL.updateFilterSettings(userCTRL.getCurrentUser(), filterCsv);
-                            
-                                // feedback
-                                System.out.println("Your filters have been saved: " + filterCsv);
-                            
-                                // 2) re‑fetch & display
-            
-                                var filtered = projectCTRL.getFilteredProjectsForUser(userCTRL.getCurrentUser());
-                                projectView.displayAvailableForApplicant(userCTRL.getCurrentUser(), filtered);
+                        case "2" -> { // display all bto projects by filter
+                            // 1) prompt & save
+                            FilterSettings fs = projectView.promptFilterSettings(userCTRL.getCurrentUser(), sc);
+                            projectCTRL.updateUserFilterSettings(userCTRL.getCurrentUser(), fs);
+                            userCTRL.saveUserData();
+                            // convert to the single CSV string
+                            String filterCsv = fs.toCsv();
+                        
+                            // store it on the user
+                            userCTRL.updateFilterSettings(userCTRL.getCurrentUser(), filterCsv);
+                        
+                            // feedback
+                            System.out.println("Your filters have been saved: " + filterCsv);
+                        
+                            // 2) re‑fetch & display
+        
+                            var filtered = projectCTRL.getFilteredProjectsForUser(userCTRL.getCurrentUser());
+                            projectView.displayAvailableForApplicant(userCTRL.getCurrentUser(), filtered);
                         }
                         case "3" -> { // Apply for a BTO Project
                             try {
@@ -510,7 +507,26 @@ public class Main {
                             var allProjects = projectCTRL.getAllProjects();
                             projectView.displayAllProject(allProjects);
                         }
-                        case "2" -> { // Manager views his own projects
+                        case "2" -> { // display all bto projects by filter
+                            // 1) prompt & save
+                            FilterSettings fs = projectView.promptFilterSettings(userCTRL.getCurrentUser(), sc);
+                            projectCTRL.updateUserFilterSettings(userCTRL.getCurrentUser(), fs);
+                            userCTRL.saveUserData();
+                            // convert to the single CSV string
+                            String filterCsv = fs.toCsv();
+
+                            // store it on the user
+                            userCTRL.updateFilterSettings(userCTRL.getCurrentUser(), filterCsv);
+
+                            // feedback
+                            System.out.println("Your filters have been saved: " + filterCsv);
+
+                            // 2) re‑fetch & display
+        
+                            var filtered = projectCTRL.getFilteredProjectsForUser(userCTRL.getCurrentUser());
+                            projectView.displayAvailableForApplicant(userCTRL.getCurrentUser(), filtered);
+                        }
+                        case "3" -> { // Manager views his own projects
 
                             var allProjects = projectCTRL.getAllProjects();
                             var managerNRIC = userCTRL.getCurrentUser().getNRIC();
@@ -524,7 +540,7 @@ public class Main {
                             }
                         }
 
-                        case "3" -> { // Add BTO Project
+                        case "4" -> { // Add BTO Project
                             BTOProject newProj = projectView.promptNewProject(sc);
                             // automatically set projectID
                             int id = projectCTRL.getNextProjectID();
@@ -558,7 +574,7 @@ public class Main {
                             projectCTRL.createProject(newProj);
                             projectView.showMessage("Project created.");
                         }
-                        case "4" -> { // Edit BTO Project
+                        case "5" -> { // Edit BTO Project
                             int id = projectView.promptProjectID(sc);
                             BTOProject existing = projectCTRL.getProjectById(id);
                             if (existing == null) {
@@ -609,7 +625,7 @@ public class Main {
                             projectCTRL.editProject(id, existing);
                             projectView.showMessage("Project updated.");
                         }
-                        case "5" -> { // Delete BTO Project
+                        case "6" -> { // Delete BTO Project
                             // display a list of projects and ID for reference
                             var allProjects = projectCTRL.getAllProjects();
                             projectView.displayProjectIdNameList(allProjects);
@@ -621,7 +637,7 @@ public class Main {
                                 projectView.showMessage("Project not found.");
                             }
                         }
-                        case "6" -> { // back to central menu
+                        case "7" -> { // back to central menu
                             return;
                         }
                     

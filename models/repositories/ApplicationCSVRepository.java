@@ -6,7 +6,6 @@ import java.util.List;
 import models.BTOApplication;
 import models.enumerations.ApplicationStatus;
 import models.enumerations.ApplicationType;
-import models.enumerations.FlatType;
 
 public class ApplicationCSVRepository {
     private static final String CSV_FILE = "assets/BTOApplication.csv";
