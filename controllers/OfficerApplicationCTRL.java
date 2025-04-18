@@ -7,8 +7,9 @@ import java.util.stream.Collectors;
 import models.BTOApplication;
 import models.BTOProject;
 import models.OfficerApplication;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import models.User;
-import models.enumerations.RegistrationStatus;
 import models.repositories.ApplicationCSVRepository;
 import models.repositories.BTOProjectCSVRepository;
 import models.repositories.OfficerApplicationCSVRepository;
@@ -28,6 +29,11 @@ public class OfficerApplicationCTRL {
     /**
      * Load all applications and projects, keep track of the logged-in user
      */
+
+
+
+
+
 
 
 
@@ -112,6 +118,9 @@ public class OfficerApplicationCTRL {
             System.out.println("You've already registered as an officer for this project.");
             return false;
         }
+
+
+        
         
         // Check if already approved as officer for another project with overlapping dates
         boolean isOfficerElsewhere = false;
@@ -173,7 +182,7 @@ public class OfficerApplicationCTRL {
                 .collect(Collectors.toList());
     }
     
-    /**
+        /**
      * Process an officer application decision (approve/reject)
      * @param applicationId ID of the application to process
      * @param decision "A" for approve, "R" for reject
@@ -182,7 +191,6 @@ public class OfficerApplicationCTRL {
     public boolean processOfficerApplicationDecision(int applicationId, String decision) {
         // Find the application
         Optional<OfficerApplication> appOpt = officerApplicationList.stream()
-		
                 .filter(a -> a.getOfficerApplicationId() == applicationId && 
                              a.getStatus() == RegistrationStatus.PENDING)
                 .findFirst();
@@ -211,8 +219,32 @@ public class OfficerApplicationCTRL {
             return false;
         }
         
+        // Check if officer has date conflicts with other approved projects
+        boolean hasDateConflicts = false;
+        List<BTOProject> conflictingProjects = new ArrayList<>();
+        
+        for (BTOProject p : projects) {
+            if (p.getProjectID() != project.getProjectID() && // Different project
+                p.getApprovedOfficer() != null && 
+                p.getApprovedOfficer().contains(app.getOfficerNRIC()) && // Officer approved in this project
+                datesOverlap(p, project)) { // Dates overlap
+                    hasDateConflicts = true;
+                    conflictingProjects.add(p);
+            }
+        }
+        
         if (decision.equalsIgnoreCase("A")) {
-            // Approve application
+            // If there are conflicts and trying to approve, only allow rejection
+            if (hasDateConflicts) {
+                System.out.println("Cannot approve this application. Officer already has commitments for:");
+                for (BTOProject p : conflictingProjects) {
+                    System.out.println("- Project: " + p.getProjectName() + 
+                                     " (" + p.getApplicationOpeningDate() + " to " + 
+                                     p.getApplicationClosingDate() + ")");
+                }
+                System.out.println("Please reject this application instead.");
+                return false;
+            }
             
             // Update application status
             app.setStatus(RegistrationStatus.APPROVED);
@@ -231,9 +263,11 @@ public class OfficerApplicationCTRL {
             
             project.setPendingOfficer(pendingOfficers);
             project.setApprovedOfficer(approvedOfficers);
+            // Decrement available officer slots
+            project.setAvailableOfficerSlots(project.getAvailableOfficerSlots() - 1);
             
         } else if (decision.equalsIgnoreCase("R")) {
-            // Reject application
+            // Reject application - always allowed, even with no conflicts
             
             // Update application status
             app.setStatus(RegistrationStatus.REJECTED);
@@ -256,6 +290,7 @@ public class OfficerApplicationCTRL {
         
         return true;
     }
+
     
     /**
      * Check if current user is an approved officer for a project
@@ -278,10 +313,16 @@ public class OfficerApplicationCTRL {
     /**
      * Check if dates overlap between two projects
      */
-    private boolean datesOverlap(BTOProject p1, BTOProject p2) {
-        // Simple string comparison - assumes consistent date format
-        return !(p1.getApplicationClosingDate().compareTo(p2.getApplicationOpeningDate()) < 0 ||
-                 p2.getApplicationClosingDate().compareTo(p1.getApplicationOpeningDate()) < 0);
+   private boolean datesOverlap(BTOProject p1, BTOProject p2) {
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+    LocalDate p1Start = LocalDate.parse(p1.getApplicationOpeningDate(), formatter);
+    LocalDate p1End = LocalDate.parse(p1.getApplicationClosingDate(), formatter);
+    LocalDate p2Start = LocalDate.parse(p2.getApplicationOpeningDate(), formatter);
+    LocalDate p2End = LocalDate.parse(p2.getApplicationClosingDate(), formatter);
+
+    // No overlap if one project ends before the other starts
+    return !(p1End.isBefore(p2Start) || p2End.isBefore(p1Start));
     }
     
     /**
@@ -297,28 +338,73 @@ public class OfficerApplicationCTRL {
     /**
      * Get all projects user can apply to be an officer for
      */
-    public List<BTOProject> getEligibleOfficerProjects() {
-        return projects.stream()
-                .filter(p -> p.isVisibility() && p.getAvailableOfficerSlots() > 0)
-                .filter(p -> {
-                    // Not already applied for this project as applicant
-                    boolean notAppliedAsApplicant = btoApplicationList.stream()
-                            .noneMatch(a -> a.getApplicantNRIC().equals(currentUser.getNRIC()) && 
-                                           a.getProjectID() == p.getProjectID());
-                    
-                    // Not already registered for this project as officer
-                    boolean notRegisteredAsOfficer = officerApplicationList.stream()
-                            .noneMatch(a -> a.getOfficerNRIC().equals(currentUser.getNRIC()) && 
-                                           a.getProjectID() == p.getProjectID());
-                    
-                    // No overlapping commitments as officer for other projects
-                    boolean noOverlappingCommitments = projects.stream()
-                            .filter(other -> other.getApprovedOfficer() != null && 
-                                           other.getApprovedOfficer().contains(currentUser.getNRIC()))
-                            .noneMatch(other -> datesOverlap(other, p));
-                    
-                    return notAppliedAsApplicant && notRegisteredAsOfficer && noOverlappingCommitments;
-                })
-                .collect(Collectors.toList());
-    }
+/**
+ * Get all projects user can apply to be an officer for
+ */
+public List<BTOProject> getEligibleOfficerProjects() {
+    return projects.stream()
+            .filter(p -> p.isVisibility() && p.getAvailableOfficerSlots() > 0)
+            .filter(p -> {
+                // Not already applied for this project as applicant
+                boolean notAppliedAsApplicant = btoApplicationList.stream()
+                        .noneMatch(a -> a.getApplicantNRIC().equals(currentUser.getNRIC()) && 
+                                       a.getProjectID() == p.getProjectID());
+                
+                // Check if officer has any pending or approved applications for this project
+                List<OfficerApplication> userApplicationsForThisProject = officerApplicationList.stream()
+                        .filter(a -> a.getOfficerNRIC().equals(currentUser.getNRIC()) && 
+                                   a.getProjectID() == p.getProjectID())
+                        .collect(Collectors.toList());
+                
+                // Officer can apply again only if all previous applications were rejected
+                boolean canApplyToProject = userApplicationsForThisProject.isEmpty() || 
+                                          userApplicationsForThisProject.stream()
+                                              .allMatch(a -> a.getStatus() == RegistrationStatus.REJECTED);
+                
+                // Check for overlapping commitments with approved applications
+                boolean noApprovedOverlaps = projects.stream()
+                        .filter(other -> other.getApprovedOfficer() != null && 
+                                       other.getApprovedOfficer().contains(currentUser.getNRIC()))
+                        .noneMatch(other -> datesOverlap(other, p));
+                
+                // Check for overlapping commitments with pending applications
+                boolean noPendingOverlaps = officerApplicationList.stream()
+                        .filter(a -> a.getOfficerNRIC().equals(currentUser.getNRIC()) && 
+                                   a.getStatus() == RegistrationStatus.PENDING &&
+                                   a.getProjectID() != p.getProjectID()) // Exclude current project
+                        .noneMatch(a -> {
+                            // Find the project for this pending application
+                            BTOProject pendingProject = projects.stream()
+                                    .filter(proj -> proj.getProjectID() == a.getProjectID())
+                                    .findFirst()
+                                    .orElse(null);
+                                    
+                            return pendingProject != null && datesOverlap(pendingProject, p);
+                        });
+                
+                return notAppliedAsApplicant && canApplyToProject && noApprovedOverlaps && noPendingOverlaps;
+            })
+            .collect(Collectors.toList());
 }
+
+
+public List<OfficerApplication> getPendingAndSuccessfullOfficerApplicationsForManager() {
+    List<Integer> managedProjectIds = projects.stream()
+            .filter(p -> p.getManager().equals(currentUser.getNRIC()))
+            .map(BTOProject::getProjectID)
+            .collect(Collectors.toList());
+
+    return officerApplicationList.stream()
+            .filter(app -> managedProjectIds.contains(app.getProjectID()) &&
+                          (app.getStatus() == RegistrationStatus.PENDING || 
+                           app.getStatus() == RegistrationStatus.APPROVED))
+            .collect(Collectors.toList());
+}
+
+
+
+
+}
+
+
+

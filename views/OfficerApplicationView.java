@@ -20,7 +20,7 @@ public class OfficerApplicationView {
 
     public void displayManagerMenu() {
         System.out.println("\n=== Officer Application Menu ===");
-        System.out.println("1. Display All Applications Handled By You");
+        System.out.println("1. Display All Pending/Successful Applications Managed By You");
         System.out.println("2. Approval / Rejection for Application");
         System.out.println("3. Back");
         System.out.print("Select an option: ");
