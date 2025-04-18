@@ -482,7 +482,7 @@ public class Main {
 
                             String enquiryText = enquiryView.promptEnquiryCreation(sc);
                             Enquiry newEnquiry = enquiryCTRL.createEnquiry(projectId, enquiryText);
-                            enquiryView.displayEnquiryCreated(newEnquiry);
+                            enquiryView.displayEnquiry(newEnquiry);
 
                         }
                         case "5" -> { // Register as HDB Officer of a BTO Projects
