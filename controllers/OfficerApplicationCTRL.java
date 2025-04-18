@@ -371,7 +371,14 @@ public class OfficerApplicationCTRL {
 
                                 return pendingProject != null && datesOverlap(pendingProject, p);
                             });
-
+                    // if (!notAppliedAsApplicant)
+                    //     System.out.println("Filtered out: already applicant for " + p.getProjectID());
+                    // if (!canApplyToProject)
+                    //     System.out.println("Filtered out: already officer for " + p.getProjectID());
+                    // if (!noApprovedOverlaps)
+                    //     System.out.println("Filtered out: overlapping approved for " + p.getProjectID());
+                    // if (!noPendingOverlaps)
+                    //     System.out.println("Filtered out: overlapping pending for " + p.getProjectID());
                     return notAppliedAsApplicant && canApplyToProject && noApprovedOverlaps && noPendingOverlaps;
                 })
                 .collect(Collectors.toList());
