@@ -5,7 +5,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
+import models.BTOProject;
 import models.Enquiry;
 import models.User;
 import models.interfaces.IEnquiryResponse;
@@ -39,7 +41,7 @@ public final class EnquiryCTRL implements IEnquiryResponse, IEnquirySubmission {
         loadEnquiryData();
     }
 
-    public List<Enquiry> getEnquiries(String projName) {
+    public List<Enquiry> getEnquiries() {
         return enquiries;
     }
     
@@ -62,6 +64,29 @@ public final class EnquiryCTRL implements IEnquiryResponse, IEnquirySubmission {
             .collect(Collectors.toList());
     }
 
+    // Returns a list of filtered enquiries by logged in user
+    public List<Enquiry> getFilteredEnquiriesByManager(List<BTOProject> projectList) {
+        if (enquiries == null) {
+            return new ArrayList<>();
+        }
+        String userNRIC = currentUser.getNRIC();
+        // Filter projects managed by the current user
+        List<BTOProject> managedProjects = projectList.stream()
+            .filter(p -> p.getManagerID().equalsIgnoreCase(userNRIC))
+            .collect(Collectors.toList());
+        // Collect all project IDs from the managed projects and place it into a Set to remove duplicated and increase search time
+        Set<Integer> managedProjectIds = managedProjects.stream()
+            .map(BTOProject::getProjectID)
+            .collect(Collectors.toSet());
+        // Filter enquiries by:
+        // -- projectID that is managed by current user using project IDs
+        // -- no response 
+        return enquiries.stream()
+            .filter(e -> managedProjectIds.contains(e.getProjectId())
+                        && (e.getResponse() == null || e.getResponse().isEmpty()))
+            .collect(Collectors.toList());
+    }
+    
     // Returns a list of filtered enquiries by logged in user and that it has not been responded yet
     public List<Enquiry> getEditableEnquiriesByNRIC() {
         if (enquiries == null) {
@@ -164,8 +189,27 @@ public final class EnquiryCTRL implements IEnquiryResponse, IEnquirySubmission {
     }
 
     @Override
-    public void responseEnquiry(Enquiry enquiry, String response) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'responseEnquiry'");
+    public boolean responseEnquiry(Enquiry enquiry, String response) {
+        if(enquiries != null){
+            for(Enquiry en : enquiries){
+                if (en.getEnquiryId() == enquiry.getEnquiryId()) {
+                    try {
+                        // Get current time
+                        LocalDateTime now = LocalDateTime.now();
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                        // Update new Enquiry Text with latest edited date & time
+                        en.setResponse(response + " [Responded on: " + now.format(formatter) + "]");
+
+                        // Persist changes.
+                        saveEnquiryData();
+                        return true;
+                    }catch (Exception e) {
+                        System.err.println("Error responding enquiry: " + e.getMessage());
+                        return false;
+                    }
+                }
+            }
+        }
+        return false;
     }
 }

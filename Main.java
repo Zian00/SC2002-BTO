@@ -85,11 +85,9 @@ public class Main {
             baseView.displayMenu();
 
             String opt = sc.nextLine().trim();
-
             // --- Common options 1–4 ---
             switch (opt) {
-                case "1" ->
-                    runProjectMenu(sc, userCTRL, projectCTRL, projectView, applicationCTRL, enquiryView, enquiryCTRL);
+                case "1" -> runProjectMenu(sc, userCTRL, projectCTRL, projectView, applicationCTRL, enquiryView, enquiryCTRL);
                 case "2" -> runApplicationMenu(sc, userCTRL, projectCTRL, applicationCTRL, btoApplicationView);
                 case "3" -> runEnquiryMenu(sc, userCTRL, projectCTRL, enquiryView, enquiryCTRL);
                 case "4" -> {
@@ -517,7 +515,7 @@ public class Main {
                             var allProjects = projectCTRL.getAllProjects();
                             var managerNRIC = userCTRL.getCurrentUser().getNRIC();
                             var myProjects = allProjects.stream()
-                                    .filter(project -> project.getManager().equals(managerNRIC))
+                                    .filter(project -> project.getManagerID().equals(managerNRIC))
                                     .toList();
                             if (myProjects.isEmpty()) {
                                 projectView.showMessage("No projects found for you.");
@@ -531,12 +529,12 @@ public class Main {
                             // automatically set projectID
                             int id = projectCTRL.getNextProjectID();
                             newProj.setProjectID(id);
-                            newProj.setManager(userCTRL.getCurrentUser().getNRIC());
+                            newProj.setManagerID(userCTRL.getCurrentUser().getNRIC());
 
                             // --- Overlap check: prevent overlapping application periods for same manager
                             var managerNRIC = userCTRL.getCurrentUser().getNRIC();
                             var myProjects = projectCTRL.getAllProjects().stream()
-                                    .filter(project -> project.getManager().equals(managerNRIC))
+                                    .filter(project -> project.getManagerID().equals(managerNRIC))
                                     .toList();
 
                             // Parse dates for new project
@@ -569,7 +567,7 @@ public class Main {
                             }
                             // prevent manager from editing other people projects - bryan
                             String mgrNRIC = userCTRL.getCurrentUser().getNRIC();
-                            if (!existing.getManager().equals(mgrNRIC)) {
+                            if (!existing.getManagerID().equals(mgrNRIC)) {
                                 projectView.showMessage("Error: You do not manage that project.");
                                 break;
                             }
@@ -587,7 +585,7 @@ public class Main {
                             if (!oldOpen.equals(newOpen) || !oldClose.equals(newClose)) {
                                 var managerNRIC = userCTRL.getCurrentUser().getNRIC();
                                 var myProjects = projectCTRL.getAllProjects().stream()
-                                        .filter(project -> project.getManager().equals(managerNRIC)
+                                        .filter(project -> project.getManagerID().equals(managerNRIC)
                                                 && project.getProjectID() != id)
                                         .toList();
 
@@ -644,16 +642,17 @@ public class Main {
             EnquiryView enquiryView, EnquiryCTRL enquiryCTRL) {
         while (true) {
             Role role = userCTRL.getCurrentUser().getRole();
+            var projectList = projectCTRL.getAllProjects();
             switch (role) {
-                case APPLICANT, HDBOFFICER -> enquiryView.displayApplicantMenu();
-                case HDBMANAGER -> enquiryView.displayAdminMenu();
+                case APPLICANT -> enquiryView.displayApplicantMenu();
+                case HDBOFFICER -> enquiryView.displayOfficerMenu();
+                case HDBMANAGER -> enquiryView.displayManagerMenu();
             }
 
             String c = sc.nextLine().trim();
             switch (role) {
                 case APPLICANT -> {
                     var userEnquiries = enquiryCTRL.getFilteredEnquiriesByNRIC();
-                    var projectList = projectCTRL.getAllProjects();
                     switch (c) {
                         case "1" -> { // Only display Enquiry by User
                             enquiryView.displayFilteredEnquiries(projectList, userEnquiries);
@@ -694,7 +693,7 @@ public class Main {
                                 break;
                             }
                             enquiryView.displayFilteredEnquiries(projectList, editableEnquiries);
-                            // Get user selection on which enquiry to edit
+                            // Get user selection on which enquiry to delete
                             int selectedId = enquiryView.promptEnquirySelection(editableEnquiries, sc);
                             Enquiry selected = enquiryCTRL.findEnquiryById(editableEnquiries, selectedId);
                             if (selected == null) {
@@ -709,22 +708,111 @@ public class Main {
                                 enquiryView.showMessage("Deletion cancelled.");
                             }
                         }
-                        case "4" -> {
-                            return; // back to central menu
+                        case "4" -> { // back to central menu
+                            return; 
                         }
                     }
                 }
                 case HDBOFFICER -> {
+                    var userEnquiries = enquiryCTRL.getFilteredEnquiriesByNRIC();
                     switch (c) {
-                        case "4" -> {
-                            return; // back to central menu
+                        case "1" -> { // Only display Enquiry by User
+                            enquiryView.displayFilteredEnquiries(projectList, userEnquiries);
+                        }
+                        case "2" -> { // Edit Selected Enquiry
+                            // Filter userEnquiries with no response and display
+                            var editableEnquiries = enquiryCTRL.getEditableEnquiriesByNRIC();
+                            if (editableEnquiries.isEmpty()) {
+                                enquiryView.showMessage("No editable enquiries found.");
+                                break;
+                            }
+                            enquiryView.displayFilteredEnquiries(projectList, editableEnquiries);
+                            // Get user selection on which enquiry to edit
+                            int selectedId = enquiryView.promptEnquirySelection(editableEnquiries, sc);
+                            Enquiry selected = enquiryCTRL.findEnquiryById(editableEnquiries, selectedId);
+                            if (selected == null) {
+                                enquiryView.showMessage("Invalid Enquiry ID selected.");
+                                break;
+                            }
+                            // Get new enquiry text to update
+                            String newText = enquiryView.promptNewEnquiryText(selected.getEnquiryText(), sc);
+                            if (newText == null || newText.isEmpty()) {
+                                enquiryView.showMessage("Enquiry update cancelled!");
+                            } else {
+                                if (enquiryCTRL.editEnquiry(selected, newText)) {
+                                    enquiryView.showMessage("Enquiry updated successfully!");
+                                    enquiryView.displayEnquiry(selected);
+                                } else {
+                                    enquiryView.showMessage("Failed to edit enquiry, please try again.");
+                                }
+                            }
+                        }
+                        case "3" -> { // Delete Enquiry
+                            // Filter userEnquiries with no response and display
+                            var editableEnquiries = enquiryCTRL.getEditableEnquiriesByNRIC();
+                            if (editableEnquiries.isEmpty()) {
+                                enquiryView.showMessage("No editable enquiries found.");
+                                break;
+                            }
+                            enquiryView.displayFilteredEnquiries(projectList, editableEnquiries);
+                            // Get user selection on which enquiry to delete
+                            int selectedId = enquiryView.promptEnquirySelection(editableEnquiries, sc);
+                            Enquiry selected = enquiryCTRL.findEnquiryById(editableEnquiries, selectedId);
+                            if (selected == null) {
+                                enquiryView.showMessage("Invalid Enquiry ID selected.");
+                                break;
+                            }
+                            // Confirm deletion
+                            if (enquiryView.promptDeletionConfirmation(sc)) {
+                                enquiryCTRL.deleteEnquiry(selected);
+                                enquiryView.showMessage("Enquiry deleted successfully!");
+                            } else {
+                                enquiryView.showMessage("Deletion cancelled.");
+                            }
+                        }
+                        case "4" -> { // Respond to Enquiries in-charge by User
+                            
+                        }
+                        case "5" -> { // back to central menu 
+                            return; 
                         }
                     }
                 }
                 case HDBMANAGER -> {
                     switch (c) {
-                        case "2" -> {
-                            return; // back to central menu
+                        case "1" -> { // View All Enquiries
+                            enquiryView.displayAllEnquiries(projectList, enquiryCTRL.getEnquiries());
+                        }
+                        case "2" -> { // Respond to Enquiries in-charge by User
+                            // Filter userManagedEnquiries with no response & Enquiry is in-chaged current user and display
+                            var userManagedEnquiries = enquiryCTRL.getFilteredEnquiriesByManager(projectList);
+                            if (userManagedEnquiries.isEmpty()) {
+                                enquiryView.showMessage("No enquiries to respond to.");
+                                break;
+                            }
+                            enquiryView.displayAllEnquiries(projectList, userManagedEnquiries);
+                            // Get user selection on which enquiry to respond to
+                            int selectedId = enquiryView.promptEnquirySelection(userManagedEnquiries, sc);
+                            Enquiry selected = enquiryCTRL.findEnquiryById(userManagedEnquiries, selectedId);
+                            if (selected == null) {
+                                enquiryView.showMessage("Invalid Enquiry ID selected.");
+                                break;
+                            }
+                            // Get response text to update enquiry
+                            String responseText = enquiryView.promptResponseText(sc);
+                            if (responseText == null || responseText.isEmpty()) {
+                                enquiryView.showMessage("Response cancelled!");
+                            } else {
+                                if (enquiryCTRL.responseEnquiry(selected, responseText)) {
+                                    enquiryView.showMessage("Response added successfully!");
+                                    enquiryView.displayEnquiryWithResponse(selected);
+                                } else {
+                                    enquiryView.showMessage("Failed to add response, please try again.");
+                                }
+                            }
+                        }
+                        case "3" -> { // back to central menu
+                            return;
                         }
                     }
                 }
@@ -907,7 +995,7 @@ public class Main {
                                     BTOProject project = projectCTRL.getProjectById(app.getProjectID());
                                     if (project != null) {
                                         System.out.println("   -> Project Details: ID: " + project.getProjectID()
-                                                + ", Manager: " + project.getManager()
+                                                + ", Manager: " + project.getManagerID()
                                                 + ", Available 2-Room: " + project.getAvailable2Room()
                                                 + ", Available 3-Room: " + project.getAvailable3Room() + "\n");
                                     } else {
