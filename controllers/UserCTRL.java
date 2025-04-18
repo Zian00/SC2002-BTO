@@ -16,9 +16,18 @@ public class UserCTRL {
     }
 
     public void saveUserData() {
-        userRepo.writeUserToCSV(userList);
+        if (this.userList == null) {
+            // Instead of printing an error, load the users here.
+            loadUserData();
+            if (this.userList == null) {
+                System.err.println("ERROR: no users loaded, skipping save");
+                return;
+            }
+        }
+        userRepo.writeUserToCSV(this.userList);
     }
 
+  
     /**
      * Login as before.
      */
@@ -33,7 +42,22 @@ public class UserCTRL {
         }
         return false;
     }
-
+     /** update just the filterSettings for one user and persist */
+     public void updateFilterSettings(User me, String filterCsv) {
+         if (userList == null)
+            {
+                loadUserData();
+            }
+            currentUser.setFilterSettings(filterCsv);
+            // Also synchronize the change into userList
+            for (User u : userList) {
+                if (u.getNRIC().equalsIgnoreCase(currentUser.getNRIC())) {
+                    u.setFilterSettings(filterCsv);
+                    break;
+                }
+            }
+            saveUserData();
+    }
     /**
      * Change password with verification of the old password.
      * 
@@ -80,4 +104,6 @@ public class UserCTRL {
         }
         return null;
     }
+
+   
 }

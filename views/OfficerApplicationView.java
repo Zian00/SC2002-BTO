@@ -37,11 +37,14 @@ public class OfficerApplicationView {
             System.out.println("You have not submitted any officer applications.");
             return;
         }
-
+    
         System.out.println("\n=== Your Officer Applications ===");
         for (OfficerApplication app : officerApplicationList) {
             System.out.println("Application ID: " + app.getOfficerApplicationId());
             System.out.println("Project ID: " + app.getProjectID());
+            // Display the additional project information
+            System.out.println("Project Name: " + (app.getProjectName() != null ? app.getProjectName() : "Unknown"));
+            System.out.println("Project Location: " + (app.getProjectLocation() != null ? app.getProjectLocation() : "Unknown"));
             System.out.println("Status: " + app.getStatus());
             System.out.println("-------------------------------");
         }
