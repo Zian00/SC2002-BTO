@@ -6,10 +6,7 @@ import controllers.UserCTRL;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
-import models.repositories.ReceiptCSVRepository;
 import models.BTOApplication;
-import models.Receipt;
-import models.User;
 import models.BTOProject;
 import models.Enquiry;
 import models.enumerations.ApplicationStatus;
@@ -113,7 +110,6 @@ public class Main {
                         }
                     case HDBOFFICER:
                         switch (opt) {
-                            
 
                             case "5" -> { // case "5" Enter Officer Application Menu
                                 runOfficerApplicationMenu(sc, OfficerAppCTRL, officerAppView, projectCTRL);
@@ -128,7 +124,8 @@ public class Main {
                     case HDBMANAGER:
                         switch (opt) {
                             // case "5" -> officerApplicationCTRL.
-                            case "5" -> {}
+                            case "5" -> {
+                            }
                             case "6" -> {
                                 // Logout
                                 userCTRL.setCurrentUser(null);
@@ -661,37 +658,26 @@ public class Main {
                         }
 
                         case "3" -> { // Approval for Withdrawal of BTO Application (no need for rejection)
-                            try { // withdrawal application has to be in pending status in order to approve
+                            try {
                                 var pendingWithdrawals = applicationCTRL.getApplicationsHandledByManager().stream()
                                         .filter(app -> app.getApplicationType() == ApplicationType.WITHDRAWAL
                                                 && app.getStatus() == ApplicationStatus.PENDING)
                                         .collect(Collectors.toList());
-
+                        
                                 if (pendingWithdrawals.isEmpty()) {
                                     System.out.println("No pending withdrawal applications available for approval.");
                                     break;
                                 }
-
+                        
                                 System.out.println("\n=== Pending Withdrawal Applications ===");
                                 for (BTOApplication app : pendingWithdrawals) {
                                     System.out.println("Application ID: " + app.getApplicationId()
                                             + " | Applicant: " + app.getApplicantNRIC()
                                             + " | Flat Type: " + app.getFlatType()
                                             + " | Status: " + app.getStatus());
-
-                                    BTOProject project = projectCTRL.getProjectById(app.getProjectID());
-                                    if (project != null) {
-                                        System.out.println("   -> Project Details: ID: " + project.getProjectID()
-                                                + ", Manager: " + project.getManager()
-                                                + ", Available 2-Room: " + project.getAvailable2Room()
-                                                + ", Available 3-Room: " + project.getAvailable3Room() + "\n");
-                                    } else {
-                                        System.out.println("   -> Project details not found for Project ID: "
-                                                + app.getProjectID());
-                                    }
-                                    System.out.println("------------------------------");
+                                    System.out.println("--------------------------------------");
                                 }
-
+                        
                                 System.out.print("Enter Application ID for withdrawal approve: ");
                                 String input = sc.nextLine().trim();
                                 int appId;
@@ -701,25 +687,13 @@ public class Main {
                                     System.out.println("Invalid application ID entered. Please enter a valid number.");
                                     break;
                                 }
-
-                                var selectedWithdrawal = pendingWithdrawals.stream()
-                                        .filter(app -> app.getApplicationId() == appId)
-                                        .findFirst();
-                                if (selectedWithdrawal.isEmpty()) {
-                                    System.out.println("Withdrawal application not found or not pending.");
-                                    break;
-                                }
-
-                                // Approving the withdrawal simply means updating its status to SUCCESSFUL
-                                boolean success = applicationCTRL.updateApplicationStatus(appId, "SUCCESSFUL");
-                                if (success) {
-                                    System.out.println("Withdrawal approved. Application marked as SUCCESSFUL.");
-                                } else {
-                                    System.out.println("Failed to update the withdrawal application status.");
+                        
+                                boolean success = applicationCTRL.approveWithdrawalApplication(appId, projectCTRL);
+                                if (!success) {
+                                    System.out.println("Withdrawal approval failed.");
                                 }
                             } catch (Exception e) {
-                                System.out.println(
-                                        "An error occurred while processing the withdrawal: " + e.getMessage());
+                                System.out.println("An error occurred while processing the withdrawal: " + e.getMessage());
                             }
                         }
                         case "4" -> {

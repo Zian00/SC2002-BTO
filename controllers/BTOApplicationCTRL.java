@@ -418,4 +418,50 @@ public class BTOApplicationCTRL {
             return false;
         }
     }
+
+    public boolean approveWithdrawalApplication(int appId, BTOProjectCTRL projectCTRL) {
+        // Find the pending withdrawal application
+        Optional<BTOApplication> appOpt = applicationList.stream()
+                .filter(app -> app.getApplicationId() == appId
+                        && app.getApplicationType() == ApplicationType.WITHDRAWAL
+                        && app.getStatus() == ApplicationStatus.PENDING)
+                .findFirst();
+
+        if (appOpt.isEmpty()) {
+            System.out.println("Withdrawal application not found or not pending.");
+            return false;
+        }
+        BTOApplication withdrawalApp = appOpt.get();
+
+        // Check project and manager
+        BTOProject project = projectCTRL.getProjectById(withdrawalApp.getProjectID());
+        if (project == null) {
+            System.out.println("Associated project not found.");
+            return false;
+        }
+        if (!project.getManager().equals(currentUser.getNRIC())) {
+            System.out.println("You can only approve withdrawal applications for projects you manage.");
+            return false;
+        }
+
+        // Increment flat availability
+        switch (withdrawalApp.getFlatType().toUpperCase()) {
+            case "TWOROOM" -> project.setAvailable2Room(project.getAvailable2Room() + 1);
+            case "THREEROOM" -> project.setAvailable3Room(project.getAvailable3Room() + 1);
+            default -> {
+                System.out.println("Unknown flat type: " + withdrawalApp.getFlatType());
+                return false;
+            }
+        }
+
+        // Persist project and application changes
+        projectCTRL.editProject(project.getProjectID(), project);
+        projectCTRL.saveProjects();
+        withdrawalApp.setStatus(ApplicationStatus.SUCCESSFUL);
+        appRepo.writeApplicationToCSV(applicationList);
+
+        System.out.println("Withdrawal approved. Application marked as SUCCESSFUL. Available flat type incremented.");
+        return true;
+    }
+
 }
