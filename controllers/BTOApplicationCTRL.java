@@ -150,7 +150,7 @@ public class BTOApplicationCTRL {
         return applicationList.stream()
                 .filter(app -> projects.stream()
                         .anyMatch(proj -> proj.getProjectID() == app.getProjectID() &&
-                                proj.getManager().equals(currentUser.getNRIC())))
+                                proj.getManagerID().equals(currentUser.getNRIC())))
                 .collect(Collectors.toList());
     }
 
@@ -221,7 +221,7 @@ public class BTOApplicationCTRL {
             System.out.println("Associated project not found.");
             return false;
         }
-        if (!project.getManager().equals(currentUser.getNRIC())) {
+        if (!project.getManagerID().equals(currentUser.getNRIC())) {
             System.out.println("You can only approve/reject applications for projects you manage.");
             return false;
         }
@@ -393,8 +393,8 @@ public class BTOApplicationCTRL {
             receipt.setApplicationClosingDate(bookedProject.getApplicationClosingDate());
 
             // Get manager's name
-            User manager = userCTRL.getUserByNRIC(bookedProject.getManager());
-            String managerName = (manager != null) ? manager.getName() : bookedProject.getManager();
+            User manager = userCTRL.getUserByNRIC(bookedProject.getManagerID());
+            String managerName = (manager != null) ? manager.getName() : bookedProject.getManagerID();
             receipt.setManager(managerName);
 
             // Write the receipt to CSV.
@@ -443,7 +443,7 @@ public class BTOApplicationCTRL {
             System.out.println("Associated project not found.");
             return false;
         }
-        if (!project.getManager().equals(currentUser.getNRIC())) {
+        if (!project.getManagerID().equals(currentUser.getNRIC())) {
             System.out.println("You can only approve withdrawal applications for projects you manage.");
             return false;
         }

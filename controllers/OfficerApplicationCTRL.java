@@ -1,5 +1,7 @@
 package controllers;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -7,13 +9,11 @@ import java.util.stream.Collectors;
 import models.BTOApplication;
 import models.BTOProject;
 import models.OfficerApplication;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import models.User;
+import models.enumerations.*;
 import models.repositories.ApplicationCSVRepository;
 import models.repositories.BTOProjectCSVRepository;
 import models.repositories.OfficerApplicationCSVRepository;
-import models.enumerations.*;
 
 public class OfficerApplicationCTRL {
 
@@ -161,7 +161,7 @@ public class OfficerApplicationCTRL {
      */
     public List<OfficerApplication> getPendingOfficerApplicationsForManager() {
         List<Integer> managedProjectIds = projects.stream()
-                .filter(p -> p.getManager().equals(currentUser.getNRIC()))
+                .filter(p -> p.getManagerID().equals(currentUser.getNRIC()))
                 .map(BTOProject::getProjectID)
                 .collect(Collectors.toList());
 
@@ -204,7 +204,7 @@ public class OfficerApplicationCTRL {
         }
 
         // Verify this manager manages this project
-        if (!project.getManager().equals(currentUser.getNRIC())) {
+        if (!project.getManagerID().equals(currentUser.getNRIC())) {
             System.out.println("You do not manage this project.");
             return false;
         }
@@ -372,13 +372,16 @@ public class OfficerApplicationCTRL {
                                 return pendingProject != null && datesOverlap(pendingProject, p);
                             });
                     // if (!notAppliedAsApplicant)
-                    //     System.out.println("Filtered out: already applicant for " + p.getProjectID());
+                    // System.out.println("Filtered out: already applicant for " +
+                    // p.getProjectID());
                     // if (!canApplyToProject)
-                    //     System.out.println("Filtered out: already officer for " + p.getProjectID());
+                    // System.out.println("Filtered out: already officer for " + p.getProjectID());
                     // if (!noApprovedOverlaps)
-                    //     System.out.println("Filtered out: overlapping approved for " + p.getProjectID());
+                    // System.out.println("Filtered out: overlapping approved for " +
+                    // p.getProjectID());
                     // if (!noPendingOverlaps)
-                    //     System.out.println("Filtered out: overlapping pending for " + p.getProjectID());
+                    // System.out.println("Filtered out: overlapping pending for " +
+                    // p.getProjectID());
                     return notAppliedAsApplicant && canApplyToProject && noApprovedOverlaps && noPendingOverlaps;
                 })
                 .collect(Collectors.toList());
@@ -386,7 +389,7 @@ public class OfficerApplicationCTRL {
 
     public List<OfficerApplication> getPendingAndSuccessfullOfficerApplicationsForManager() {
         List<Integer> managedProjectIds = projects.stream()
-                .filter(p -> p.getManager().equals(currentUser.getNRIC()))
+                .filter(p -> p.getManagerID().equals(currentUser.getNRIC()))
                 .map(BTOProject::getProjectID)
                 .collect(Collectors.toList());
 
