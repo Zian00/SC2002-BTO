@@ -200,6 +200,7 @@ public class BTOApplicationCTRL {
     }
 
     public boolean processApplicationDecision(int appId, String decision, BTOProjectCTRL projectCTRL) {
+
         // Retrieve the application from applicationList
         Optional<BTOApplication> optApp = applicationList.stream()
                 .filter(app -> app.getApplicationId() == appId && app.getStatus() == ApplicationStatus.PENDING)
@@ -209,15 +210,19 @@ public class BTOApplicationCTRL {
             return false;
         }
         BTOApplication selectedApp = optApp.get();
-        
-        if (decision.equalsIgnoreCase("A")) {
 
-            // Approval: check project supply
-            BTOProject project = projectCTRL.getProjectById(selectedApp.getProjectID());
-            if (project == null) {
-                System.out.println("Associated project not found.");
-                return false;
-            }
+        // --- Only allow approval/rejection if manager handles the project ---
+        BTOProject project = projectCTRL.getProjectById(selectedApp.getProjectID());
+        if (project == null) {
+            System.out.println("Associated project not found.");
+            return false;
+        }
+        if (!project.getManager().equals(currentUser.getNRIC())) {
+            System.out.println("You can only approve/reject applications for projects you manage.");
+            return false;
+        }
+
+        if (decision.equalsIgnoreCase("A")) {
             String flatType = selectedApp.getFlatType();
             boolean supplyAvailable = false;
             if (flatType.equalsIgnoreCase("TWOROOM")) {
@@ -337,24 +342,40 @@ public class BTOApplicationCTRL {
 
     public boolean bookAndGenerateReceipt(int appId, BTOProjectCTRL projectCTRL, UserCTRL userCTRL) {
         try {
+            // Only allow booking for applications handled by this officer
+            var handledApps = getApplicationsHandledByOfficer();
+            var appOpt = handledApps.stream()
+                    .filter(a -> a.getApplicationId() == appId && a.getStatus() == ApplicationStatus.SUCCESSFUL)
+                    .findFirst();
+            if (appOpt.isEmpty()) {
+                System.out.println("Application not found, not successful, or not handled by you.");
+                return false;
+            }
             // Book the application as before.
             boolean booked = bookApplication(appId, projectCTRL);
             if (!booked) {
+                System.out.println("Booking failed. Please check application status and flat availability.");
                 return false;
             }
             // Retrieve application and project details.
             BTOApplication bookedApp = getApplicationById(appId);
             if (bookedApp == null) {
-                throw new Exception("Booked application details not found.");
+                System.out.println("Booked application details not found.");
+                return false;
             }
             BTOProject bookedProject = projectCTRL.getProjectById(bookedApp.getProjectID());
             if (bookedProject == null) {
-                throw new Exception("Associated project details not found.");
+                System.out.println("Associated project details not found.");
+                return false;
             }
             // Create and populate the receipt.
             ReceiptCSVRepository receiptRepo = new ReceiptCSVRepository();
             Receipt receipt = new Receipt();
             User applicant = userCTRL.getUserByNRIC(bookedApp.getApplicantNRIC());
+            if (applicant == null) {
+                System.out.println("Applicant details not found.");
+                return false;
+            }
             receipt.setReceiptID(receiptRepo.getNextReceiptID());
             receipt.setNRIC(bookedApp.getApplicantNRIC());
             receipt.setApplicantName(applicant.getName());
@@ -366,7 +387,12 @@ public class BTOApplicationCTRL {
             receipt.setNeighborhood(bookedProject.getNeighborhood());
             receipt.setApplicationOpeningDate(bookedProject.getApplicationOpeningDate());
             receipt.setApplicationClosingDate(bookedProject.getApplicationClosingDate());
-            receipt.setManager(bookedProject.getManager());
+
+            // Get manager's name
+            User manager = userCTRL.getUserByNRIC(bookedProject.getManager());
+            String managerName = (manager != null) ? manager.getName() : bookedProject.getManager();
+            receipt.setManager(managerName);
+
             // Write the receipt to CSV.
             receiptRepo.writeReceiptCSV(receipt);
 
@@ -391,6 +417,51 @@ public class BTOApplicationCTRL {
             System.out.println("Error in booking and receipt generation: " + ex.getMessage());
             return false;
         }
+    }
+
+    public boolean approveWithdrawalApplication(int appId, BTOProjectCTRL projectCTRL) {
+        // Find the pending withdrawal application
+        Optional<BTOApplication> appOpt = applicationList.stream()
+                .filter(app -> app.getApplicationId() == appId
+                        && app.getApplicationType() == ApplicationType.WITHDRAWAL
+                        && app.getStatus() == ApplicationStatus.PENDING)
+                .findFirst();
+
+        if (appOpt.isEmpty()) {
+            System.out.println("Withdrawal application not found or not pending.");
+            return false;
+        }
+        BTOApplication withdrawalApp = appOpt.get();
+
+        // Check project and manager
+        BTOProject project = projectCTRL.getProjectById(withdrawalApp.getProjectID());
+        if (project == null) {
+            System.out.println("Associated project not found.");
+            return false;
+        }
+        if (!project.getManager().equals(currentUser.getNRIC())) {
+            System.out.println("You can only approve withdrawal applications for projects you manage.");
+            return false;
+        }
+
+        // Increment flat availability
+        switch (withdrawalApp.getFlatType().toUpperCase()) {
+            case "TWOROOM" -> project.setAvailable2Room(project.getAvailable2Room() + 1);
+            case "THREEROOM" -> project.setAvailable3Room(project.getAvailable3Room() + 1);
+            default -> {
+                System.out.println("Unknown flat type: " + withdrawalApp.getFlatType());
+                return false;
+            }
+        }
+
+        // Persist project and application changes
+        projectCTRL.editProject(project.getProjectID(), project);
+        projectCTRL.saveProjects();
+        withdrawalApp.setStatus(ApplicationStatus.SUCCESSFUL);
+        appRepo.writeApplicationToCSV(applicationList);
+
+        System.out.println("Withdrawal approved. Application marked as SUCCESSFUL. Available flat type incremented.");
+        return true;
     }
 
 }

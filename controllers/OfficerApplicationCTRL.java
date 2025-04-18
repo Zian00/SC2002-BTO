@@ -12,6 +12,7 @@ import models.enumerations.RegistrationStatus;
 import models.repositories.ApplicationCSVRepository;
 import models.repositories.BTOProjectCSVRepository;
 import models.repositories.OfficerApplicationCSVRepository;
+import models.enumerations.*;
 
 public class OfficerApplicationCTRL {
     
@@ -27,6 +28,15 @@ public class OfficerApplicationCTRL {
     /**
      * Load all applications and projects, keep track of the logged-in user
      */
+
+
+
+
+    public Role getCurrentUserRole()
+    {
+        return currentUser.getRole();
+    }
+
     public OfficerApplicationCTRL(User currentUser) {
         this.currentUser = currentUser;
         this.officerRepo = new OfficerApplicationCSVRepository();
@@ -43,9 +53,27 @@ public class OfficerApplicationCTRL {
      * View all officer applications submitted by current user
      */
     public List<OfficerApplication> viewUserOfficerApplications() {
-        return officerApplicationList.stream()
+        List<OfficerApplication> userApplications = officerApplicationList.stream()
                 .filter(a -> a.getOfficerNRIC().equals(currentUser.getNRIC()))
                 .collect(Collectors.toList());
+                
+        // Enhance each application with project information
+        for (OfficerApplication app : userApplications) {
+            // Find the corresponding project
+            BTOProject project = projects.stream()
+                    .filter(p -> p.getProjectID() == app.getProjectID())
+                    .findFirst()
+                    .orElse(null);
+                    
+            if (project != null) {
+                // Set additional project information in the application
+                app.setProjectName(project.getProjectName());
+                app.setProjectLocation(project.getNeighborhood());
+                
+            }
+        }
+        
+        return userApplications;
     }
     
     /**
@@ -56,12 +84,12 @@ public class OfficerApplicationCTRL {
     public boolean registerAsOfficer(int projectId) {
         // Find the project
         BTOProject project = projects.stream()
-                .filter(p -> p.getProjectID() == projectId && p.isVisibility())
+                .filter(p -> p.getProjectID() == projectId )
                 .findFirst()
                 .orElse(null);
                 
         if (project == null) {
-            System.out.println("Project not found or not visible.");
+            System.out.println("Project not found.");
             return false;
         }
         

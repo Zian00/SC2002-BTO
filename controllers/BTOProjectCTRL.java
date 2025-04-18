@@ -74,6 +74,7 @@ public class BTOProjectCTRL {
         existing.setApplicationClosingDate(updated.getApplicationClosingDate());
         existing.setAvailableOfficerSlots(updated.getAvailableOfficerSlots());
         existing.setVisibility(updated.isVisibility());
+        
         // manager, pending/approved lists typically left alone
         repo.writeBTOProjectToCSV(projects);
         return true;
@@ -204,13 +205,13 @@ public class BTOProjectCTRL {
         new UserCTRL().saveUserData();
     }
     // stubs for edit/delete…
-    public void editProject() {
-        throw new UnsupportedOperationException();
-    }
+    // public void editProject() {
+    //     throw new UnsupportedOperationException();
+    // }
 
-    public void deleteProject() {
-        throw new UnsupportedOperationException();
-    }
+    // public void deleteProject() {
+    //     throw new UnsupportedOperationException();
+    // }
 
     public void saveProjects() {
         repo.writeBTOProjectToCSV(projects);

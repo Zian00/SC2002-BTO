@@ -351,7 +351,7 @@ public class Main {
                                 projectView.showMessage("Project not found.");
                                 break;
                             }
-                             // prevent manager from editing other people projects - bryan
+                            // prevent manager from editing other people projects - bryan
                             String mgrNRIC = userCTRL.getCurrentUser().getNRIC();
                             if (!existing.getManager().equals(mgrNRIC)) {
                                 projectView.showMessage("Error: You do not manage that project.");
