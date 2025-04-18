@@ -24,8 +24,10 @@ public class UserCSVRepository {
                 // header line read
             }
             while ((line = br.readLine()) != null) {
-                if (line.trim().isEmpty()) continue;
-                String[] tokens = line.split(",", -1); // Filter Settings is default as blank so -1 to prevent field getting deleted
+                if (line.trim().isEmpty())
+                    continue;
+                String[] tokens = line.split(",", 7); //im trying sth
+                // String[] tokens = line.split(",", -1); // Filter Settings is default as blank so -1 to prevent field getting deleted
                 // Ensure tokens length is correct
                 if (tokens.length < 7) {
                     System.out.println("Skipping invalid record: " + line);
@@ -40,7 +42,9 @@ public class UserCSVRepository {
                 String password = tokens[4].trim();
                 Role role = Role.valueOf(tokens[5].trim().toUpperCase());
                 String filterSettings = tokens[6].trim();
-    
+                if (filterSettings.startsWith("\"") && filterSettings.endsWith("\"") && filterSettings.length() >= 2) {
+                    filterSettings = filterSettings.substring(1, filterSettings.length() - 1);
+                }
                 User user = new User(nric, name, password, age, maritalStatus, filterSettings, role);
                 users.add(user);
             }
@@ -51,20 +55,29 @@ public class UserCSVRepository {
         return users;
     }
 
+    
     public void writeUserToCSV(List<User> users) {
         try (PrintWriter pw = new PrintWriter(new FileWriter(CSV_FILE))) {
-            // Write header
+            // 1) Header
             pw.println("Name,NRIC,Age,Marital Status,Password,role,filterSettings");
+            // 2) Each user
             for (User user : users) {
-                String line = String.join(",",
-                        user.getName(),
-                        user.getNRIC(),
-                        String.valueOf(user.getAge()),
-                        user.getMaritalStatus().toString(),
-                        user.getPassword(),
-                        user.getRole().toString(),
-                        user.getFilterSettings() == null ? "" : user.getFilterSettings());
-                pw.println(line);
+                String fs = user.getFilterSettings();
+                if (fs == null) {
+                    fs = "";
+                } else if (fs.contains(",")) {
+                    // wrap in quotes so your commas stay in one cell
+                    fs = "\"" + fs + "\"";
+                }
+                pw.printf("%s,%s,%d,%s,%s,%s,%s%n",
+                    user.getName(),
+                    user.getNRIC(),
+                    user.getAge(),
+                    user.getMaritalStatus(),
+                    user.getPassword(),
+                    user.getRole(),
+                    fs            // <- use the local, possibly‐quoted fs
+                );
             }
         } catch (IOException e) {
             e.printStackTrace();

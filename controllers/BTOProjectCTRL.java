@@ -1,13 +1,16 @@
 package controllers;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import models.BTOApplication;
 import models.BTOProject;
+import models.FilterSettings;
 import models.User;
 import models.HDBManager;
+import models.enumerations.FlatType;
 import models.enumerations.MaritalState;
 import models.enumerations.Role;
 import models.repositories.BTOProjectCSVRepository;
@@ -148,6 +151,58 @@ public class BTOProjectCTRL {
                 .collect(Collectors.toList());
     }
 
+    //FILTER SETTINGS
+     /** apply both “visibility + eligibility” _and_ the user’s custom price/room filters */
+    public List<BTOProject> getFilteredProjectsForUser(User user) {
+        // 1) existing filter (visibility, marital/age)
+        List<BTOProject> base = getFilteredProjects();
+
+        // 2) load user’s saved filter settings
+        FilterSettings fs = FilterSettings.fromCsv(user.getFilterSettings());
+
+        // check marital/age eligibility
+        boolean canSee2 = user.getMaritalStatus() == MaritalState.SINGLE
+                        ? user.getAge() >= 35
+                        : user.getAge() >= 21;
+        boolean canSee3 = user.getMaritalStatus() == MaritalState.MARRIED
+                        && user.getAge() >= 21;
+
+        // if they asked for 3‑Room but can’t see 3‑Room, return empty immediately:
+        if ("3-Room".equals(fs.getRoomType()) && !canSee3) {
+            System.out.println("Sorry as you are only able to view 2 rooms, and are asking to see 3 rooms, the view is empty");
+            return Collections.emptyList();
+        }
+        if ("2-Room".equals(fs.getRoomType()) && !canSee2) {
+            return Collections.emptyList();
+        }
+        // 3) apply them
+        return base.stream()
+            .filter(p -> {
+                // room‐type filter?
+                if (fs.getRoomType() != null) {
+                    if (fs.getRoomType().equals("2‑Room") && p.getAvailable2Room() == 0) return false;
+                    if (fs.getRoomType().equals("3‑Room") && p.getAvailable3Room() == 0) return false;
+                }
+                return true;
+            })
+            .filter(p -> {
+                // price filter (choose correct price)
+                int price = fs.getRoomType()!=null && fs.getRoomType().equals("3‑Room")
+                                ? p.getThreeRoomPrice()
+                                : p.getTwoRoomPrice();
+                if (fs.getMinPrice() != null && price < fs.getMinPrice()) return false;
+                if (fs.getMaxPrice() != null && price > fs.getMaxPrice()) return false;
+                return true;
+            })
+            .collect(Collectors.toList());
+    }
+
+    /** save new filter settings back to the user record + CSV */
+    public void updateUserFilterSettings(User user, FilterSettings fs) {
+        user.setFilterSettings(fs.toCsv());
+        // assume UserCTRL has saveUserData()
+        new UserCTRL().saveUserData();
+    }
     // stubs for edit/delete…
     public void editProject() {
         throw new UnsupportedOperationException();

@@ -35,4 +35,9 @@ public class User {
     public void setPassword(String password) {
         this.password = password;
     }
+
+    //setter method for filtersettings
+    public void setFilterSettings(String filterSettings) {
+        this.filterSettings = filterSettings;
+    }
 }

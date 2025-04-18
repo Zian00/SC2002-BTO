@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import models.BTOProject;
+import models.FilterSettings;
 import models.User;
 import models.enumerations.MaritalState;
 
@@ -16,9 +17,10 @@ public class BTOProjectView {
 	public void displayApplicantMenu() {
 		System.out.println("\n=== BTO Project Menu ===");
 		System.out.println("1. Display All Available BTO Projects");
-		System.out.println("2. Apply for a BTO Project");
-		System.out.println("3. Submit Enquiry for a BTO project");
-		System.out.println("4. Back");
+		System.out.println("2. Display filtered BTO Projects");
+		System.out.println("3. Apply for a BTO Project");
+		System.out.println("4. Submit Enquiry for a BTO project");
+		System.out.println("5. Back");
 		System.out.print("Select an option: ");
 	}
 
@@ -392,4 +394,78 @@ public class BTOProjectView {
 			System.out.println("-----------------------------------");
 		}
 	}
+
+	//Filter settings menu for applicants and bto officers
+	/** show current filters, then let user enter new ones **/
+	public FilterSettings promptFilterSettings(User user, Scanner sc) {
+		
+		 
+        // 1) Parse the existing CSV into a FilterSettings object
+    	FilterSettings existing = FilterSettings.fromCsv(user.getFilterSettings());
+
+		
+		 // Remove any quotation marks from the room type before display
+		 String displayedRoomType = existing.getRoomType();
+			if (displayedRoomType != null) {
+				displayedRoomType = displayedRoomType.replace("\"", "");
+			}
+         // 2) Print _all_ three fields of the existing filter:
+		System.out.println("Existing filters:");
+		System.out.println(" Room type: " + (displayedRoomType == null || displayedRoomType.isEmpty() ? "any" : displayedRoomType));
+		System.out.println("  Minimum price: $" + 
+			(existing.getMinPrice() == null ? "none" : existing.getMinPrice()));
+		System.out.println("  Maximum price: $" + 
+			(existing.getMaxPrice() == null ? "none" : existing.getMaxPrice()));
+		System.out.println();
+
+        System.out.print("Apply new filters? (y/N): ");
+        if (!sc.nextLine().trim().equalsIgnoreCase("y")) {
+            return existing;  // keep old
+        }
+
+        // 2) choose room
+        String roomType = null;
+        while (true) {
+            System.out.print("Room type? 1)2-Room  2)3-Room  0)any: ");
+            String in = sc.nextLine().trim();
+            if      ("1".equals(in)) { roomType = "2-Room"; break; }
+            else if ("2".equals(in)) { roomType = "3-Room"; break; }
+            else if ("0".equals(in)) { break; }
+            else    { System.out.println("Choose 1,2 or 0."); }
+        }
+
+        // 3) min price
+        Integer minP = null;
+        while (true) {
+            System.out.print("Minimum price (blank=none): ");
+            String in = sc.nextLine().trim();
+            if (in.isEmpty()) break;
+            try {
+                int v = Integer.parseInt(in);
+                if (v < 0) System.out.println("Cannot be negative.");
+                else { minP = v; break; }
+            } catch (NumberFormatException e) {
+                System.out.println("Whole number only.");
+            }
+        }
+
+        // 4) max price
+        Integer maxP = null;
+        while (true) {
+            System.out.print("Maximum price (blank=none): ");
+            String in = sc.nextLine().trim();
+            if (in.isEmpty()) break;
+            try {
+                int v = Integer.parseInt(in);
+                if (v < 0) System.out.println("Cannot be negative.");
+                else if (minP != null && v < minP)
+                    System.out.println("Must be ≥ minimum price.");
+                else { maxP = v; break; }
+            } catch (NumberFormatException e) {
+                System.out.println("Whole number only.");
+            }
+        }
+
+        return new FilterSettings(roomType, minP, maxP);
+    }
 }
