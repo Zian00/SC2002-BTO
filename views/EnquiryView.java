@@ -7,6 +7,7 @@ import models.Enquiry;
 
 public class EnquiryView {
 
+    // Menu to be displayed based on User Role 
 	public void displayApplicantMenu() {
 		System.out.println("\n=== Enquiry Menu ===");
 		System.out.println("1. Display All My Enquiries");
@@ -16,10 +17,21 @@ public class EnquiryView {
 		System.out.print("Select an option: ");
 	}
 
-	public void displayAdminMenu() { // Not implemented properly, need to come back to this - Kaibao
+	public void displayOfficerMenu() {
+		System.out.println("\n=== Enquiry Menu ===");
+		System.out.println("1. Display All My Enquiries");
+		System.out.println("2. Edit My Enquiry");
+		System.out.println("3. Delete My Enquiry");
+		System.out.println("4. Respond to an Enquiry");
+		System.out.println("5. Back");
+		System.out.print("Select an option: ");
+	}
+
+	public void displayManagerMenu() {
 		System.out.println("\n=== Enquiry Menu ===");
 		System.out.println("1. Display All Enquiries");
-		System.out.println("2. Back");
+		System.out.println("2. Respond to an Enquiry");
+		System.out.println("3. Back");
 		System.out.println("Select an option: ");
 	}
 
@@ -66,6 +78,12 @@ public class EnquiryView {
         return sc.nextLine().trim();
     }
 
+    // Displays text to get user input for Response
+    public String promptResponseText(Scanner sc) {
+        System.out.print("Enter response text (leave empty to cancel): ");
+        return sc.nextLine().trim();
+    }
+
     /**
      * Displays a confirmation that an enquiry was created, with its details.
      * @param enquiry The newly created enquiry.
@@ -77,6 +95,51 @@ public class EnquiryView {
         System.out.println("Enquiry Text : " + enquiry.getEnquiryText());
         System.out.println("Timestamp    : " + enquiry.getTimestamp());
         System.out.println("--------------------------------------------------");
+    }
+
+    /**
+     * Displays a confirmation that an enquiry was created, with its details.
+     * @param enquiry The newly created enquiry.
+     */
+    public void displayEnquiryWithResponse(Enquiry enquiry) {
+        System.out.println("\n--------------------------------------------------");
+        System.out.println("Enquiry created successfully!");
+        System.out.println("Enquiry ID   : " + enquiry.getEnquiryId());
+        System.out.println("Enquiry Text : " + enquiry.getEnquiryText());
+        System.out.println("Timestamp    : " + enquiry.getTimestamp());
+        System.out.println("Response     : " + enquiry.getResponse());
+        System.out.println("--------------------------------------------------");
+    }
+
+    // Displays all Enquiries
+    public void displayAllEnquiries(List<BTOProject> projects, List<Enquiry> enquiries) {
+        System.out.println("\n"); // Line break
+        if (enquiries == null || enquiries.isEmpty()) {
+            System.out.println("No enquiries found.");
+            return;
+        }
+        for (Enquiry enquiry : enquiries) {
+            System.out.println("--------------------------------------------------");
+            System.out.println("Enquiry ID   : " + enquiry.getEnquiryId());
+            System.out.println("Timestamp    : " + enquiry.getTimestamp());
+            
+            // Get project name by matching project id.
+            BTOProject matchingProject = projects.stream()
+                .filter(p -> p.getProjectID() == enquiry.getProjectId())
+                .findFirst()
+                .orElse(null);
+            String projectName = (matchingProject != null) 
+                ? matchingProject.getProjectName() 
+                : "Unknown Project";
+            System.out.println("BTO Project  : " + projectName);
+            
+            System.out.println("Enquiry Text : " + enquiry.getEnquiryText());
+            if (enquiry.getResponse() != null && !enquiry.getResponse().isEmpty()) {
+                System.out.println("Response     : " + enquiry.getResponse());
+            }else{
+                System.out.println("Response     : (No response yet)");	
+            }
+        }
     }
 
     // Displays all enquiries that maps Project ID 

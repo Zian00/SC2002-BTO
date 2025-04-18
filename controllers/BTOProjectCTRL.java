@@ -4,13 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import models.BTOApplication;
 import models.BTOProject;
 import models.FilterSettings;
-import models.User;
 import models.HDBManager;
-import models.enumerations.FlatType;
+import models.User;
 import models.enumerations.MaritalState;
 import models.enumerations.Role;
 import models.repositories.BTOProjectCSVRepository;
@@ -150,7 +147,7 @@ public class BTOProjectCTRL {
                         .collect(Collectors.toList());
             }
             case HDBMANAGER -> filtered = projects.stream()
-                    .filter(p -> p.getManager().equalsIgnoreCase(currentUser.getNRIC()))
+                    .filter(p -> p.getManagerID().equalsIgnoreCase(currentUser.getNRIC()))
                     .collect(Collectors.toList());
             default -> filtered = new ArrayList<>();
         }

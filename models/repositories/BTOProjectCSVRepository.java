@@ -96,7 +96,7 @@ public class BTOProjectCSVRepository {
                 p.setNeighborhood(location);
                 p.setApplicationOpeningDate(openDate);
                 p.setApplicationClosingDate(closeDate);
-                p.setManager(manager);
+                p.setManagerID(manager);
                 p.setVisibility(isVisible);
                 p.setAvailableOfficerSlots(officerSlots);
     
@@ -165,7 +165,7 @@ public class BTOProjectCSVRepository {
                 // 11. Closing date
                 p.getApplicationClosingDate(),
                 // 12. ManagerID
-                p.getManager(),
+                p.getManagerID(),
                 // 13. Officer Slot
                 p.getAvailableOfficerSlots(),
                 // 14. Pending Officer by NRIC (quoted comma‑list)

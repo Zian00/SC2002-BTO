@@ -15,7 +15,7 @@ public class BTOProject {
     private String applicationClosingDate;
     private int availableOfficerSlots;
     private boolean visibility; // default visible, then manager can turn off - bryan
-    private String manager;
+    private String managerID;
     private List<String> pendingOfficer;
     private List<String> approvedOfficer;
 
@@ -107,12 +107,12 @@ public class BTOProject {
         this.visibility = visibility;
     }
 
-    public String getManager() {
-        return manager;
+    public String getManagerID() {
+        return managerID;
     }
 
-    public void setManager(String manager) {
-        this.manager = manager;
+    public void setManagerID(String managerID) {
+        this.managerID = managerID;
     }
 
     public List<String> getPendingOfficer() {
@@ -158,7 +158,7 @@ public class BTOProject {
                 applicationClosingDate,
                 availableOfficerSlots,
                 visibility,
-                manager,
+                managerID,
                 pendingOfficer,
                 approvedOfficer);
     }
