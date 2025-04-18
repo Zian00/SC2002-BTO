@@ -64,7 +64,7 @@ public final class EnquiryCTRL implements IEnquiryResponse, IEnquirySubmission {
             .collect(Collectors.toList());
     }
 
-    // Returns a list of filtered enquiries by logged in user
+    // Returns a list of filtered enquiries by logged in user (Role: Manager)
     public List<Enquiry> getFilteredEnquiriesByManager(List<BTOProject> projectList) {
         if (enquiries == null) {
             return new ArrayList<>();
@@ -87,6 +87,30 @@ public final class EnquiryCTRL implements IEnquiryResponse, IEnquirySubmission {
             .collect(Collectors.toList());
     }
     
+    // Returns a list of filtered enquiries by logged in user (Role: Officer)
+    public List<Enquiry> getFilteredEnquiriesByOfficer(List<BTOProject> projectList) {
+        if (enquiries == null) {
+            return new ArrayList<>();
+        }
+        String userNRIC = currentUser.getNRIC();
+        // Filter projects managed by the current user
+        List<BTOProject> managedProjects = projectList.stream()
+            .filter(p -> p.getApprovedOfficer().stream()
+            .anyMatch(officer -> officer.equalsIgnoreCase(userNRIC)))
+            .collect(Collectors.toList());
+        // Collect all project IDs from the managed projects and place it into a Set to remove duplicated and increase search time
+        Set<Integer> managedProjectIds = managedProjects.stream()
+            .map(BTOProject::getProjectID)
+            .collect(Collectors.toSet());
+        // Filter enquiries by:
+        // -- projectID that is managed by current user using project IDs
+        // -- no response 
+        return enquiries.stream()
+            .filter(e -> managedProjectIds.contains(e.getProjectId())
+                        && (e.getResponse() == null || e.getResponse().isEmpty()))
+            .collect(Collectors.toList());
+    }
+
     // Returns a list of filtered enquiries by logged in user and that it has not been responded yet
     public List<Enquiry> getEditableEnquiriesByNRIC() {
         if (enquiries == null) {
