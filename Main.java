@@ -6,7 +6,10 @@ import controllers.UserCTRL;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
+import models.repositories.ReceiptCSVRepository;
 import models.BTOApplication;
+import models.Receipt;
+import models.User;
 import models.BTOProject;
 import models.Enquiry;
 import models.FilterSettings;
@@ -103,7 +106,8 @@ public class Main {
                 switch (role) {
                     case APPLICANT:
                         switch (opt) {
-                            case "5" -> { // Logout
+                            case "5" -> {
+                                // Logout
                                 userCTRL.setCurrentUser(null);
                                 baseView.displayLogout();
                                 return;
@@ -111,16 +115,13 @@ public class Main {
                         }
                     case HDBOFFICER:
                         switch (opt) {
-<<<<<<< HEAD
                             // case "5" Enter Officer Application Menu
                             
                             case "5" -> {
-=======
-                            case "5" -> { // case "5" Enter Officer Application Menu
->>>>>>> edfe3ea6b107e0791833562b4d3faf039893e2d4
                                 runOfficerApplicationMenu(sc, OfficerAppCTRL, officerAppView, projectCTRL);
                             }
-                            case "6" -> { // Logout
+                            case "6" -> {
+                                // Logout
                                 userCTRL.setCurrentUser(null);
                                 baseView.displayLogout();
                                 return;
@@ -281,15 +282,7 @@ public class Main {
                 }
                 case HDBOFFICER -> {
                     switch (c) {
-                        case "1" -> {
-                        }
-                        case "2" -> {
-                        }
-                        case "3" -> {
-                        }
-                        case "4" -> {
 
-                        }
                         case "5" ->
                             {
 
@@ -525,7 +518,7 @@ public class Main {
                                 boolean success = applicationCTRL.withdraw(appId);
                                 if (success) {
                                     System.out.println(
-                                            "Application withdrawn successfully. Application type updated to WITHDRAWAL and Status updated to PENDING.");
+                                            "Application withdrawn successfully. Status updated to PENDING.");
                                 } else {
                                     System.out.println(
                                             "Withdrawal failed. Please ensure the application exists and belongs to you.");
@@ -537,8 +530,8 @@ public class Main {
                                         "An error occurred while withdrawing your application: " + e.getMessage());
                             }
                         }
-                        case "3" -> { // back to central menu
-                            return;
+                        case "3" -> {
+                            return;// back to central menu
                         }
                     }
                 }
@@ -570,7 +563,7 @@ public class Main {
                                 boolean success = applicationCTRL.withdraw(appId);
                                 if (success) {
                                     System.out.println(
-                                            "Application withdrawn successfully. Application type updated to WITHDRAWAL and Status updated to PENDING.");
+                                            "Application withdrawn successfully. Status updated to PENDING.");
                                 } else {
                                     System.out.println(
                                             "Withdrawal failed. Please ensure the application exists and belongs to you.");
@@ -603,7 +596,7 @@ public class Main {
 
                                 } else {
                                     System.out.println(
-                                            "Booking failed: Please check the application details or flat availability.");
+                                            "Booking failed. Please check the application details or flat availability.");
                                 }
                             } catch (NumberFormatException nfe) {
                                 System.out.println("Invalid application ID. Please enter a valid number.");
@@ -692,7 +685,7 @@ public class Main {
                         }
 
                         case "3" -> { // Approval for Withdrawal of BTO Application (no need for rejection)
-                            try {
+                            try { // withdrawal application has to be in pending status in order to approve
                                 var pendingWithdrawals = applicationCTRL.getApplicationsHandledByManager().stream()
                                         .filter(app -> app.getApplicationType() == ApplicationType.WITHDRAWAL
                                                 && app.getStatus() == ApplicationStatus.PENDING)
@@ -709,10 +702,20 @@ public class Main {
                                             + " | Applicant: " + app.getApplicantNRIC()
                                             + " | Flat Type: " + app.getFlatType()
                                             + " | Status: " + app.getStatus());
-                                    System.out.println("--------------------------------------");
+
+                                    BTOProject project = projectCTRL.getProjectById(app.getProjectID());
+                                    if (project != null) {
+                                        System.out.println("   -> Project Details: ID: " + project.getProjectID()
+                                                + ", Manager: " + project.getManager()
+                                                + ", Available 2-Room: " + project.getAvailable2Room()
+                                                + ", Available 3-Room: " + project.getAvailable3Room() + "\n");
+                                    } else {
+                                        System.out.println("   -> Project details not found for Project ID: "
+                                                + app.getProjectID());
+                                    }
                                 }
 
-                                System.out.print("Enter Application ID for withdrawal approve: ");
+                                System.out.print("Enter Withdrawal Application ID to approve: ");
                                 String input = sc.nextLine().trim();
                                 int appId;
                                 try {
@@ -722,9 +725,20 @@ public class Main {
                                     break;
                                 }
 
-                                boolean success = applicationCTRL.approveWithdrawalApplication(appId, projectCTRL);
-                                if (!success) {
-                                    System.out.println("Withdrawal approval failed.");
+                                var selectedWithdrawal = pendingWithdrawals.stream()
+                                        .filter(app -> app.getApplicationId() == appId)
+                                        .findFirst();
+                                if (selectedWithdrawal.isEmpty()) {
+                                    System.out.println("Withdrawal application not found or not pending.");
+                                    break;
+                                }
+
+                                // Approving the withdrawal simply means updating its status to UNSUCCESSFUL
+                                boolean success = applicationCTRL.updateApplicationStatus(appId, "UNSUCCESSFUL");
+                                if (success) {
+                                    System.out.println("Withdrawal approved. Application marked as UNSUCCESSFUL.");
+                                } else {
+                                    System.out.println("Failed to update the withdrawal application status.");
                                 }
                             } catch (Exception e) {
                                 System.out.println(
