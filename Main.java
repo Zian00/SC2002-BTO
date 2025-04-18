@@ -338,7 +338,21 @@ public class Main {
 
                             // Get project selection
                             System.out.print("Enter project ID to submit Enquiry: ");
-                            int projectId = Integer.parseInt(sc.nextLine());
+                            int projectId;
+                            try {
+                                projectId = Integer.parseInt(sc.nextLine().trim());
+                            } catch (NumberFormatException e) {
+                                projectView.showMessage("Invalid project ID.");
+                                break;
+                            }
+
+                            // Ensure projectId is in availableProjects
+                            boolean valid = availableProjects.stream()
+                                    .anyMatch(p -> p.getProjectID() == projectId);
+                            if (!valid) {
+                                projectView.showMessage("You can only submit enquiries for projects shown to you.");
+                                break;
+                            }
 
                             String enquiryText = enquiryView.promptEnquiryCreation(sc);
                             Enquiry newEnquiry = enquiryCTRL.createEnquiry(projectId, enquiryText);
@@ -383,7 +397,8 @@ public class Main {
                                 var ms = userCTRL.getCurrentUser().getMaritalStatus();
                                 int age = userCTRL.getCurrentUser().getAge();
 
-                                // Only show visible projects, eligible by age/marital status, and not handled by this officer
+                                // Only show visible projects, eligible by age/marital status, and not handled
+                                // by this officer
                                 var eligibleProjects = projectCTRL.getAllProjects().stream()
                                         .filter(BTOProject::isVisibility)
                                         .filter(p -> {
@@ -479,20 +494,32 @@ public class Main {
                                         "An error occurred while applying for a BTO project: " + e.getMessage());
                             }
                         }
-                        case "4" -> { // Submit Enquiry for a BTO project
-
-                            // Show available projects
+                        case "4" -> { // Submit Enquiry for a BTO project (officer acts as applicant)
+                            // Show available projects (use officer's filtered projects)
                             projectView.displayAvailableForApplicant(
                                     userCTRL.getCurrentUser(), availableProjects);
 
                             // Get project selection
                             System.out.print("Enter project ID to submit Enquiry: ");
-                            int projectId = Integer.parseInt(sc.nextLine());
+                            int projectId;
+                            try {
+                                projectId = Integer.parseInt(sc.nextLine().trim());
+                            } catch (NumberFormatException e) {
+                                projectView.showMessage("Invalid project ID.");
+                                break;
+                            }
+
+                            // Ensure projectId is in availableProjects
+                            boolean valid = availableProjects.stream()
+                                    .anyMatch(p -> p.getProjectID() == projectId);
+                            if (!valid) {
+                                projectView.showMessage("You can only submit enquiries for projects shown to you.");
+                                break;
+                            }
 
                             String enquiryText = enquiryView.promptEnquiryCreation(sc);
                             Enquiry newEnquiry = enquiryCTRL.createEnquiry(projectId, enquiryText);
                             enquiryView.displayEnquiry(newEnquiry);
-
                         }
                         case "5" -> { // Register as HDB Officer of a BTO Projects
                             runOfficerApplicationMenu(sc, new OfficerApplicationCTRL(userCTRL.getCurrentUser()),
