@@ -115,28 +115,4 @@ public class EnquiryView {
     public void showMessage(String message) {
         System.out.println(message);
     }
-	
-    /**
-	 * 
-	 * @param newText
-	 */
-	public void edit(String newText) {
-		// TODO - implement EnquiryView.edit
-		throw new UnsupportedOperationException();
-	}
-
-	public void delete() {
-		// TODO - implement EnquiryView.delete
-		throw new UnsupportedOperationException();
-	}
-
-	/**
-	 * 
-	 * @param text
-	 */
-	public void setResponse(String text) {
-		// TODO - implement EnquiryView.setResponse
-		throw new UnsupportedOperationException();
-	}
-
 }
