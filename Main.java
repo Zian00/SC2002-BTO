@@ -254,19 +254,20 @@ public class Main {
                 }
                 case HDBOFFICER -> {
                     switch (c) {
-                        case "1" -> {
+                        case "1" -> { // Display All BTO Projects (ignore officer assignment and visibility)
+                            var allProjects = projectCTRL.getAllProjects();
+                            projectView.displayAllProject(allProjects);
                         }
-                        case "2" -> {
+                        case "2" -> { // Apply for a BTO Project
+                            
                         }
-                        case "3" -> {
+                        case "3" -> { // Submit Enquiry for a BTO project
                         }
-                        case "4" -> {
+                        case "4" -> { // Register as HDB Officer of a BTO Projects
 
                         }
-                        case "5" ->
-                            {
-
-                            }
+                        case "5" -> { // Display BTO Projects I'm handling
+                        }
                         case "6" -> {
                             return; // back to central menu
                         }

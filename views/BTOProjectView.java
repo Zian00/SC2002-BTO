@@ -24,7 +24,7 @@ public class BTOProjectView {
 
 	public void displayOfficerMenu() {
 		System.out.println("\n=== BTO Project Menu ===");
-		System.out.println("1. Display All Available BTO Projects");
+		System.out.println("1. Display All BTO Projects");
 		System.out.println("2. Apply for a BTO Project");
 		System.out.println("3. Submit Enquiry for a BTO project");
 		System.out.println("4. Register as HDB Officer of a BTO Projects ");
@@ -51,19 +51,28 @@ public class BTOProjectView {
 	 */
 	public void displayAllProject(List<BTOProject> projects) {
 		System.out.println("===================================");
-		System.out.println("      Available Projects         ");
+		System.out.println("   Available Projects in System    ");
 		System.out.println("===================================");
-		if (projects == null || projects.isEmpty()) {
-			System.out.println("No available projects.");
-		} else {
-			for (BTOProject project : projects) {
-				System.out.println(project);
-				System.out.println("-----------------------------------");
+		try {
+			if (projects == null || projects.isEmpty()) {
+				System.out.println("No available projects in system.");
+			} else {
+				for (BTOProject project : projects) {
+					if (project == null) {
+						System.out.println("Encountered a null project entry.");
+						continue;
+					}
+					System.out.println(project);
+					System.out.println("-----------------------------------");
+				}
 			}
+		} catch (Exception e) {
+			System.out.println("An error occurred while displaying projects: " + e.getMessage());
 		}
 		System.out.println("===================================");
 	}
 
+	// display projects managed by the manager
 	public void displayManagerProjects(List<BTOProject> projects) {
 		System.out.println("===================================");
 		System.out.println("            My Projects           ");
