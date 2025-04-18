@@ -282,8 +282,10 @@ public class Main {
                     var availableProjects = projectCTRL.getFilteredProjects();
                     switch (c) {
                         case "1" -> { // Only display projects User can apply
-                            projectView.displayAvailableForApplicant(
-                                    userCTRL.getCurrentUser(), availableProjects);
+                            var eligible = projectCTRL.getFilteredProjects();
+                            // 2) use the NO‑FILTER view so it doesnt re-apply filter
+                            projectView.displayAvailableForApplicantNoFilter(
+                                userCTRL.getCurrentUser(), eligible);
                         }
 
                         // display all bto projects by filter
@@ -302,6 +304,7 @@ public class Main {
                             System.out.println("Your filters have been saved: " + filterCsv);
 
                             // 2) re‑fetch & display
+        
                             var filtered = projectCTRL.getFilteredProjectsForUser(userCTRL.getCurrentUser());
                             projectView.displayAvailableForApplicant(userCTRL.getCurrentUser(), filtered);
                         }
@@ -350,11 +353,31 @@ public class Main {
                     var availableProjects = projectCTRL.getFilteredProjects();
                     switch (c) {
 
-                        case "1" -> { // Display All BTO Projects as applicant but need filter out projects he handled
-                            projectView.displayAvailableForApplicant(
-                                    userCTRL.getCurrentUser(), availableProjects);
+                        case "1" -> { // Display All BTO Projects (ignore officer assignment and visibility)
+                            var allProjects = projectCTRL.getAllProjects();
+                            projectView.displayAllProject(allProjects);
                         }
-                        case "2" -> { // Apply for a BTO Project
+                        case "2" -> {
+                            //exactly the same view as applicant
+                                    // 1) prompt & save
+                                FilterSettings fs = projectView.promptFilterSettings(userCTRL.getCurrentUser(), sc);
+                                projectCTRL.updateUserFilterSettings(userCTRL.getCurrentUser(), fs);
+                                userCTRL.saveUserData();
+                                // convert to the single CSV string
+                                String filterCsv = fs.toCsv();
+                            
+                                // store it on the user
+                                userCTRL.updateFilterSettings(userCTRL.getCurrentUser(), filterCsv);
+                            
+                                // feedback
+                                System.out.println("Your filters have been saved: " + filterCsv);
+                            
+                                // 2) re‑fetch & display
+            
+                                var filtered = projectCTRL.getFilteredProjectsForUser(userCTRL.getCurrentUser());
+                                projectView.displayAvailableForApplicant(userCTRL.getCurrentUser(), filtered);
+                        }
+                        case "3" -> { // Apply for a BTO Project
                             try {
                                 String officerNRIC = userCTRL.getCurrentUser().getNRIC();
                                 var ms = userCTRL.getCurrentUser().getMaritalStatus();
@@ -428,58 +451,60 @@ public class Main {
                                         flatType = FlatType.THREEROOM;
                                     } else {
                                         projectView.showMessage("Invalid flat type choice.");
-                                        break OUTER;
+                                        break;
                                     }
+                                } else {
+                                    projectView.showMessage("You are not eligible to apply for any flat type.");
+                                    break;
                                 }
-                            } else {
-                                projectView.showMessage("You are not eligible to apply for any flat type.");
-                                break;
+
+                                // Submit application
+                                boolean ok = applicationCTRL.apply(projectId, flatType);
+                                if (ok) {
+                                    projectView.showMessage("Application submitted! Status: PENDING.");
+                                }
+                            } catch (Exception e) {
+                                projectView.showMessage(
+                                        "An error occurred while applying for a BTO project: " + e.getMessage());
                             }
-                            boolean ok = applicationCTRL.apply(projectId, flatType);
-                            if (ok) {
-                                projectView.showMessage("Application submitted! Status: PENDING.");
-                            }
-                        }catch (Exception e) {
-                            projectView.showMessage(
-                                    "An error occurred while applying for a BTO project: " + e.getMessage());
                         }
-                    }
-                    case "3" -> { // Submit Enquiry for a BTO project
-                        
-                        // Show available projects
-                        projectView.displayAvailableForApplicant(
-                                userCTRL.getCurrentUser(), availableProjects);
-                        
-                        // Get project selection
-                        System.out.print("Enter project ID to submit Enquiry: ");
-                        int projectId = Integer.parseInt(sc.nextLine());
-                        
-                        String enquiryText = enquiryView.promptEnquiryCreation(sc);
-                        Enquiry newEnquiry = enquiryCTRL.createEnquiry(projectId, enquiryText);
-                        enquiryView.displayEnquiry(newEnquiry);
-                        
-                    }
-                    case "4" -> { // Register as HDB Officer of a BTO Projects
-                        runOfficerApplicationMenu(sc, new OfficerApplicationCTRL(userCTRL.getCurrentUser()),
-                                new OfficerApplicationView(), projectCTRL);
-                    }
-                    case "5" -> { // Display BTO Projects I'm handling
-                        try {
-                            var handledProjects = projectCTRL.getHandledProjects();
-                            if (handledProjects.isEmpty()) {
-                                System.out.println("You are not handling any BTO projects.");
-                            } else {
-                                projectView.displayAllProject(handledProjects);
-                            }
-                        } catch (Exception e) {
-                            System.out.println("An error occurred while displaying handled projects: " + e.getMessage());
+                        case "4" -> { // Submit Enquiry for a BTO project
+
+                            // Show available projects
+                            projectView.displayAvailableForApplicant(
+                                    userCTRL.getCurrentUser(), availableProjects);
+
+                            // Get project selection
+                            System.out.print("Enter project ID to submit Enquiry: ");
+                            int projectId = Integer.parseInt(sc.nextLine());
+
+                            String enquiryText = enquiryView.promptEnquiryCreation(sc);
+                            Enquiry newEnquiry = enquiryCTRL.createEnquiry(projectId, enquiryText);
+                            enquiryView.displayEnquiry(newEnquiry);
+
                         }
+                        case "5" -> { // Register as HDB Officer of a BTO Projects
+                            runOfficerApplicationMenu(sc, new OfficerApplicationCTRL(userCTRL.getCurrentUser()),
+                                    new OfficerApplicationView(), projectCTRL);
+                        }
+                        case "6" -> { // Display BTO Projects I'm handling
+                            try {
+                                var handledProjects = projectCTRL.getHandledProjects();
+                                if (handledProjects.isEmpty()) {
+                                    System.out.println("You are not handling any BTO projects.");
+                                } else {
+                                    projectView.displayAllProject(handledProjects);
+                                }
+                            } catch (Exception e) {
+                                System.out.println(
+                                        "An error occurred while displaying handled projects: " + e.getMessage());
+                            }
+                        }
+                        case "7" -> {
+                            return; // back to central menu
+                        }
+                        default -> System.out.println("Invalid choice, try again.");
                     }
-                    case "6" -> {
-                        return; // back to central menu
-                    }
-                    default -> System.out.println("Invalid choice, try again.");
-                }
                 }
                 case HDBMANAGER -> {
                     switch (c) {
