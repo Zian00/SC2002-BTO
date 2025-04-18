@@ -211,8 +211,10 @@ public class Main {
                     var availableProjects = projectCTRL.getFilteredProjects();
                     switch (c) {
                         case "1" -> { // Only display projects User can apply
-                            projectView.displayAvailableForApplicant(
-                                    userCTRL.getCurrentUser(), availableProjects);
+                            var eligible = projectCTRL.getFilteredProjects();
+                            // 2) use the NO‑FILTER view so it doesnt re-apply filter
+                            projectView.displayAvailableForApplicantNoFilter(
+                                userCTRL.getCurrentUser(), eligible);
                         }
 
                         //display all bto projects by filter
@@ -231,6 +233,7 @@ public class Main {
                             System.out.println("Your filters have been saved: " + filterCsv);
                         
                             // 2) re‑fetch & display
+        
                             var filtered = projectCTRL.getFilteredProjectsForUser(userCTRL.getCurrentUser());
                             projectView.displayAvailableForApplicant(userCTRL.getCurrentUser(), filtered);
                         }
@@ -283,7 +286,27 @@ public class Main {
                             var allProjects = projectCTRL.getAllProjects();
                             projectView.displayAllProject(allProjects);
                         }
-                        case "2" -> { // Apply for a BTO Project
+                        case "2" -> {
+                            //exactly the same view as applicant
+                                    // 1) prompt & save
+                                FilterSettings fs = projectView.promptFilterSettings(userCTRL.getCurrentUser(), sc);
+                                projectCTRL.updateUserFilterSettings(userCTRL.getCurrentUser(), fs);
+                                userCTRL.saveUserData();
+                                // convert to the single CSV string
+                                String filterCsv = fs.toCsv();
+                            
+                                // store it on the user
+                                userCTRL.updateFilterSettings(userCTRL.getCurrentUser(), filterCsv);
+                            
+                                // feedback
+                                System.out.println("Your filters have been saved: " + filterCsv);
+                            
+                                // 2) re‑fetch & display
+            
+                                var filtered = projectCTRL.getFilteredProjectsForUser(userCTRL.getCurrentUser());
+                                projectView.displayAvailableForApplicant(userCTRL.getCurrentUser(), filtered);
+                        }
+                        case "3" -> { // Apply for a BTO Project
                             try {
                                 String officerNRIC = userCTRL.getCurrentUser().getNRIC();
                                 var ms = userCTRL.getCurrentUser().getMaritalStatus();
@@ -374,7 +397,7 @@ public class Main {
                                         "An error occurred while applying for a BTO project: " + e.getMessage());
                             }
                         }
-                        case "3" -> { // Submit Enquiry for a BTO project
+                        case "4" -> { // Submit Enquiry for a BTO project
 
                             // Show available projects
                             projectView.displayAvailableForApplicant(
@@ -389,11 +412,11 @@ public class Main {
                             enquiryView.displayEnquiryCreated(newEnquiry);
 
                         }
-                        case "4" -> { // Register as HDB Officer of a BTO Projects
+                        case "5" -> { // Register as HDB Officer of a BTO Projects
                             runOfficerApplicationMenu(sc, new OfficerApplicationCTRL(userCTRL.getCurrentUser()),
                                     new OfficerApplicationView(), projectCTRL);
                         }
-                        case "5" -> { // Display BTO Projects I'm handling
+                        case "6" -> { // Display BTO Projects I'm handling
                             try {
                                 var handledProjects = projectCTRL.getHandledProjects();
                                 if (handledProjects.isEmpty()) {
@@ -406,7 +429,7 @@ public class Main {
                                         "An error occurred while displaying handled projects: " + e.getMessage());
                             }
                         }
-                        case "6" -> {
+                        case "7" -> {
                             return; // back to central menu
                         }
                         default -> System.out.println("Invalid choice, try again.");

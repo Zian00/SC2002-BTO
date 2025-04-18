@@ -27,11 +27,12 @@ public class BTOProjectView {
 	public void displayOfficerMenu() {
 		System.out.println("\n=== BTO Project Menu ===");
 		System.out.println("1. Display All BTO Projects");
-		System.out.println("2. Apply for a BTO Project");
-		System.out.println("3. Submit Enquiry for a BTO project");
-		System.out.println("4. Register as HDB Officer of a BTO Projects ");
-		System.out.println("5. Display BTO Projects I'm handling");
-		System.out.println("6. Back");
+		System.out.println("2. Display filtered BTO Projects");
+		System.out.println("3. Apply for a BTO Project");
+		System.out.println("4. Submit Enquiry for a BTO project");
+		System.out.println("5. Register as HDB Officer of a BTO Projects ");
+		System.out.println("6. Display BTO Projects I'm handling");
+		System.out.println("7. Back");
 		System.out.println("Select an option: ");
 	}
 
@@ -104,6 +105,53 @@ public class BTOProjectView {
 		}
 		System.out.println("===============");
 	}
+	//display available projects for applicant with no filter
+	public void displayAvailableForApplicantNoFilter(User user, List<BTOProject> projects) {
+		// Determine eligibility based on marital status and age only.
+		boolean canSee2 = false, canSee3 = false;
+		MaritalState ms = user.getMaritalStatus();
+		int age = user.getAge();
+		
+		if (ms == MaritalState.SINGLE && age >= 35) {
+			canSee2 = true;
+		} else if (ms == MaritalState.MARRIED && age >= 21) {
+			canSee2 = true;
+			canSee3 = true;
+		} else {
+			System.out.println("You are not eligible to view any projects.");
+			return;
+		}
+		
+		System.out.println("===================================");
+		System.out.println("      Available Projects         ");
+		System.out.println("===================================");
+		
+		if (projects == null || projects.isEmpty()) {
+			System.out.println("No available projects.");
+		} else {
+			for (BTOProject p : projects) {
+				// Check visibility: only display projects marked as visible.
+				if (!p.isVisibility()) {
+					continue;
+				}
+				System.out.println("Project ID:   " + p.getProjectID());
+				System.out.println("Name:         " + p.getProjectName());
+				System.out.println("Neighborhood: " + p.getNeighborhood());
+				
+				// Display room details based solely on eligibility.
+				if (canSee2) {
+					System.out.printf("2-Room units: %d (Price: $%d)%n",
+							p.getAvailable2Room(), p.getTwoRoomPrice());
+				}
+				if (canSee3) {
+					System.out.printf("3-Room units: %d (Price: $%d)%n",
+							p.getAvailable3Room(), p.getThreeRoomPrice());
+				}
+				System.out.println("-----------------------------------");
+			}
+		}
+		System.out.println("===================================");
+	}
 
 	/**
 	 * Displays projects for an Applicant, showing only the room‑types
@@ -128,7 +176,13 @@ public class BTOProjectView {
 			return;
 		}
 
-		// Header
+		// Load filter settings from user's CSV
+		FilterSettings fs = FilterSettings.fromCsv(user.getFilterSettings());
+		String filteredRoom = fs.getRoomType();
+		if (filteredRoom != null) {
+			filteredRoom = filteredRoom.replace("\"", "").trim();
+		}
+
 		System.out.println("===================================");
 		System.out.println("      Available Projects         ");
 		System.out.println("===================================");
@@ -141,21 +195,38 @@ public class BTOProjectView {
 				System.out.println("Name:         " + p.getProjectName());
 				System.out.println("Neighborhood: " + p.getNeighborhood());
 
-				// Always show 2‑Room if allowed
-				if (canSee2) {
-					System.out.printf("2-Room units: %d (Price: $%d)%n",
-							p.getAvailable2Room(), p.getTwoRoomPrice());
-				}
-				// Show 3‑Room only if allowed
-				if (canSee3) {
-					System.out.printf("3-Room units: %d (Price: $%d)%n",
-							p.getAvailable3Room(), p.getThreeRoomPrice());
+				// Follow filter: if filter is "2-Room" or "3-Room", display only that details.
+				if ("2-Room".equalsIgnoreCase(filteredRoom)) {
+					if (canSee2) {
+						System.out.printf("2-Room units: %d (Price: $%d)%n",
+								p.getAvailable2Room(), p.getTwoRoomPrice());
+					} else {
+						System.out.println("Not eligible for 2‑Room.");
+					}
+				} else if ("3-Room".equalsIgnoreCase(filteredRoom)) {
+					if (canSee3) {
+						System.out.printf("3-Room units: %d (Price: $%d)%n",
+								p.getAvailable3Room(), p.getThreeRoomPrice());
+					} else {
+						System.out.println("Not eligible for 3‑Room.");
+					}
+				} else { // No filter => display both eligible types
+					if (canSee2) {
+						System.out.printf("2-Room units: %d (Price: $%d)%n",
+								p.getAvailable2Room(), p.getTwoRoomPrice());
+					}
+					if (canSee3) {
+						System.out.printf("3-Room units: %d (Price: $%d)%n",
+								p.getAvailable3Room(), p.getThreeRoomPrice());
+					}
 				}
 				System.out.println("-----------------------------------");
 			}
 		}
 		System.out.println("===================================");
 	}
+
+	
 
 	public int promptProjectID(Scanner sc) {
 		return promptIntInRange(
