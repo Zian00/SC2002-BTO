@@ -125,9 +125,30 @@ public class BTOProjectCTRL {
                     filtered = new ArrayList<>();
                 }
             }
-            case HDBOFFICER -> filtered = projects.stream()
-                    .filter(BTOProject::isVisibility)
-                    .collect(Collectors.toList());
+            case HDBOFFICER -> {
+                MaritalState ms = currentUser.getMaritalStatus();
+                int age = currentUser.getAge();
+                String officerNRIC = currentUser.getNRIC();
+                System.out.println("Debug: MaritalState: " + ms + ", Age: " + age);
+
+                // Only show visible projects that officer is NOT already an approved officer of
+                filtered = projects.stream()
+                        .filter(BTOProject::isVisibility)
+                        .filter(p -> {
+                            var approved = p.getApprovedOfficer();
+                            var pending = p.getPendingOfficer();
+                            boolean notApproved = approved == null || approved.stream().noneMatch(nric -> nric.equalsIgnoreCase(officerNRIC));
+                            boolean notPending = pending == null || pending.stream().noneMatch(nric -> nric.equalsIgnoreCase(officerNRIC));
+                            boolean flatEligible = false;
+                            if (ms == MaritalState.SINGLE && age >= 35) {
+                                flatEligible = p.getAvailable2Room() > 0;
+                            } else if (ms == MaritalState.MARRIED && age >= 21) {
+                                flatEligible = p.getAvailable2Room() > 0 || p.getAvailable3Room() > 0;
+                            }
+                            return notPending && notApproved && flatEligible;
+                        })
+                        .collect(Collectors.toList());
+            }
             case HDBMANAGER -> filtered = projects.stream()
                     .filter(p -> p.getManager().equalsIgnoreCase(currentUser.getNRIC()))
                     .collect(Collectors.toList());

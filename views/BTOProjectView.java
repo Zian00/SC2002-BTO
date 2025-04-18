@@ -26,7 +26,7 @@ public class BTOProjectView {
 
 	public void displayOfficerMenu() {
 		System.out.println("\n=== BTO Project Menu ===");
-		System.out.println("1. Display All BTO Projects");
+		System.out.println("1. Display All BTO Projects as applicant");
 		System.out.println("2. Apply for a BTO Project");
 		System.out.println("3. Submit Enquiry for a BTO project");
 		System.out.println("4. Register as HDB Officer of a BTO Projects ");

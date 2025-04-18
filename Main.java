@@ -215,7 +215,7 @@ public class Main {
                                     userCTRL.getCurrentUser(), availableProjects);
                         }
 
-                        //display all bto projects by filter
+                        // display all bto projects by filter
                         case "2" -> {
                             // 1) prompt & save
                             FilterSettings fs = projectView.promptFilterSettings(userCTRL.getCurrentUser(), sc);
@@ -223,13 +223,13 @@ public class Main {
                             userCTRL.saveUserData();
                             // convert to the single CSV string
                             String filterCsv = fs.toCsv();
-                        
+
                             // store it on the user
                             userCTRL.updateFilterSettings(userCTRL.getCurrentUser(), filterCsv);
-                        
+
                             // feedback
                             System.out.println("Your filters have been saved: " + filterCsv);
-                        
+
                             // 2) re‑fetch & display
                             var filtered = projectCTRL.getFilteredProjectsForUser(userCTRL.getCurrentUser());
                             projectView.displayAvailableForApplicant(userCTRL.getCurrentUser(), filtered);
@@ -279,9 +279,9 @@ public class Main {
                     var availableProjects = projectCTRL.getFilteredProjects();
                     switch (c) {
 
-                        case "1" -> { // Display All BTO Projects (ignore officer assignment and visibility)
-                            var allProjects = projectCTRL.getAllProjects();
-                            projectView.displayAllProject(allProjects);
+                        case "1" -> { // Display All BTO Projects as applicant but need filter out projects he handled
+                            projectView.displayAvailableForApplicant(
+                                    userCTRL.getCurrentUser(), availableProjects);
                         }
                         case "2" -> { // Apply for a BTO Project
                             try {
