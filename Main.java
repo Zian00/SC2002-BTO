@@ -285,7 +285,7 @@ public class Main {
                             var eligible = projectCTRL.getFilteredProjects();
                             // 2) use the NO‑FILTER view so it doesnt re-apply filter
                             projectView.displayAvailableForApplicantNoFilter(
-                                userCTRL.getCurrentUser(), eligible);
+                                    userCTRL.getCurrentUser(), eligible);
                         }
 
                         // display all bto projects by filter
@@ -304,7 +304,7 @@ public class Main {
                             System.out.println("Your filters have been saved: " + filterCsv);
 
                             // 2) re‑fetch & display
-        
+
                             var filtered = projectCTRL.getFilteredProjectsForUser(userCTRL.getCurrentUser());
                             projectView.displayAvailableForApplicant(userCTRL.getCurrentUser(), filtered);
                         }
@@ -358,24 +358,24 @@ public class Main {
                             projectView.displayAllProject(allProjects);
                         }
                         case "2" -> {
-                            //exactly the same view as applicant
-                                    // 1) prompt & save
-                                FilterSettings fs = projectView.promptFilterSettings(userCTRL.getCurrentUser(), sc);
-                                projectCTRL.updateUserFilterSettings(userCTRL.getCurrentUser(), fs);
-                                userCTRL.saveUserData();
-                                // convert to the single CSV string
-                                String filterCsv = fs.toCsv();
-                            
-                                // store it on the user
-                                userCTRL.updateFilterSettings(userCTRL.getCurrentUser(), filterCsv);
-                            
-                                // feedback
-                                System.out.println("Your filters have been saved: " + filterCsv);
-                            
-                                // 2) re‑fetch & display
-            
-                                var filtered = projectCTRL.getFilteredProjectsForUser(userCTRL.getCurrentUser());
-                                projectView.displayAvailableForApplicant(userCTRL.getCurrentUser(), filtered);
+                            // exactly the same view as applicant
+                            // 1) prompt & save
+                            FilterSettings fs = projectView.promptFilterSettings(userCTRL.getCurrentUser(), sc);
+                            projectCTRL.updateUserFilterSettings(userCTRL.getCurrentUser(), fs);
+                            userCTRL.saveUserData();
+                            // convert to the single CSV string
+                            String filterCsv = fs.toCsv();
+
+                            // store it on the user
+                            userCTRL.updateFilterSettings(userCTRL.getCurrentUser(), filterCsv);
+
+                            // feedback
+                            System.out.println("Your filters have been saved: " + filterCsv);
+
+                            // 2) re‑fetch & display
+
+                            var filtered = projectCTRL.getFilteredProjectsForUser(userCTRL.getCurrentUser());
+                            projectView.displayAvailableForApplicant(userCTRL.getCurrentUser(), filtered);
                         }
                         case "3" -> { // Apply for a BTO Project
                             try {
@@ -383,19 +383,33 @@ public class Main {
                                 var ms = userCTRL.getCurrentUser().getMaritalStatus();
                                 int age = userCTRL.getCurrentUser().getAge();
 
-                                // Get eligible projects for officer application
-                                var eligibleProjects = projectCTRL.getEligibleProjectsForOfficerApplication(officerNRIC,
-                                        ms, age);
+                                // Only show visible projects, eligible by age/marital status, and not handled by this officer
+                                var eligibleProjects = projectCTRL.getAllProjects().stream()
+                                        .filter(BTOProject::isVisibility)
+                                        .filter(p -> {
+                                            var pending = p.getPendingOfficer();
+                                            var approved = p.getApprovedOfficer();
+                                            boolean notPending = pending == null || pending.stream()
+                                                    .noneMatch(nric -> nric.equalsIgnoreCase(officerNRIC));
+                                            boolean notApproved = approved == null || approved.stream()
+                                                    .noneMatch(nric -> nric.equalsIgnoreCase(officerNRIC));
+                                            boolean flatEligible = false;
+                                            if (ms == MaritalState.SINGLE && age >= 35) {
+                                                flatEligible = p.getAvailable2Room() > 0;
+                                            } else if (ms == MaritalState.MARRIED && age >= 21) {
+                                                flatEligible = p.getAvailable2Room() > 0 || p.getAvailable3Room() > 0;
+                                            }
+                                            return notPending && notApproved && flatEligible;
+                                        })
+                                        .collect(Collectors.toList());
 
                                 if (eligibleProjects.isEmpty()) {
                                     projectView.showMessage("No eligible BTO projects available for application.");
                                     break;
                                 }
 
-                                // Display eligible projects for officer
                                 projectView.displayEligibleProjectsForOfficer(eligibleProjects, ms, age);
 
-                                // Prompt for project ID
                                 System.out.print("Enter project ID to apply: ");
                                 int projectId;
                                 try {
@@ -405,7 +419,6 @@ public class Main {
                                     break;
                                 }
 
-                                // Validate project selection
                                 var selected = eligibleProjects.stream()
                                         .filter(p -> p.getProjectID() == projectId)
                                         .findFirst();
@@ -414,7 +427,6 @@ public class Main {
                                     break;
                                 }
 
-                                // Prompt for flat type selection
                                 FlatType flatType = null;
                                 if (ms == MaritalState.SINGLE && age >= 35) {
                                     System.out.println("Select flat type:");
@@ -458,7 +470,6 @@ public class Main {
                                     break;
                                 }
 
-                                // Submit application
                                 boolean ok = applicationCTRL.apply(projectId, flatType);
                                 if (ok) {
                                     projectView.showMessage("Application submitted! Status: PENDING.");
@@ -626,16 +637,14 @@ public class Main {
                         case "6" -> { // back to central menu
                             return;
                         }
-                    
-                
-                default -> System.out.println("Invalid choice, try again.");
-            }
-        }
+
+                        default -> System.out.println("Invalid choice, try again.");
+                    }
+                }
 
             }
         }
     }
-    
 
     // --------------------------------------------------------------------------------------------------
     // Enquiry Menu for Users

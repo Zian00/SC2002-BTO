@@ -16,7 +16,7 @@ public class UserView {
         // Change accordingly
         String nric = "T0000000G";
         String password = "aaa";
-        Role role = Role.valueOf("HDBMANAGER");
+        Role role = Role.valueOf("HDBOFFICER");
 
         // System.out.print("NRIC (uppercase only): ");
         // String nric = sc.nextLine().trim();
