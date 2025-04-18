@@ -1,4 +1,5 @@
 package views;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -11,6 +12,7 @@ import models.enumerations.MaritalState;
 
 public class BTOProjectView {
 	private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
 	public void displayApplicantMenu() {
 		System.out.println("\n=== BTO Project Menu ===");
 		System.out.println("1. Display All Available BTO Projects");
@@ -19,6 +21,7 @@ public class BTOProjectView {
 		System.out.println("4. Back");
 		System.out.print("Select an option: ");
 	}
+
 	public void displayOfficerMenu() {
 		System.out.println("\n=== BTO Project Menu ===");
 		System.out.println("1. Display All Available BTO Projects");
@@ -29,6 +32,7 @@ public class BTOProjectView {
 		System.out.println("6. Back");
 		System.out.println("Select an option: ");
 	}
+
 	public void displayManagerMenu() {
 		System.out.println("\n=== BTO Project Menu ===");
 		System.out.println("1. Display All BTO Projects");
@@ -39,26 +43,28 @@ public class BTOProjectView {
 		System.out.println("6. Back");
 		System.out.print("Select an option: ");
 	}
-	// public void displayManageBTOProjectMenu() { // Menu only available to manager to create/edit/delete BTO Project Listings
-	// 	System.out.println("\n=== BTO Project Editing Menu ===");
-	// 	System.out.println("1. Edit Project Name");
-	// 	System.out.println("2. Edit Neighborhood");
-	// 	System.out.println("3. Edit Number of 2 Room Flats");
-	// 	System.out.println("4. Edit 2 Room Flat Price");
-	// 	System.out.println("5. Edit Number of 3 Room Flats");
-	// 	System.out.println("6. Edit 3 Room Flat Price");
-	// 	System.out.println("7. Edit Application Opening Date");
-	// 	System.out.println("8. Edit Application Closing Date");
-	// 	System.out.println("9. Edit HDB Manager in charge");
-	// 	System.out.println("10. Edit Available HDB Officer SLots (Max10)");
-	// 	System.out.println("11. Back");
-	// 	System.out.print("Select an option to edit: ");
+	// public void displayManageBTOProjectMenu() { // Menu only available to manager
+	// to create/edit/delete BTO Project Listings
+	// System.out.println("\n=== BTO Project Editing Menu ===");
+	// System.out.println("1. Edit Project Name");
+	// System.out.println("2. Edit Neighborhood");
+	// System.out.println("3. Edit Number of 2 Room Flats");
+	// System.out.println("4. Edit 2 Room Flat Price");
+	// System.out.println("5. Edit Number of 3 Room Flats");
+	// System.out.println("6. Edit 3 Room Flat Price");
+	// System.out.println("7. Edit Application Opening Date");
+	// System.out.println("8. Edit Application Closing Date");
+	// System.out.println("9. Edit HDB Manager in charge");
+	// System.out.println("10. Edit Available HDB Officer SLots (Max10)");
+	// System.out.println("11. Back");
+	// System.out.print("Select an option to edit: ");
 	// }
 
 	/**
-     * Displays all projects with divider lines.
-     * @param projects the list of BTOProject objects to display
-     */
+	 * Displays all projects with divider lines.
+	 * 
+	 * @param projects the list of BTOProject objects to display
+	 */
 	public void displayAllProject(List<BTOProject> projects) {
 		System.out.println("===================================");
 		System.out.println("      Available Projects         ");
@@ -74,28 +80,43 @@ public class BTOProjectView {
 		System.out.println("===================================");
 	}
 
+	public void displayManagerProjects(List<BTOProject> projects) {
+		System.out.println("===================================");
+		System.out.println("            My Projects           ");
+		System.out.println("===================================");
+		if (projects == null || projects.isEmpty()) {
+			System.out.println("No available projects.");
+		} else {
+			for (BTOProject project : projects) {
+				System.out.println(project);
+				System.out.println("-----------------------------------");
+			}
+		}
+		System.out.println("===================================");
+	}
+
 	/**
- * Displays only the project ID and name for each project.
- */
-public void displayProjectIdNameList(List<BTOProject> projects) {
-    if (projects == null || projects.isEmpty()) {
-        System.out.println("No projects available.");
-        return;
-    }
-    System.out.println("\n=== Projects (choose ID to delete) ===");
-    for (BTOProject p : projects) {
-        System.out.printf("%d: %s%n", p.getProjectID(), p.getProjectName());
-    }
-    System.out.println("===============");
-}
-	
-	  /**
-     * Displays projects for an Applicant, showing only the room‑types
-     * they’re eligible to view:
-     *  - Singles ≥35 see only 2‑Room
-     *  - Married ≥21 see both 2‑Room & 3‑Room
-     *  - Everyone else sees a “not eligible” message
-     */
+	 * Displays only the project ID and name for each project.
+	 */
+	public void displayProjectIdNameList(List<BTOProject> projects) {
+		if (projects == null || projects.isEmpty()) {
+			System.out.println("No projects available.");
+			return;
+		}
+		System.out.println("\n=== Projects (choose ID to delete) ===");
+		for (BTOProject p : projects) {
+			System.out.printf("%d: %s%n", p.getProjectID(), p.getProjectName());
+		}
+		System.out.println("===============");
+	}
+
+	/**
+	 * Displays projects for an Applicant, showing only the room‑types
+	 * they’re eligible to view:
+	 * - Singles ≥35 see only 2‑Room
+	 * - Married ≥21 see both 2‑Room & 3‑Room
+	 * - Everyone else sees a “not eligible” message
+	 */
 	public void displayAvailableForApplicant(User user, List<BTOProject> projects) {
 		// Determine eligibility
 		boolean canSee2 = false, canSee3 = false;
@@ -143,48 +164,55 @@ public void displayProjectIdNameList(List<BTOProject> projects) {
 
 	public int promptProjectID(Scanner sc) {
 		return promptIntInRange(
-			sc,
-			"Enter Project ID: ",
-			1,
-			Integer.MAX_VALUE,
-			null  // no default, must enter something
+				sc,
+				"Enter Project ID: ",
+				1,
+				Integer.MAX_VALUE,
+				null // no default, must enter something
 		);
 	}
+
 	// Prompt until user enters a non‑empty line. must add for creation
-    private String promptNonEmpty(Scanner sc, String prompt) {
-        while (true) {
-            System.out.print(prompt);
-            String in = sc.nextLine().trim();
-			if (!in.isEmpty())
-			{
+	private String promptNonEmpty(Scanner sc, String prompt) {
+		while (true) {
+			System.out.print(prompt);
+			String in = sc.nextLine().trim();
+			if (!in.isEmpty()) {
 				return in;
 			}
-			
-            System.out.println("Cannot be blank.");
-        }
-    }
 
-    /** prompt for an int between min/max (inclusive). If defaultVal!=null and input blank, returns defaultVal. */
-    private int promptIntInRange(Scanner sc, String prompt, int min, int max, Integer defaultVal) {
-        while (true) {
-            System.out.print(prompt);
+			System.out.println("Cannot be blank.");
+		}
+	}
+
+	/**
+	 * prompt for an int between min/max (inclusive). If defaultVal!=null and input
+	 * blank, returns defaultVal.
+	 */
+	private int promptIntInRange(Scanner sc, String prompt, int min, int max, Integer defaultVal) {
+		while (true) {
+			System.out.print(prompt);
 			String in = sc.nextLine().trim();
-			//if user just presses enter, the doesnt edit at all
-            if (in.isEmpty() && defaultVal != null) return defaultVal;
-            try {
-                int v = Integer.parseInt(in);
-                if (v < min || v > max) {
-                    System.out.printf("Must be between %d and %d.%n", min, max);
-                } else {
-                    return v;
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("Please enter a whole number.");
-            }
-        }
-    }
+			// if user just presses enter, the doesnt edit at all
+			if (in.isEmpty() && defaultVal != null)
+				return defaultVal;
+			try {
+				int v = Integer.parseInt(in);
+				if (v < min || v > max) {
+					System.out.printf("Must be between %d and %d.%n", min, max);
+				} else {
+					return v;
+				}
+			} catch (NumberFormatException e) {
+				System.out.println("Please enter a whole number.");
+			}
+		}
+	}
 
-    /** Prompt for a date in dd/MM/yyyy. If defaultVal!=null and blank, returns defaultVal. */
+	/**
+	 * Prompt for a date in dd/MM/yyyy. If defaultVal!=null and blank, returns
+	 * defaultVal.
+	 */
 	private LocalDate promptDate(Scanner sc, String prompt, LocalDate defaultVal) {
 		while (true) {
 			System.out.print(prompt);
@@ -198,8 +226,8 @@ public void displayProjectIdNameList(List<BTOProject> projects) {
 			}
 		}
 	}
-	
-	//catch if the closing date is before opening
+
+	// catch if the closing date is before opening
 	private LocalDate promptDateNotBefore(Scanner sc, String prompt, LocalDate minDate) {
 		while (true) {
 			System.out.print(prompt);
@@ -212,155 +240,137 @@ public void displayProjectIdNameList(List<BTOProject> projects) {
 					return d;
 				}
 			} catch (DateTimeParseException e) {
-				System.out.println("Invalid date. Please use dd/MM/yyyy.");
+				System.out.println("Invalid date. Use dd/MM/yyyy.");
 			}
 		}
 	}
 
-    /** Prompt for a boolean. If defaultVal!=null and blank, returns defaultVal. */
-    private boolean promptBoolean(Scanner sc, String prompt, Boolean defaultVal) {
-        while (true) {
-            System.out.print(prompt);
-            String in = sc.nextLine().trim().toLowerCase();
-            if (in.isEmpty() && defaultVal != null) return defaultVal;
-            if (in.equals("true") || in.equals("false")) {
-                return Boolean.parseBoolean(in);
-            }
-            System.out.println("Enter 'true' or 'false'.");
-        }
-    }
+	/** Prompt for a boolean. If defaultVal!=null and blank, returns defaultVal. */
+	private boolean promptBoolean(Scanner sc, String prompt, Boolean defaultVal) {
+		while (true) {
+			System.out.print(prompt);
+			String in = sc.nextLine().trim().toLowerCase();
+			if (in.isEmpty() && defaultVal != null)
+				return defaultVal;
+			if (in.equals("true") || in.equals("false")) {
+				return Boolean.parseBoolean(in);
+			}
+			System.out.println("Enter 'true' or 'false'.");
+		}
+	}
 
-    //–– Create Flow ––//
+	// –– Create Flow ––//
 
-    public BTOProject promptNewProject(Scanner sc) {
-        BTOProject p = new BTOProject();
+	public BTOProject promptNewProject(Scanner sc) {
+		BTOProject p = new BTOProject();
 
-        p.setProjectName(
-            promptNonEmpty(sc, "Name: ")
-        );
-        p.setNeighborhood(
-            promptNonEmpty(sc, "Neighborhood: ")
-        );
-        p.setAvailable2Room(
-            promptIntInRange(sc, "2-Room units: ", 0, Integer.MAX_VALUE, null)
-        );
-        p.setTwoRoomPrice(
-            promptIntInRange(sc, "2-Room price: ", 0, Integer.MAX_VALUE, null)
-        );
-        p.setAvailable3Room(
-            promptIntInRange(sc, "3-Room units: ", 0, Integer.MAX_VALUE, null)
-        );
-        p.setThreeRoomPrice(
-            promptIntInRange(sc, "3-Room price: ", 0, Integer.MAX_VALUE, null)
-        );
-
-        LocalDate open = promptDate(sc,
-    "Application opening date (dd/MM/yyyy): ", null);
+		p.setProjectName(
+				promptNonEmpty(sc, "Name: "));
+		p.setNeighborhood(
+				promptNonEmpty(sc, "Neighborhood: "));
+		p.setAvailable2Room(
+				promptIntInRange(sc, "2-Room units: ", 0, Integer.MAX_VALUE, null));
+		p.setTwoRoomPrice(
+				promptIntInRange(sc, "2-Room price: ", 0, Integer.MAX_VALUE, null));
+		p.setAvailable3Room(
+				promptIntInRange(sc, "3-Room units: ", 0, Integer.MAX_VALUE, null));
+		p.setThreeRoomPrice(
+				promptIntInRange(sc, "3-Room price: ", 0, Integer.MAX_VALUE, null));
+		// Ask for the opening date (must not be blank)
+		LocalDate open = promptDate(sc, "Application opening date (dd/MM/yyyy): ", null);
 		p.setApplicationOpeningDate(open.format(DATE_FMT));
 
+		// Use promptDateNotBefore to enforce:
+		// 1. Input is not blank
+		// 2. The date is on or after the opening date
 		LocalDate close = promptDateNotBefore(sc,
-			"Application closing date (dd/MM/yyyy): ", open);
+				String.format("Application closing date (dd/MM/yyyy) [>= %s]: ", open.format(DATE_FMT)),
+				open);
 		p.setApplicationClosingDate(close.format(DATE_FMT));
 
+		p.setAvailableOfficerSlots(
+				promptIntInRange(sc, "Officer slots (0-10): ", 0, 10, null));
+		p.setVisibility(
+				promptBoolean(sc, "Visible? (true/false): ", null));
 
-        p.setAvailableOfficerSlots(
-            promptIntInRange(sc, "Officer slots (0-10): ", 0, 10, null)
-        );
-        p.setVisibility(
-            promptBoolean(sc, "Visible? (true/false): ", null)
-        );
+		// Safe defaults
+		p.setPendingOfficer(new ArrayList<>());
+		p.setApprovedOfficer(new ArrayList<>());
 
-        // Safe defaults
-        p.setPendingOfficer(new ArrayList<>());
-        p.setApprovedOfficer(new ArrayList<>());
+		return p;
+	}
 
-        return p;
-    }
+	// –– Edit Flow ––//
 
-    //–– Edit Flow ––//
+	public void editProjectDetails(Scanner sc, BTOProject p) {
+		System.out.println("Editing project " + p.getProjectID() + ". Leave blank to keep current.");
 
-    public void editProjectDetails(Scanner sc, BTOProject p) {
-        System.out.println("Editing project " + p.getProjectID() + ". Leave blank to keep current.");
+		// For name prompt input, if it's blank, keep the current name.
+		System.out.print(String.format("Name (%s): ", p.getProjectName()));
+		String nameInput = sc.nextLine().trim();
+		if (!nameInput.isEmpty()) {
+			p.setProjectName(nameInput);
+		}
 
-        p.setProjectName(
-            promptNonEmpty(sc,
-                String.format("Name (%s): ", p.getProjectName())
-            )
-        );
+		// same for neighborhood
+		System.out.print(String.format("Neighborhood (%s): ", p.getNeighborhood()));
+		String nbInput = sc.nextLine().trim();
+		if (!nbInput.isEmpty()) {
+			p.setNeighborhood(nbInput);
+		}
 
-        p.setNeighborhood(
-            promptNonEmpty(sc,
-                String.format("Neighborhood (%s): ", p.getNeighborhood())
-            )
-        );
+		p.setAvailable2Room(
+				promptIntInRange(sc,
+						String.format("2-Room units (%d): ", p.getAvailable2Room()),
+						0, Integer.MAX_VALUE,
+						p.getAvailable2Room()));
+		p.setTwoRoomPrice(
+				promptIntInRange(sc,
+						String.format("2-Room price (%d): ", p.getTwoRoomPrice()),
+						0, Integer.MAX_VALUE,
+						p.getTwoRoomPrice()));
+		p.setAvailable3Room(
+				promptIntInRange(sc,
+						String.format("3-Room units (%d): ", p.getAvailable3Room()),
+						0, Integer.MAX_VALUE,
+						p.getAvailable3Room()));
+		p.setThreeRoomPrice(
+				promptIntInRange(sc,
+						String.format("3-Room price (%d): ", p.getThreeRoomPrice()),
+						0, Integer.MAX_VALUE,
+						p.getThreeRoomPrice()));
 
-        p.setAvailable2Room(
-            promptIntInRange(sc,
-                String.format("2-Room units (%d): ", p.getAvailable2Room()),
-                0, Integer.MAX_VALUE,
-                p.getAvailable2Room()
-            )
-        );
-        p.setTwoRoomPrice(
-            promptIntInRange(sc,
-                String.format("2-Room price (%d): ", p.getTwoRoomPrice()),
-                0, Integer.MAX_VALUE,
-                p.getTwoRoomPrice()
-            )
-        );
-        p.setAvailable3Room(
-            promptIntInRange(sc,
-                String.format("3-Room units (%d): ", p.getAvailable3Room()),
-                0, Integer.MAX_VALUE,
-                p.getAvailable3Room()
-            )
-        );
-        p.setThreeRoomPrice(
-            promptIntInRange(sc,
-                String.format("3-Room price (%d): ", p.getThreeRoomPrice()),
-                0, Integer.MAX_VALUE,
-                p.getThreeRoomPrice()
-            )
-        );
-
-        // parse the existing dates once
-		LocalDate openDefault  = LocalDate.parse(p.getApplicationOpeningDate(), DATE_FMT);
-		// LocalDate closeDefault = LocalDate.parse(p.getApplicationClosingDate(), DATE_FMT);
+		// parse the existing dates once
+		LocalDate openDefault = LocalDate.parse(p.getApplicationOpeningDate(), DATE_FMT);
+		// LocalDate closeDefault = LocalDate.parse(p.getApplicationClosingDate(),
+		// DATE_FMT);
 
 		// Prompt for a new opening date, or blank to keep the old one
 		LocalDate open = promptDate(
-			sc,
-			String.format("Application opening date (%s): ", p.getApplicationOpeningDate()),
-			openDefault   
-		);
+				sc,
+				String.format("Application opening date (%s): ", p.getApplicationOpeningDate()),
+				openDefault);
 		p.setApplicationOpeningDate(open.format(DATE_FMT));
 
 		// Prompt for a new closing date, but enforce >= opening date
+		// now ask for closing date, must be on or after the opening date
 		LocalDate close = promptDateNotBefore(
-			sc,
-			String.format("Application closing date (%s): ", p.getApplicationClosingDate()),
-			open          // <-- use the newly chosen (or default) opening date
-		);
+				sc,
+				String.format("Application closing date (%s): ", p.getApplicationClosingDate()),
+				open);
 		p.setApplicationClosingDate(close.format(DATE_FMT));
 
+		p.setAvailableOfficerSlots(
+				promptIntInRange(sc,
+						String.format("Officer slots (%d) [0-10]: ", p.getAvailableOfficerSlots()),
+						0, 10,
+						p.getAvailableOfficerSlots()));
 
-        p.setAvailableOfficerSlots(
-            promptIntInRange(sc,
-                String.format("Officer slots (%d) [0-10]: ", p.getAvailableOfficerSlots()),
-                0, 10,
-                p.getAvailableOfficerSlots()
-            )
-        );
-
-        p.setVisibility(
-            promptBoolean(sc,
-                String.format("Visible? (%b): ", p.isVisibility()),
-                p.isVisibility()
-            )
-        );
-    }
-	
-	
+		p.setVisibility(
+				promptBoolean(sc,
+						String.format("Visible? (%b): ", p.isVisibility()),
+						p.isVisibility()));
+	}
 
 	/**
 	 * 
@@ -375,12 +385,11 @@ public void displayProjectIdNameList(List<BTOProject> projects) {
 			System.out.println("You have no approved officer assignments.");
 			return;
 		}
-		
+
 		System.out.println("=== Projects You're Handling ===");
 		for (BTOProject p : projects) {
-			System.out.println(p);  // relies on your detailed toString()
+			System.out.println(p); // relies on your detailed toString()
 			System.out.println("-----------------------------------");
 		}
 	}
 }
-

@@ -1,4 +1,12 @@
-﻿receiptID,NRIC,applicantName,age,maritalStatus,flatType,projectID,projectName,neighborhood,applicationOpeningDate,applicationClosingDate,manager
-1,S1234567A,John,35,SINGLE,2-Room,1,Acacia Breeze,Fishun,15-02-25,20-03-25,Jessica
-2,T9876543B,Sarah,28,MARRIED,3-Room,2,Acacia Tree,Chua Chu Kai,16-02-25,21-03-25,Michael
-3,T0114158E,Bryan,42,MARRIED,3-Room,3,Birch Logging,Orchid,17-02-25,22-03-25,Jessica
+receiptID,NRIC,applicantName,age,maritalStatus,flatType,projectID,projectName,neighborhood,applicationOpeningDate,applicationClosingDate,manager
+1,S1234567A,John,12,SINGLE,2-Room,1,Acacia Breeze,Fishun,15/2/2025,20/3/2025,Jessica
+2,T9876543B,Sarah,28,MARRIED,3-Room,2,Acacia Tree,Chua Chu Kai,16/2/2025,21/3/2025,Michael
+3,T0114158E,Bryan,42,MARRIED,3-Room,3,Birch Logging,Orchid,17/2/2025,22/3/2025,Jessica
+4,T0000000G,Kaibao,21,MARRIED,TWOROOM,12,bryan batman,gotham,25/4/2025,26/4/2025,T0114158E
+5,S1234567A,John,35,SINGLE,TWOROOM,1,Acacia Breeze,Fishun,15/2/2025,20/3/2025,S5678901G
+6,T9876543B,paimon,21,SINGLE,TWOROOM,2,Acacia Tree,Chua Chu Kai,16/2/2025,21/3/2025,T0000000G
+7,T0000000G,Kaibao,21,MARRIED,THREEROOM,13,testing,testing,25/4/2025,26/4/2025,T0000000G
+8,S1234567A,John,35,SINGLE,TWOROOM,1,Acacia Breeze,Fishun,15/2/2025,20/3/2025,S5678901G
+9,T0000000G,Kaibao,21,MARRIED,THREEROOM,1,Acacia Breeze,Fishun,15/2/2025,20/3/2025,S5678901G
+10,T0000000G,Kaibao,21,MARRIED,THREEROOM,2,Acacia Tree,Chua Chu Kai,16/2/2025,21/3/2025,T0000000G
+11,T0000000G,Kaibao,21,MARRIED,THREEROOM,2,Acacia Tree,Chua Chu Kai,16/2/2025,21/3/2025,T0000000G

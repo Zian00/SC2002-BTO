@@ -23,11 +23,10 @@ public class UserCTRL {
      * Login as before.
      */
     public boolean login(String NRIC, String password, Role role) {
-        if (userList == null) loadUserData();
+        if (userList == null)
+            loadUserData();
         for (User u : userList) {
-            if (u.getNRIC().equalsIgnoreCase(NRIC)
-             && u.getPassword().equals(password)
-             && u.getRole() == role) {
+            if (u.getNRIC().equalsIgnoreCase(NRIC) && u.getPassword().equals(password) && u.getRole() == role) {
                 currentUser = u;
                 return true;
             }
@@ -37,30 +36,30 @@ public class UserCTRL {
 
     /**
      * Change password with verification of the old password.
+     * 
      * @param newPassword the desired new password
      * @return true if the change succeeded, false otherwise
      */
-    /** 
- * Change the current user’s password to newPassword, then persist to CSV.
- */
+    /**
+     * Change the current user’s password to newPassword, then persist to CSV.
+     */
     public boolean changePassword(String newPassword) {
-        if (newPassword == null || newPassword.trim().isEmpty()){
+        if (newPassword == null || newPassword.trim().isEmpty()) {
             System.out.println("Password cannot be blank");
             return false;
         }
-        
+
         if (currentUser == null) {
             System.out.println("Error: no user is currently logged in.");
             return false;
         }
 
         currentUser.setPassword(newPassword);
-        saveUserData();  // writes out assets/userList.csv
+        saveUserData(); // writes out assets/userList.csv
         System.out.println("Password changed successfully. You will be logged out now.");
-        setCurrentUser(null);  // <— force logout
+        setCurrentUser(null); // <— force logout
         return true;
     }
-
 
     // getters/setters…
 
@@ -70,5 +69,15 @@ public class UserCTRL {
 
     public void setCurrentUser(User user) {
         currentUser = user;
+    }
+
+    public User getUserByNRIC(String nric) {
+        if (userList != null) {
+            for (User u : userList) {
+                if (u.getNRIC().equalsIgnoreCase(nric))
+                    return u;
+            }
+        }
+        return null;
     }
 }

@@ -1,17 +1,25 @@
 import controllers.BTOApplicationCTRL;
 import controllers.BTOProjectCTRL;
 import controllers.EnquiryCTRL;
+import controllers.OfficerApplicationCTRL;
 import controllers.UserCTRL;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
+import models.BTOApplication;
 import models.BTOProject;
 import models.Enquiry;
+import models.enumerations.ApplicationStatus;
+import models.enumerations.ApplicationType;
 import models.enumerations.FlatType;
+import models.enumerations.RegistrationStatus;
 import models.enumerations.Role;
+import views.BTOApplicationView;
 import views.ApplicantView;
 import views.BTOProjectView;
 import views.EnquiryView;
 import views.ManagerView;
+import views.OfficerApplicationView;
 import views.OfficerView;
 import views.UserView;
 
@@ -19,11 +27,10 @@ public class Main {
     public static void main(String[] args) {
         try (Scanner sc = new Scanner(System.in)) {
             UserCTRL userCTRL = new UserCTRL();
-            UserView userView = new UserView();  // Create a UserView instance
+            UserView userView = new UserView(); // Create a UserView instance
             userCTRL.loadUserData();
-            
-            OUTER:
-            while (true) {
+
+            OUTER: while (true) {
                 // =====================================
                 // Main Menu Options
                 // =====================================
@@ -57,70 +64,79 @@ public class Main {
 
         // Instantiate Views
         UserView baseView = switch (role) {
-            case APPLICANT  -> new ApplicantView();
+            case APPLICANT -> new ApplicantView();
             case HDBOFFICER -> new OfficerView();
             case HDBMANAGER -> new ManagerView();
         };
         BTOProjectView projectView = new BTOProjectView();
-        // BTOApplicationView btoApplicationView = new BTOApplicationView();
+        BTOApplicationView btoApplicationView = new BTOApplicationView();
         EnquiryView enquiryView = new EnquiryView();
 
         // Instantiate Controllers
         BTOProjectCTRL projectCTRL = new BTOProjectCTRL(userCTRL.getCurrentUser());
-        BTOApplicationCTRL  applicationCTRL = new BTOApplicationCTRL(userCTRL.getCurrentUser());
+        BTOApplicationCTRL applicationCTRL = new BTOApplicationCTRL(userCTRL.getCurrentUser());
         EnquiryCTRL enquiryCTRL = new EnquiryCTRL(userCTRL.getCurrentUser());
-        // OfficerApplicationCTRL officerApplicationCTRL = new OfficerApplicationCTRL(userCTRL.getCurrentUser());
+        // added this used for offical application viewing - bryan
+        OfficerApplicationCTRL OfficerAppCTRL = new OfficerApplicationCTRL(userCTRL.getCurrentUser());
+        OfficerApplicationView officerAppView = new OfficerApplicationView();
 
         while (true) {
             baseView.displayMenu();
-            System.out.print("Select an option: ");
+
             String opt = sc.nextLine().trim();
 
             // --- Common options 1–4 ---
             switch (opt) {
-                case "1" -> runProjectMenu(sc, userCTRL, projectCTRL, projectView, applicationCTRL, enquiryView, enquiryCTRL);
-                // case "2" -> runApplicationMenu(sc, userCTRL, applicationCTRL, btoApplicationView);
+                case "1" ->
+                    runProjectMenu(sc, userCTRL, projectCTRL, projectView, applicationCTRL, enquiryView, enquiryCTRL);
+                case "2" -> runApplicationMenu(sc, userCTRL, projectCTRL, applicationCTRL, btoApplicationView);
                 case "3" -> runEnquiryMenu(sc, userCTRL, projectCTRL, enquiryView, enquiryCTRL);
-                case "4" -> { 
+                case "4" -> {
                     handleChangePassword(sc, userCTRL);
-                    if (userCTRL.getCurrentUser() == null) return;  // back to login
+                    if (userCTRL.getCurrentUser() == null)
+                        return; // back to login
                 }
             }
 
             if (role != null) // --- Role‑specific extra options ---
-            switch (role) {
-                case APPLICANT:
-                    switch (opt){
-                        case "5" -> {
-                            // Logout
-                            userCTRL.setCurrentUser(null);
-                            baseView.displayLogout();
-                            return;
+                switch (role) {
+                    case APPLICANT:
+                        switch (opt) {
+                            case "5" -> { // Logout
+                                userCTRL.setCurrentUser(null);
+                                baseView.displayLogout();
+                                return;
+                            }
                         }
-                    }
-                case HDBOFFICER:
-                    switch (opt) {
-                        // case "5" -> officerApplicationCTRL.
-                        case "6" -> {
-                            // Logout
-                            userCTRL.setCurrentUser(null);
-                            baseView.displayLogout();
-                            return;
+                    case HDBOFFICER:
+                        switch (opt) {
+
+                            case "5" -> { // case "5" Enter Officer Application Menu
+                                runOfficerApplicationMenu(sc, OfficerAppCTRL, officerAppView, projectCTRL);
+                            }
+                            case "6" -> { // Logout
+                                userCTRL.setCurrentUser(null);
+                                baseView.displayLogout();
+                                return;
+                            }
                         }
-                    }   break;
-                case HDBMANAGER:
-                    switch (opt) {
-                        // case "5" -> officerApplicationCTRL.
-                        case "6" -> {
-                            // Logout
-                            userCTRL.setCurrentUser(null);
-                            baseView.displayLogout();
-                            return;
+                        break;
+                    case HDBMANAGER:
+                        switch (opt) {
+                            // case "5" -> officerApplicationCTRL.
+                            case "5" -> {
+                            }
+                            case "6" -> {
+                                // Logout
+                                userCTRL.setCurrentUser(null);
+                                baseView.displayLogout();
+                                return;
+                            }
                         }
-                    }   break;
-                default:
-                    break;
-            }
+                        break;
+                    default:
+                        break;
+                }
         }
     }
 
@@ -133,12 +149,54 @@ public class Main {
         userCTRL.changePassword(newPass);
     }
 
+    // OFFICER APPLICATION VIEW MENU
+    // ===========================
+    private static void runOfficerApplicationMenu(Scanner sc,
+            OfficerApplicationCTRL offAppCTRL,
+            OfficerApplicationView view,
+            BTOProjectCTRL projectCTRL) {
+        while (true) {
+            view.displayOfficerMenu(); // 1–4 + Back
+            String choice = sc.nextLine().trim();
+            switch (choice) {
+                case "1" -> {
+                    // 1) View all *your* officer applications
+                    var mine = offAppCTRL.viewUserOfficerApplications();
+                    view.displayOfficerApplications(mine);
+                }
+                case "2" -> {
+                    // 2) Check registration status (i.e. show only PENDING if you like)
+                    var mine = offAppCTRL.viewUserOfficerApplications()
+                            .stream()
+                            .filter(a -> a.getStatus() == RegistrationStatus.PENDING)
+                            .collect(Collectors.toList());
+                    view.displayOfficerApplications(mine);
+                }
+                case "3" -> {
+                    // 3) Register as officer
+                    var elig = offAppCTRL.getEligibleOfficerProjects();
+                    view.displayEligibleProjects(elig);
+                    System.out.print("Enter Project ID to register: ");
+                    int pid = Integer.parseInt(sc.nextLine().trim());
+                    boolean ok = offAppCTRL.registerAsOfficer(pid);
+                    System.out.println(ok
+                            ? "Registration submitted (status PENDING)."
+                            : "Registration failed.");
+                }
+                case "4" -> {
+                    return; // Back to the officer’s main menu
+                }
+                default -> System.out.println("Invalid choice, try again.");
+            }
+        }
+    }
+
     // --------------------------------------------------------------------------------------------------
     // Projects Menu for Users
     // --------------------------------------------------------------------------------------------------
-    private static void runProjectMenu(Scanner sc, UserCTRL userCTRL, BTOProjectCTRL projectCTRL, 
-                                    BTOProjectView projectView, BTOApplicationCTRL applicationCTRL,
-                                    EnquiryView enquiryView, EnquiryCTRL enquiryCTRL) {
+    private static void runProjectMenu(Scanner sc, UserCTRL userCTRL, BTOProjectCTRL projectCTRL,
+            BTOProjectView projectView, BTOApplicationCTRL applicationCTRL,
+            EnquiryView enquiryView, EnquiryCTRL enquiryCTRL) {
         while (true) {
             Role role = userCTRL.getCurrentUser().getRole();
             switch (role) {
@@ -150,27 +208,27 @@ public class Main {
             switch (role) {
                 case APPLICANT -> {
                     var availableProjects = projectCTRL.getFilteredProjects();
-                    switch (c){
+                    switch (c) {
                         case "1" -> { // Only display projects User can apply
                             projectView.displayAvailableForApplicant(
-                                userCTRL.getCurrentUser(), availableProjects);
+                                    userCTRL.getCurrentUser(), availableProjects);
                         }
                         case "2" -> { // Apply for BTO
                             // Show available projects
                             projectView.displayAvailableForApplicant(
-                                userCTRL.getCurrentUser(), availableProjects);
-                            
+                                    userCTRL.getCurrentUser(), availableProjects);
+
                             // Get project selection
                             System.out.print("Enter project ID to apply: ");
                             int projectId = Integer.parseInt(sc.nextLine());
-                            
+
                             // Get flat type selection
                             System.out.println("Select flat type:");
                             System.out.println("1. 2-Room");
                             System.out.println("2. 3-Room");
                             int flatChoice = Integer.parseInt(sc.nextLine());
                             FlatType flatType = (flatChoice == 1) ? FlatType.TWOROOM : FlatType.THREEROOM;
-                            
+
                             // Submit application
                             boolean ok = applicationCTRL.apply(projectId, flatType);
                             if (ok) {
@@ -180,8 +238,8 @@ public class Main {
                         case "3" -> { // Submit Enquiry for a project
                             // Show available projects
                             projectView.displayAvailableForApplicant(
-                                userCTRL.getCurrentUser(), availableProjects);
-                            
+                                    userCTRL.getCurrentUser(), availableProjects);
+
                             // Get project selection
                             System.out.print("Enter project ID to submit Enquiry: ");
                             int projectId = Integer.parseInt(sc.nextLine());
@@ -190,54 +248,133 @@ public class Main {
                             Enquiry newEnquiry = enquiryCTRL.createEnquiry(projectId, enquiryText);
                             enquiryView.displayEnquiryCreated(newEnquiry);
                         }
-                        case "4" -> {
-                            return;  // back to central menu
+                        case "4" -> { // back to central menu
+                            return;
                         }
                     }
                 }
                 case HDBOFFICER -> {
                     switch (c) {
-                        
+
+                        case "5" ->
+                            {
+
+                            }
                         case "6" -> {
-                            return;  // back to central menu
+                            return; // back to central menu
                         }
                     }
                 }
-                    case HDBMANAGER ->{
-                        switch (c) {
-                            case "1" ->
-                            {
-                                var allProjects = projectCTRL.getAllProjects();
-                                projectView.displayAllProject(allProjects);
+                case HDBMANAGER -> {
+                    switch (c) {
+                        case "1" -> { // Display All BTO Projects
+                            var allProjects = projectCTRL.getAllProjects();
+                            projectView.displayAllProject(allProjects);
+                        }
+                        case "2" -> { // Manager views his own projects
+
+                            var allProjects = projectCTRL.getAllProjects();
+                            var managerNRIC = userCTRL.getCurrentUser().getNRIC();
+                            var myProjects = allProjects.stream()
+                                    .filter(project -> project.getManager().equals(managerNRIC))
+                                    .toList();
+                            if (myProjects.isEmpty()) {
+                                projectView.showMessage("No projects found for you.");
+                            } else {
+                                projectView.displayManagerProjects(myProjects);
                             }
-                            //maybe implement filtered view case here? projects you have created
-                            case "2" ->
-                            {
-                                
-                                BTOProject newProj = projectView.promptNewProject(sc);
-                                //automatically set projectID
-                                int id = projectCTRL.getNextProjectID();
-                                newProj.setProjectID(id);
-                                newProj.setManager(userCTRL.getCurrentUser().getNRIC());
-                                projectCTRL.createProject(newProj);
-                                projectView.showMessage("Project created.");
+                        }
+
+                        case "3" -> { // Add BTO Project
+                            BTOProject newProj = projectView.promptNewProject(sc);
+                            // automatically set projectID
+                            int id = projectCTRL.getNextProjectID();
+                            newProj.setProjectID(id);
+                            newProj.setManager(userCTRL.getCurrentUser().getNRIC());
+
+                            // --- Overlap check: prevent overlapping application periods for same manager
+                            var managerNRIC = userCTRL.getCurrentUser().getNRIC();
+                            var myProjects = projectCTRL.getAllProjects().stream()
+                                    .filter(project -> project.getManager().equals(managerNRIC))
+                                    .toList();
+
+                            // Parse dates for new project
+                            String newOpen = newProj.getApplicationOpeningDate();
+                            String newClose = newProj.getApplicationClosingDate();
+
+                            boolean overlaps = myProjects.stream().anyMatch(existing -> {
+                                String existOpen = existing.getApplicationOpeningDate();
+                                String existClose = existing.getApplicationClosingDate();
+
+                                // not (existClose < newOpen || newClose < existOpen)
+                                return !(existClose.compareTo(newOpen) < 0 || newClose.compareTo(existOpen) < 0);
+                            });
+
+                            if (overlaps) {
+                                projectView.showMessage(
+                                        "Error: The new project's application period overlaps with an existing project you manage. Please choose a different period.");
+                                break;
                             }
-                        case "3" -> { // Edit
+
+                            projectCTRL.createProject(newProj);
+                            projectView.showMessage("Project created.");
+                        }
+                        case "4" -> { // Edit BTO Project
                             int id = projectView.promptProjectID(sc);
                             BTOProject existing = projectCTRL.getProjectById(id);
                             if (existing == null) {
                                 projectView.showMessage("Project not found.");
                                 break;
                             }
+                            // prevent manager from editing other people projects - bryan
+                            String mgrNRIC = userCTRL.getCurrentUser().getNRIC();
+                            if (!existing.getManager().equals(mgrNRIC)) {
+                                projectView.showMessage("Error: You do not manage that project.");
+                                break;
+                            }
+                            // Store old dates for comparison
+                            String oldOpen = existing.getApplicationOpeningDate();
+                            String oldClose = existing.getApplicationClosingDate();
+
+                            // Let manager edit details (including dates)
                             projectView.editProjectDetails(sc, existing);
+
+                            // If application period changed, check for overlap
+                            String newOpen = existing.getApplicationOpeningDate();
+                            String newClose = existing.getApplicationClosingDate();
+
+                            if (!oldOpen.equals(newOpen) || !oldClose.equals(newClose)) {
+                                var managerNRIC = userCTRL.getCurrentUser().getNRIC();
+                                var myProjects = projectCTRL.getAllProjects().stream()
+                                        .filter(project -> project.getManager().equals(managerNRIC)
+                                                && project.getProjectID() != id)
+                                        .toList();
+
+                                boolean overlaps = myProjects.stream().anyMatch(other -> {
+                                    String existOpen = other.getApplicationOpeningDate();
+                                    String existClose = other.getApplicationClosingDate();
+                                    // not (existClose < newOpen || newClose < existOpen)
+                                    return !(existClose.compareTo(newOpen) < 0 || newClose.compareTo(existOpen) < 0);
+                                });
+
+                                if (overlaps) {
+                                    projectView.showMessage(
+                                            "Error: The new application period overlaps with another project you manage. Edit cancelled.");
+                                    // Revert to old dates
+                                    existing.setApplicationOpeningDate(oldOpen);
+                                    existing.setApplicationClosingDate(oldClose);
+                                    break;
+                                }
+                            }
+
                             projectCTRL.editProject(id, existing);
                             projectView.showMessage("Project updated.");
                         }
-                        case "4" -> { // Delete
-                            //display a list of projects and ID for reference
+                        case "5" -> { // Delete BTO Project
+                            // display a list of projects and ID for reference
                             var allProjects = projectCTRL.getAllProjects();
                             projectView.displayProjectIdNameList(allProjects);
-                            //which ID to delete
+                            // which ID to delete
                             int id = projectView.promptProjectID(sc);
                             if (projectCTRL.deleteProject(id)) {
                                 projectView.showMessage("Project deleted.");
@@ -245,8 +382,8 @@ public class Main {
                                 projectView.showMessage("Project not found.");
                             }
                         }
-                        case "5" -> {
-                            return;  // back to central menu
+                        case "6" -> { // back to central menu
+                            return;
                         }
                     }
                 }
@@ -259,19 +396,19 @@ public class Main {
     // Enquiry Menu for Users
     // --------------------------------------------------------------------------------------------------
     private static void runEnquiryMenu(Scanner sc, UserCTRL userCTRL, BTOProjectCTRL projectCTRL,
-                                        EnquiryView enquiryView, EnquiryCTRL enquiryCTRL) {
+            EnquiryView enquiryView, EnquiryCTRL enquiryCTRL) {
         while (true) {
             Role role = userCTRL.getCurrentUser().getRole();
             switch (role) {
-                case APPLICANT,HDBOFFICER -> enquiryView.displayApplicantMenu();
+                case APPLICANT, HDBOFFICER -> enquiryView.displayApplicantMenu();
                 case HDBMANAGER -> enquiryView.displayAdminMenu();
             }
-            
+
             String c = sc.nextLine().trim();
             switch (role) {
                 case APPLICANT -> {
                     var userEnquiries = enquiryCTRL.getFilteredEnquiriesByNRIC();
-                    switch (c){
+                    switch (c) {
                         case "1" -> { // Only display Enquiry by User
                             var projectList = projectCTRL.getAllProjects();
                             enquiryView.displayFilteredEnquiries(projectList, userEnquiries);
@@ -284,24 +421,283 @@ public class Main {
                         case "3" -> { // Delete Enquiry
                             // Show enquiries by user
                             // Select enquiry to delete
-                            // Confirm deletion 
+                            // Confirm deletion
                         }
                         case "4" -> {
-                            return;  // back to central menu
+                            return; // back to central menu
                         }
                     }
                 }
                 case HDBOFFICER -> {
-                    switch (c){
+                    switch (c) {
                         case "4" -> {
-                            return;  // back to central menu
+                            return; // back to central menu
                         }
                     }
                 }
-                case HDBMANAGER ->{
-                    switch (c){
+                case HDBMANAGER -> {
+                    switch (c) {
                         case "2" -> {
-                            return;  // back to central menu
+                            return; // back to central menu
+                        }
+                    }
+                }
+                default -> System.out.println("Invalid choice, try again.");
+            }
+        }
+    }
+
+    // --------------------------------------------------------------------------------------------------
+    // Application Menu for Users
+    // --------------------------------------------------------------------------------------------------
+    private static void runApplicationMenu(Scanner sc, UserCTRL userCTRL, BTOProjectCTRL projectCTRL,
+            BTOApplicationCTRL applicationCTRL,
+            BTOApplicationView btoApplicationView) {
+        while (true) {
+            Role role = userCTRL.getCurrentUser().getRole();
+            switch (role) {
+                case APPLICANT -> btoApplicationView.displayApplicantMenu();
+                case HDBOFFICER -> btoApplicationView.displayOfficerMenu();
+                case HDBMANAGER -> btoApplicationView.displayManagerMenu();
+            }
+
+            String c = sc.nextLine().trim();
+            switch (role) {
+                case APPLICANT -> {
+
+                    switch (c) {
+                        case "1" -> { // Display All My Applications
+                            try {
+                                var apps = applicationCTRL.viewUserApplications();
+                                var projects = applicationCTRL.getProjects(); // retrieve projects list
+                                btoApplicationView.displayUserApplication(apps, userCTRL.getCurrentUser(), projects);
+                            } catch (Exception e) {
+                                System.out.println(
+                                        "An error occurred while retrieving your applications: " + e.getMessage());
+                            }
+                        }
+                        case "2" -> { // Withdraw my application
+                            try {
+                                var userApps = applicationCTRL.viewUserApplications();
+                                var projects = applicationCTRL.getProjects(); // retrieve projects list
+                                // Use the view method to display available pending applications
+                                if (!btoApplicationView.displayPendingApplications(userApps, projects)) {
+                                    break;
+                                }
+
+                                // Now prompt user for the application ID to withdraw
+                                System.out.print("Enter Application ID to withdraw: ");
+                                int appId = Integer.parseInt(sc.nextLine().trim());
+                                boolean success = applicationCTRL.withdraw(appId);
+                                if (success) {
+                                    System.out.println(
+                                            "Application withdrawn successfully. Application type updated to WITHDRAWAL and Status updated to PENDING.");
+                                } else {
+                                    System.out.println(
+                                            "Withdrawal failed. Please ensure the application exists and belongs to you.");
+                                }
+                            } catch (NumberFormatException nfe) {
+                                System.out.println("Invalid application ID. Please enter a valid number.");
+                            } catch (Exception e) {
+                                System.out.println(
+                                        "An error occurred while withdrawing your application: " + e.getMessage());
+                            }
+                        }
+                        case "3" -> { // back to central menu
+                            return;
+                        }
+                    }
+                }
+                case HDBOFFICER -> {
+                    switch (c) {
+                        case "1" -> { // Display All My Applications
+                            try {
+                                var apps = applicationCTRL.viewUserApplications();
+                                var projects = applicationCTRL.getProjects(); // retrieve projects list
+                                btoApplicationView.displayUserApplication(apps, userCTRL.getCurrentUser(), projects);
+                            } catch (Exception e) {
+                                System.out.println(
+                                        "An error occurred while retrieving your applications: " + e.getMessage());
+                            }
+
+                        }
+                        case "2" -> { // Withdraw my application
+                            try {
+                                var userApps = applicationCTRL.viewUserApplications();
+                                var projects = applicationCTRL.getProjects(); // retrieve projects list
+                                // Use the view method to display available pending applications
+                                if (!btoApplicationView.displayPendingApplications(userApps, projects)) {
+                                    break;
+                                }
+
+                                // Prompt the user for the application ID to withdraw
+                                System.out.print("Enter Application ID to withdraw: ");
+                                int appId = Integer.parseInt(sc.nextLine().trim());
+                                boolean success = applicationCTRL.withdraw(appId);
+                                if (success) {
+                                    System.out.println(
+                                            "Application withdrawn successfully. Application type updated to WITHDRAWAL and Status updated to PENDING.");
+                                } else {
+                                    System.out.println(
+                                            "Withdrawal failed. Please ensure the application exists and belongs to you.");
+                                }
+                            } catch (NumberFormatException nfe) {
+                                System.out.println("Invalid application ID. Please enter a valid number.");
+                            } catch (Exception e) {
+                                System.out.println(
+                                        "An error occurred while withdrawing your application: " + e.getMessage());
+                            }
+                        }
+                        case "3" -> { // Booking for successful applicant
+                            try {
+                                // Get successful applications handled by this officer.
+                                var officerApps = applicationCTRL.getApplicationsHandledByOfficer();
+                                // Retrieve all projects.
+                                var projects = applicationCTRL.getProjects();
+                                // Use view helper to display successful applications.
+                                if (!btoApplicationView.displaySuccessfulApplications(officerApps, projects)) {
+                                    break;
+                                }
+
+                                System.out.print("Enter Application ID to book: ");
+                                int appId = Integer.parseInt(sc.nextLine().trim());
+
+                                // Book and generate receipt.
+                                boolean booked = applicationCTRL.bookAndGenerateReceipt(appId, projectCTRL, userCTRL);
+                                if (booked) {
+                                    System.out.println("Booking confirmed and receipt generated successfully.");
+
+                                } else {
+                                    System.out.println(
+                                            "Booking failed: Please check the application details or flat availability.");
+                                }
+                            } catch (NumberFormatException nfe) {
+                                System.out.println("Invalid application ID. Please enter a valid number.");
+                            } catch (Exception e) {
+                                System.out.println("An error occurred while processing booking: " + e.getMessage());
+                            }
+                        }
+                        case "4" -> {
+                            return; // back to central menu
+                        }
+                    }
+                }
+                case HDBMANAGER -> {
+                    switch (c) {
+                        case "1" -> { // Display All Applications Handled By Me
+                            try {
+
+                                var managerApplications = applicationCTRL.getApplicationsHandledByManager();
+                                if (managerApplications == null || managerApplications.isEmpty()) {
+                                    System.out.println("No applications were found under your management.");
+                                } else {
+                                    btoApplicationView.displayAllApplications(managerApplications);
+                                }
+                            } catch (Exception e) {
+                                System.out
+                                        .println("An error occurred while retrieving applications handled by manager: "
+                                                + e.getMessage());
+                            }
+                        }
+                        case "2" -> { // Approval / Rejection for Application
+                            try {
+                                var pendingApps = applicationCTRL.getApplicationsHandledByManager().stream()
+                                        .filter(app -> app.getApplicationType() == ApplicationType.APPLICATION
+                                                && app.getStatus() == ApplicationStatus.PENDING)
+                                        .collect(Collectors.toList());
+
+                                if (pendingApps.isEmpty()) {
+                                    System.out.println("No pending applications available for approval or rejection.");
+                                    break;
+                                }
+
+                                System.out.println("\n=== Pending Applications for Approval/Rejection ===");
+                                for (BTOApplication app : pendingApps) {
+                                    System.out.println("Application ID: " + app.getApplicationId()
+                                            + " | Applicant: " + app.getApplicantNRIC()
+                                            + " | Flat Type Applying for: " + app.getFlatType()
+                                            + " | Status: " + app.getStatus());
+
+                                    BTOProject project = projectCTRL.getProjectById(app.getProjectID());
+                                    if (project != null) {
+                                        System.out.println("   -> Project Details: ID: " + project.getProjectID()
+                                                + ", Manager: " + project.getManager()
+                                                + ", Available 2-Room: " + project.getAvailable2Room()
+                                                + ", Available 3-Room: " + project.getAvailable3Room() + "\n");
+                                    } else {
+                                        System.out.println("   -> Project details not found for Project ID: "
+                                                + app.getProjectID());
+                                    }
+                                }
+
+                                System.out.print("Enter Application ID to process: ");
+                                String input = sc.nextLine().trim();
+                                int appId;
+                                try {
+                                    appId = Integer.parseInt(input);
+                                } catch (NumberFormatException e) {
+                                    System.out.println("Invalid application ID entered. Please enter a valid number.");
+                                    break;
+                                }
+
+                                System.out.print("Approve (A) or Reject (R) the application? ");
+                                String decision = sc.nextLine().trim();
+
+                                // Delegate the decision processing to the controller.
+                                boolean success = applicationCTRL.processApplicationDecision(appId, decision,
+                                        projectCTRL);
+                                if (success) {
+                                    System.out.println("Application decision processed successfully.");
+                                } else {
+                                    System.out.println("Application decision processing failed.");
+                                }
+                            } catch (Exception e) {
+                                System.out.println(
+                                        "An error occurred while processing the application: " + e.getMessage());
+                            }
+                        }
+
+                        case "3" -> { // Approval for Withdrawal of BTO Application (no need for rejection)
+                            try {
+                                var pendingWithdrawals = applicationCTRL.getApplicationsHandledByManager().stream()
+                                        .filter(app -> app.getApplicationType() == ApplicationType.WITHDRAWAL
+                                                && app.getStatus() == ApplicationStatus.PENDING)
+                                        .collect(Collectors.toList());
+                        
+                                if (pendingWithdrawals.isEmpty()) {
+                                    System.out.println("No pending withdrawal applications available for approval.");
+                                    break;
+                                }
+                        
+                                System.out.println("\n=== Pending Withdrawal Applications ===");
+                                for (BTOApplication app : pendingWithdrawals) {
+                                    System.out.println("Application ID: " + app.getApplicationId()
+                                            + " | Applicant: " + app.getApplicantNRIC()
+                                            + " | Flat Type: " + app.getFlatType()
+                                            + " | Status: " + app.getStatus());
+                                    System.out.println("--------------------------------------");
+                                }
+                        
+                                System.out.print("Enter Application ID for withdrawal approve: ");
+                                String input = sc.nextLine().trim();
+                                int appId;
+                                try {
+                                    appId = Integer.parseInt(input);
+                                } catch (NumberFormatException e) {
+                                    System.out.println("Invalid application ID entered. Please enter a valid number.");
+                                    break;
+                                }
+                        
+                                boolean success = applicationCTRL.approveWithdrawalApplication(appId, projectCTRL);
+                                if (!success) {
+                                    System.out.println("Withdrawal approval failed.");
+                                }
+                            } catch (Exception e) {
+                                System.out.println("An error occurred while processing the withdrawal: " + e.getMessage());
+                            }
+                        }
+                        case "4" -> {
+                            return; // back to central menu
                         }
                     }
                 }

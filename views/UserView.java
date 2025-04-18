@@ -14,26 +14,26 @@ public class UserView {
 
         // Uncomment for actual run, for now use this user for testing
         // Change accordingly
-        String nric = "T0114158E";
-        String password = "kaimian";
-        Role role = Role.valueOf("HDBOFFICER");
+        String nric = "T1111111G";
+        String password = "aaa";
+        Role role = Role.valueOf("HDBMANAGER");
 
         // System.out.print("NRIC (uppercase only): ");
         // String nric = sc.nextLine().trim();
 
         // // enforce uppercase
         // if (!nric.equals(nric.toUpperCase())) {
-        //     System.out.println("Error: NRIC must be in uppercase.");
-        //     return false;
+        // System.out.println("Error: NRIC must be in uppercase.");
+        // return false;
         // }
 
         // // validate structure
         // if (!NRIC_PATTERN.matcher(nric).matches()) {
-        //     System.out.println("Invalid NRIC format. It must:");
-        //     System.out.println("- Start with 'S' or 'T'");
-        //     System.out.println("- Followed by exactly 7 digits");
-        //     System.out.println("- End with an uppercase letter");
-        //     return false;
+        // System.out.println("Invalid NRIC format. It must:");
+        // System.out.println("- Start with 'S' or 'T'");
+        // System.out.println("- Followed by exactly 7 digits");
+        // System.out.println("- End with an uppercase letter");
+        // return false;
         // }
 
         // System.out.print("Password: ");
@@ -43,15 +43,14 @@ public class UserView {
         // String roleInput = sc.nextLine().trim().toUpperCase();
         // Role role;
         // try {
-        //     role = Role.valueOf(roleInput);
+        // role = Role.valueOf(roleInput);
         // } catch (IllegalArgumentException e) {
-        //     System.out.println("Invalid role. Returning to main menu.");
-        //     return false;
+        // System.out.println("Invalid role. Returning to main menu.");
+        // return false;
         // }
 
         if (userCTRL.login(nric, password, role)) {
-            System.out.println("Login successful! Welcome, " +
-                               userCTRL.getCurrentUser().getName());
+            System.out.println("Login successful! Welcome, " + userCTRL.getCurrentUser().getName() + " [" + userCTRL.getCurrentUser().getRole()  +"]");
             return true;
         } else {
             System.out.println("Invalid credentials or role. Returning to main menu.");
