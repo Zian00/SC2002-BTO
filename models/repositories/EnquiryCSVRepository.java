@@ -32,23 +32,24 @@ public class EnquiryCSVRepository {
             br.readLine();
             String line;
             while ((line = br.readLine()) != null) {
-                if (line.isBlank()) continue;
-                
+                if (line.isBlank())
+                    continue;
+
                 // Split into 6 parts; empty trailing fields will be preserved.
                 String[] tokens = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
                 if (tokens.length < 6) {
                     System.out.println("Warning: insufficient tokens in line: " + line);
                     continue;
                 }
-                
+
                 try {
                     int id = Integer.parseInt(tokens[0].trim());
-                    String enquiryText = tokens[1].trim();
+                    String enquiryText = unescapeCSV(tokens[1].trim());
                     String submittedByNRIC = tokens[2].trim();
                     int projectId = Integer.parseInt(tokens[3].trim());
-                    String response = tokens[4].trim();
+                    String response = unescapeCSV(tokens[4].trim());
                     String timestamp = tokens[5].trim();
-                    
+
                     Enquiry enquiry = new Enquiry();
                     enquiry.setEnquiryId(id);
                     enquiry.setEnquiryText(enquiryText);
@@ -56,7 +57,7 @@ public class EnquiryCSVRepository {
                     enquiry.setProjectId(projectId);
                     enquiry.setResponse(response);
                     enquiry.setTimestamp(timestamp);
-                    
+
                     enquiries.add(enquiry);
                 } catch (Exception e) {
                     System.out.println("Error parsing line: " + line);
@@ -69,6 +70,18 @@ public class EnquiryCSVRepository {
         return enquiries;
     }
 
+    //helper method for " " bug
+    private String unescapeCSV(String value) {
+        if (value == null || value.isEmpty()) {
+            return "";
+        }
+        // If value is surrounded by quotes, remove them and unescape inner quotes
+        if (value.startsWith("\"") && value.endsWith("\"")) {
+            value = value.substring(1, value.length() - 1);
+            value = value.replace("\"\"", "\"");
+        }
+        return value;
+    }
     /**
      * Writes the list of Enquiry objects to CSV.
      * The CSV is written with the following columns:
