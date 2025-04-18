@@ -75,7 +75,6 @@ public class BTOProjectCTRL {
         existing.setAvailableOfficerSlots(updated.getAvailableOfficerSlots());
         existing.setVisibility(updated.isVisibility());
 
-        
         // manager, pending/approved lists typically left alone
         repo.writeBTOProjectToCSV(projects);
         return true;
@@ -153,28 +152,11 @@ public class BTOProjectCTRL {
                 .collect(Collectors.toList());
     }
 
-    // get eligible projects for officer application
-    public List<BTOProject> getEligibleProjectsForOfficerApplication(String officerNRIC, MaritalState ms, int age) {
-        return projects.stream()
-                .filter(p -> {
-                    var pending = p.getPendingOfficer();
-                    var approved = p.getApprovedOfficer();
-                    boolean notPending = pending == null
-                            || pending.stream().noneMatch(nric -> nric.equalsIgnoreCase(officerNRIC));
-                    boolean notApproved = approved == null
-                            || approved.stream().noneMatch(nric -> nric.equalsIgnoreCase(officerNRIC));
-                    boolean flatEligible = false;
-                    if (ms == MaritalState.SINGLE && age >= 35) {
-                        flatEligible = p.getAvailable2Room() > 0;
-                    } else if (ms == MaritalState.MARRIED && age >= 21) {
-                        flatEligible = p.getAvailable2Room() > 0 || p.getAvailable3Room() > 0;
-                    }
-                    return notPending && notApproved && flatEligible;
-                })
-                .collect(Collectors.toList());
-    }
-    //FILTER SETTINGS
-     /** apply both “visibility + eligibility” _and_ the user’s custom price/room filters */
+    // FILTER SETTINGS
+    /**
+     * apply both “visibility + eligibility” _and_ the user’s custom price/room
+     * filters
+     */
     public List<BTOProject> getFilteredProjectsForUser(User user) {
         // 1) existing filter (visibility, marital/age)
         List<BTOProject> base = getFilteredProjects();
@@ -184,14 +166,15 @@ public class BTOProjectCTRL {
 
         // check marital/age eligibility
         boolean canSee2 = user.getMaritalStatus() == MaritalState.SINGLE
-                        ? user.getAge() >= 35
-                        : user.getAge() >= 21;
+                ? user.getAge() >= 35
+                : user.getAge() >= 21;
         boolean canSee3 = user.getMaritalStatus() == MaritalState.MARRIED
-                        && user.getAge() >= 21;
+                && user.getAge() >= 21;
 
         // if they asked for 3‑Room but can’t see 3‑Room, return empty immediately:
         if ("3-Room".equals(fs.getRoomType()) && !canSee3) {
-            System.out.println("Sorry as you are only able to view 2 rooms, and are asking to see 3 rooms, the view is empty");
+            System.out.println(
+                    "Sorry as you are only able to view 2 rooms, and are asking to see 3 rooms, the view is empty");
             return Collections.emptyList();
         }
         if ("2-Room".equals(fs.getRoomType()) && !canSee2) {
@@ -199,24 +182,28 @@ public class BTOProjectCTRL {
         }
         // 3) apply them
         return base.stream()
-            .filter(p -> {
-                // room‐type filter?
-                if (fs.getRoomType() != null) {
-                    if (fs.getRoomType().equals("2-Room") && p.getAvailable2Room() == 0) return false;
-                    if (fs.getRoomType().equals("3-Room") && p.getAvailable3Room() == 0) return false;
-                }
-                return true;
-            })
-            .filter(p -> {
-                // price filter (choose correct price)
-                int price = fs.getRoomType()!=null && fs.getRoomType().equals("3-Room")
-                                ? p.getThreeRoomPrice()
-                                : p.getTwoRoomPrice();
-                if (fs.getMinPrice() != null && price < fs.getMinPrice()) return false;
-                if (fs.getMaxPrice() != null && price > fs.getMaxPrice()) return false;
-                return true;
-            })
-            .collect(Collectors.toList());
+                .filter(p -> {
+                    // room‐type filter?
+                    if (fs.getRoomType() != null) {
+                        if (fs.getRoomType().equals("2-Room") && p.getAvailable2Room() == 0)
+                            return false;
+                        if (fs.getRoomType().equals("3-Room") && p.getAvailable3Room() == 0)
+                            return false;
+                    }
+                    return true;
+                })
+                .filter(p -> {
+                    // price filter (choose correct price)
+                    int price = fs.getRoomType() != null && fs.getRoomType().equals("3-Room")
+                            ? p.getThreeRoomPrice()
+                            : p.getTwoRoomPrice();
+                    if (fs.getMinPrice() != null && price < fs.getMinPrice())
+                        return false;
+                    if (fs.getMaxPrice() != null && price > fs.getMaxPrice())
+                        return false;
+                    return true;
+                })
+                .collect(Collectors.toList());
     }
 
     /** save new filter settings back to the user record + CSV */
@@ -227,11 +214,11 @@ public class BTOProjectCTRL {
     }
     // stubs for edit/delete…
     // public void editProject() {
-    //     throw new UnsupportedOperationException();
+    // throw new UnsupportedOperationException();
     // }
 
     // public void deleteProject() {
-    //     throw new UnsupportedOperationException();
+    // throw new UnsupportedOperationException();
     // }
 
     public void saveProjects() {
