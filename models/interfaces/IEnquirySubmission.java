@@ -13,13 +13,15 @@ public interface IEnquirySubmission {
 	 * 
 	 * @param enquiry
 	 * @param newText
+	 * @return 
 	 */
-	void editEnquiry(Enquiry enquiry, String newText);
+	boolean editEnquiry(Enquiry enquiry, String newText);
 
 	/**
 	 * 
 	 * @param enquiry
+	 * @return 
 	 */
-	void deleteEnquiry(Enquiry enquiry);
+	boolean deleteEnquiry(Enquiry enquiry);
 
 }

@@ -5,7 +5,6 @@ import controllers.OfficerApplicationCTRL;
 import controllers.UserCTRL;
 import java.util.Scanner;
 import java.util.stream.Collectors;
-
 import models.BTOApplication;
 import models.BTOProject;
 import models.Enquiry;
@@ -14,8 +13,8 @@ import models.enumerations.ApplicationType;
 import models.enumerations.FlatType;
 import models.enumerations.RegistrationStatus;
 import models.enumerations.Role;
-import views.BTOApplicationView;
 import views.ApplicantView;
+import views.BTOApplicationView;
 import views.BTOProjectView;
 import views.EnquiryView;
 import views.ManagerView;
@@ -110,7 +109,6 @@ public class Main {
                         }
                     case HDBOFFICER:
                         switch (opt) {
-
                             case "5" -> { // case "5" Enter Officer Application Menu
                                 runOfficerApplicationMenu(sc, OfficerAppCTRL, officerAppView, projectCTRL);
                             }
@@ -246,7 +244,7 @@ public class Main {
 
                             String enquiryText = enquiryView.promptEnquiryCreation(sc);
                             Enquiry newEnquiry = enquiryCTRL.createEnquiry(projectId, enquiryText);
-                            enquiryView.displayEnquiryCreated(newEnquiry);
+                            enquiryView.displayEnquiry(newEnquiry);
                         }
                         case "4" -> { // back to central menu
                             return;
@@ -408,20 +406,61 @@ public class Main {
             switch (role) {
                 case APPLICANT -> {
                     var userEnquiries = enquiryCTRL.getFilteredEnquiriesByNRIC();
+                    var projectList = projectCTRL.getAllProjects();
                     switch (c) {
                         case "1" -> { // Only display Enquiry by User
-                            var projectList = projectCTRL.getAllProjects();
                             enquiryView.displayFilteredEnquiries(projectList, userEnquiries);
                         }
-                        case "2" -> { // Apply for BTO
-                            // Show enquiries by user
-                            // Select enquiry to edit
-                            // Show edit options
+                        case "2" -> { // Edit Selected Enquiry
+                            // Filter userEnquiries with no response and display
+                            var editableEnquiries = enquiryCTRL.getEditableEnquiriesByNRIC();
+                            if (editableEnquiries.isEmpty()) {
+                                enquiryView.showMessage("No editable enquiries found.");
+                                break;
+                            }
+                            enquiryView.displayFilteredEnquiries(projectList, editableEnquiries);
+                            // Get user selection on which enquiry to edit
+                            int selectedId = enquiryView.promptEnquirySelection(editableEnquiries, sc);
+                            Enquiry selected = enquiryCTRL.findEnquiryById(editableEnquiries, selectedId);
+                            if (selected == null) {
+                                enquiryView.showMessage("Invalid Enquiry ID selected.");
+                                break;
+                            }
+                            // Get new enquiry text to update
+                            String newText = enquiryView.promptNewEnquiryText(selected.getEnquiryText(), sc);
+                            if(newText == null || newText.isEmpty()){
+                                enquiryView.showMessage("Enquiry update cancelled!");
+                            }else{
+                                if (enquiryCTRL.editEnquiry(selected, newText)){
+                                    enquiryView.showMessage("Enquiry updated successfully!");
+                                    enquiryView.displayEnquiry(selected);
+                                }else{
+                                    enquiryView.showMessage("Failed to edit enquiry, please try again.");
+                                }
+                            }
                         }
                         case "3" -> { // Delete Enquiry
-                            // Show enquiries by user
-                            // Select enquiry to delete
+                            // Filter userEnquiries with no response and display
+                            var editableEnquiries = enquiryCTRL.getEditableEnquiriesByNRIC();
+                            if (editableEnquiries.isEmpty()) {
+                                enquiryView.showMessage("No editable enquiries found.");
+                                break;
+                            }
+                            enquiryView.displayFilteredEnquiries(projectList, editableEnquiries);
+                            // Get user selection on which enquiry to edit
+                            int selectedId = enquiryView.promptEnquirySelection(editableEnquiries, sc);
+                            Enquiry selected = enquiryCTRL.findEnquiryById(editableEnquiries, selectedId);
+                            if (selected == null) {
+                                enquiryView.showMessage("Invalid Enquiry ID selected.");
+                                break;
+                            }
                             // Confirm deletion
+                            if(enquiryView.promptDeletionConfirmation(sc)){
+                                enquiryCTRL.deleteEnquiry(selected);
+                                enquiryView.showMessage("Enquiry deleted successfully!");
+                            }else{
+                                enquiryView.showMessage("Deletion cancelled.");
+                            }
                         }
                         case "4" -> {
                             return; // back to central menu
