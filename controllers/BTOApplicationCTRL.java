@@ -59,7 +59,7 @@ public class BTOApplicationCTRL {
                 .findFirst()
                 .orElse(null);
         if (proj == null) {
-            System.out.println("Project not found or not visible.");
+            System.out.println("Project not found or not avaialable.");
             return false;
         }
 

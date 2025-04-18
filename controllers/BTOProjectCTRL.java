@@ -36,7 +36,6 @@ public class BTOProjectCTRL {
                 .orElse(null);
     }
 
-
     /** Returns max existing ID + 1 (dont need to manually key in) */
     public int getNextProjectID() {
         return projects.stream()
@@ -54,7 +53,7 @@ public class BTOProjectCTRL {
     /** Edit an existing project: replace fields on the found object */
     public boolean editProject(int projectId, BTOProject updated) {
         BTOProject existing = null;
-        // only manager can edit project          
+        // only manager can edit project
         if (currentUser instanceof HDBManager manager) {
             existing = manager.getProjectById(projects, projectId);
         }
@@ -71,7 +70,7 @@ public class BTOProjectCTRL {
         existing.setApplicationClosingDate(updated.getApplicationClosingDate());
         existing.setAvailableOfficerSlots(updated.getAvailableOfficerSlots());
         existing.setVisibility(updated.isVisibility());
-        
+
         // manager, pending/approved lists typically left alone
         repo.writeBTOProjectToCSV(projects);
         return true;
@@ -149,14 +148,26 @@ public class BTOProjectCTRL {
                 .collect(Collectors.toList());
     }
 
-    // stubs for edit/delete…
-    // public void editProject() {
-    //     throw new UnsupportedOperationException();
-    // }
-
-    // public void deleteProject() {
-    //     throw new UnsupportedOperationException();
-    // }
+    // get eligible projects for officer application
+    public List<BTOProject> getEligibleProjectsForOfficerApplication(String officerNRIC, MaritalState ms, int age) {
+        return projects.stream()
+                .filter(p -> {
+                    var pending = p.getPendingOfficer();
+                    var approved = p.getApprovedOfficer();
+                    boolean notPending = pending == null
+                            || pending.stream().noneMatch(nric -> nric.equalsIgnoreCase(officerNRIC));
+                    boolean notApproved = approved == null
+                            || approved.stream().noneMatch(nric -> nric.equalsIgnoreCase(officerNRIC));
+                    boolean flatEligible = false;
+                    if (ms == MaritalState.SINGLE && age >= 35) {
+                        flatEligible = p.getAvailable2Room() > 0;
+                    } else if (ms == MaritalState.MARRIED && age >= 21) {
+                        flatEligible = p.getAvailable2Room() > 0 || p.getAvailable3Room() > 0;
+                    }
+                    return notPending && notApproved && flatEligible;
+                })
+                .collect(Collectors.toList());
+    }
 
     public void saveProjects() {
         repo.writeBTOProjectToCSV(projects);
