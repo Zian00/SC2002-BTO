@@ -22,7 +22,6 @@ import entity.enumerations.FlatType;
 import entity.enumerations.MaritalState;
 import entity.enumerations.RegistrationStatus;
 import entity.enumerations.Role;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
@@ -1152,138 +1151,23 @@ public class Main {
                             }
                         }
                         case "4" -> { // Generate / Filter report of all APPLICANTS under projects handled by you
-                            
                             try {
-                                // 1. Get all applications under manager's projects
                                 var allManagerApps = applicationCTRL.getApplicationsHandledByManager();
                                 if (allManagerApps == null || allManagerApps.isEmpty()) {
                                     System.out.println("No applications found under your management.");
                                     break;
                                 }
                                 var allProjects = applicationCTRL.getProjects();
-
-                                // 2. Prompt for filter criteria
-                                System.out.println("\n=== Applicant Report Filter ===");
-
-                                // Marital Status filter
-                                MaritalState maritalFilter = null;
-                                while (true) { 
-                                    System.out.print("Filter by Marital Status (MARRIED or SINGLE) or press Enter for all: ");
-                                    String maritalInput = sc.nextLine().trim().toUpperCase();
-                                    if (maritalInput.isEmpty() || maritalInput.equals("ALL")) {
-                                        break;
-                                    }
-                                    try {
-                                        maritalFilter = MaritalState.valueOf(maritalInput);
-                                        break;
-                                    } catch (IllegalArgumentException e) {
-                                        System.out.println("Invalid marital status. Please enter SINGLE, MARRIED, or ALL.");
-                                    }
-                                }
-
-                                // Flat Type filter
-                                String flatTypeFilter = null;
-                                while (true) {
-                                    System.out.print("Filter by Flat Type (TWOROOM/THREEROOM) or press Enter for all: ");
-                                    String flatTypeInput = sc.nextLine().trim().toUpperCase();
-                                    if (flatTypeInput.isEmpty() || flatTypeInput.equals("ALL")) {
-                                        break;
-                                    }
-                                    if (flatTypeInput.equals("TWOROOM") || flatTypeInput.equals("THREEROOM")) {
-                                        flatTypeFilter = flatTypeInput;
-                                        break;
-                                    } else {
-                                        System.out.println("Invalid flat type. Please enter TWOROOM, THREEROOM, or ALL.");
-                                    }
-                                }
-
-                                // Minimum Age filter
-                                Integer minAge = null;
-                                while (true) {
-                                    System.out.print("Filter by Minimum Age or press Enter for all: ");
-                                    String minAgeInput = sc.nextLine().trim();
-                                    if (minAgeInput.isEmpty()) {
-                                        break;
-                                    }
-                                    try {
-                                        minAge = Integer.parseInt(minAgeInput);
-                                        if (minAge < 0) {
-                                            System.out.println("Minimum age cannot be negative.");
-                                        } else {
-                                            break;
-                                        }
-                                    } catch (NumberFormatException e) {
-                                        System.out.println("Invalid minimum age. Please enter a valid number or leave blank.");
-                                    }
-                                }
-
-                                // Max Age filter
-                                Integer maxAge = null;
-                                while (true) {
-                                    System.out.print("Filter by Maximum Age or press Enter for all: ");
-                                    String maxAgeInput = sc.nextLine().trim();
-                                    if (maxAgeInput.isEmpty()) {
-                                        break;
-                                    }
-                                    try {
-                                        maxAge = Integer.parseInt(maxAgeInput);
-                                        if (maxAge < 0) {
-                                            System.out.println("Maximum age cannot be negative.");
-                                        } else if (minAge != null && maxAge < minAge) {
-                                            System.out.println("Maximum age cannot be less than minimum age.");
-                                        } else {
-                                            break;
-                                        }
-                                    } catch (NumberFormatException e) {
-                                        System.out.println("Invalid maximum age. Please enter a valid number or leave blank.");
-                                    }
-                                }
-
-                                // Neighbourhood filter
-                                String neighbourhoodFilter = null;
-                                System.out.print("Filter by Neighbourhood or press Enter for all: ");
-                                String neighbourhoodInput = sc.nextLine().trim().toLowerCase();
-                                if (!neighbourhoodInput.isEmpty()) {
-                                    neighbourhoodFilter = neighbourhoodInput;
-                                }
-
-                                // 3. Filter applications
-                                List<BTOApplication> filteredApps = new ArrayList<>();
-                                for (BTOApplication app : allManagerApps) {
-                                    // Only consider main applications (not withdrawals)
-                                    if (app.getApplicationType() != ApplicationType.APPLICATION)
-                                        continue;
-
-                                    // Get applicant user
-                                    User applicant = userCTRL.getUserByNRIC(app.getApplicantNRIC());
-                                    if (applicant == null)
-                                        continue;
-
-                                    // Get project
-                                    Optional<BTOProject> projectOpt = allProjects.stream()
-                                            .filter(p -> p.getProjectID() == app.getProjectID())
-                                            .findFirst();
-                                    if (projectOpt.isEmpty())
-                                        continue;
-                                    BTOProject project = projectOpt.get();
-
-                                    // Apply filters
-                                    if (maritalFilter != null && applicant.getMaritalStatus() != maritalFilter)
-                                        continue;
-                                    if (flatTypeFilter != null && !app.getFlatType().equalsIgnoreCase(flatTypeFilter))
-                                        continue;
-                                    if (minAge != null && applicant.getAge() < minAge)
-                                        continue;
-                                    if (maxAge != null && applicant.getAge() > maxAge)
-                                        continue;
-                                    if (neighbourhoodFilter != null
-                                            && !project.getNeighborhood().toLowerCase().contains(neighbourhoodFilter))
-                                        continue;
-
-                                    filteredApps.add(app);
-                                }
-
-                                // 4. Display report
+                        
+                                MaritalState maritalFilter = btoApplicationView.promptMaritalStatusFilter(sc);
+                                String flatTypeFilter = btoApplicationView.promptFlatTypeFilter(sc);
+                                Integer minAge = btoApplicationView.promptMinAge(sc);
+                                Integer maxAge = btoApplicationView.promptMaxAge(sc);
+                                String neighbourhoodFilter = btoApplicationView.promptNeighbourhoodFilter(sc);
+                        
+                                List<BTOApplication> filteredApps = applicationCTRL.generateReport(
+                                        maritalFilter, flatTypeFilter, minAge, maxAge, neighbourhoodFilter, allProjects, userCTRL);
+                        
                                 if (filteredApps.isEmpty()) {
                                     System.out.println("No applicants found matching the selected filters.");
                                 } else {
@@ -1312,9 +1196,6 @@ public class Main {
                             } catch (Exception e) {
                                 System.out.println("An error occurred while generating the report: " + e.getMessage());
                             }
-                        }
-                        case "5" -> {
-                            return; // back to central menu
                         }
                     }
                 }

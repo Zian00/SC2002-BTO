@@ -1,13 +1,14 @@
 package boundaries;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import entity.BTOApplication;
 import entity.BTOProject;
 import entity.User;
 import entity.enumerations.ApplicationStatus;
 import entity.enumerations.ApplicationType;
+import entity.enumerations.MaritalState;
+import java.util.List;
+import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class BTOApplicationView {
 
@@ -165,10 +166,102 @@ public class BTOApplicationView {
 		return true;
 	}
 
-	public void generateReport() {
-		// TODO - implement BTOApplicationView.generateReport
-		// print 
+	/**
+     * Prompts the user to filter by marital status.
+     * The user may enter "MARRIED" or "SINGLE" (case insensitive) or press Enter for no filter.
+     *
+     * @param sc the Scanner used for reading user input.
+     * @return the MaritalState if valid input is provided; otherwise, null.
+     */
+	public MaritalState promptMaritalStatusFilter(Scanner sc) {
+        System.out.print("Filter by Marital Status (MARRIED or SINGLE) or press Enter for all: ");
+        String input = sc.nextLine().trim().toUpperCase();
+        if (input.isEmpty() || input.equals("ALL")) {
+            return null;
+        }
+        try {
+            return MaritalState.valueOf(input);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid marital status. No filter applied.");
+            return null;
+        }
+    }
 
-	}
+	/**
+     * Prompts the user to filter by flat type.
+     * The user may enter "TWOROOM" or "THREEROOM" (case insensitive) or press Enter for no filter.
+     *
+     * @param sc the Scanner used for reading user input.
+     * @return the flat type as a String if valid input is provided; otherwise, null.
+     */
+    public String promptFlatTypeFilter(Scanner sc) {
+        System.out.print("Filter by Flat Type (TWOROOM or THREEROOM) or press Enter for all: ");
+        String input = sc.nextLine().trim().toUpperCase();
+        if (input.isEmpty() || input.equals("ALL")) {
+            return null;
+        }
+        if (input.equals("TWOROOM") || input.equals("THREEROOM")) {
+            return input;
+        }
+        System.out.println("Invalid flat type. No filter applied.");
+        return null;
+    }
 
+    /**
+     * Prompts the user to enter a minimum age to filter applications.
+     * The user should provide an integer value, or press Enter for no filter.
+     *
+     * @param sc the Scanner used for reading user input.
+     * @return the minimum age as an Integer if valid input is provided; otherwise, null.
+     */
+    public Integer promptMinAge(Scanner sc) {
+        System.out.print("Filter by Minimum Age or press Enter for all: ");
+        String input = sc.nextLine().trim();
+        if (input.isEmpty()){
+            return null;
+        }
+        try {
+            return Integer.valueOf(input);
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid minimum age. No filter applied.");
+            return null;
+        }
+    }
+
+    /**
+     * Prompts the user to enter a maximum age to filter applications.
+     * The user should provide an integer value, or press Enter for no filter.
+     *
+     * @param sc the Scanner used for reading user input.
+     * @return the maximum age as an Integer if valid input is provided; otherwise, null.
+     */
+    public Integer promptMaxAge(Scanner sc) {
+        System.out.print("Filter by Maximum Age or press Enter for all: ");
+        String input = sc.nextLine().trim();
+        if (input.isEmpty()){
+            return null;
+        }
+        try {
+            return Integer.valueOf(input);
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid maximum age. No filter applied.");
+            return null;
+        }
+    }
+
+    /**
+     * Prompts the user to filter by neighbourhood.
+     * The user may enter a neighbourhood name or press Enter for no filter.
+     *
+     * @param sc the Scanner used for reading user input.
+     * @return the neighbourhood filter as a String if provided; otherwise, null.
+     */
+    public String promptNeighbourhoodFilter(Scanner sc) {
+        System.out.print("Filter by Neighbourhood or press Enter for all: ");
+        String input = sc.nextLine().trim();
+        if (input.isEmpty()){
+            return null;
+        }
+        return input;
+    }
 }

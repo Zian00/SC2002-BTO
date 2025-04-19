@@ -1,9 +1,5 @@
 package controllers;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import entity.BTOApplication;
 import entity.BTOProject;
 import entity.Receipt;
@@ -11,9 +7,14 @@ import entity.User;
 import entity.enumerations.ApplicationStatus;
 import entity.enumerations.ApplicationType;
 import entity.enumerations.FlatType;
+import entity.enumerations.MaritalState;
 import entity.repositories.ApplicationCSVRepository;
 import entity.repositories.BTOProjectCSVRepository;
 import entity.repositories.ReceiptCSVRepository;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class BTOApplicationCTRL {
 
@@ -469,4 +470,59 @@ public class BTOApplicationCTRL {
         return true;
     }
 
+    // Takes in filter parameters and returns the filtered list
+    public List<BTOApplication> generateReport(
+            MaritalState maritalFilter,
+            String flatTypeFilter,
+            Integer minAge,
+            Integer maxAge,
+            String neighbourhoodFilter,
+            List<BTOProject> allProjects,
+            UserCTRL userCTRL) {
+    
+        List<BTOApplication> managerApps = getApplicationsHandledByManager(); // existing method
+        if (managerApps == null || managerApps.isEmpty()) {
+            return new ArrayList<>();
+        }
+        
+        List<BTOApplication> filteredApps = new ArrayList<>();
+        for (BTOApplication app : managerApps) {
+            // Only consider main applications (skip withdrawals)
+            if (app.getApplicationType() != ApplicationType.APPLICATION) {
+                continue;
+            }
+            
+            // Get applicant details
+            User applicant = userCTRL.getUserByNRIC(app.getApplicantNRIC());
+            if (applicant == null) {
+                continue;
+            }
+            
+            // Get project details
+            Optional<BTOProject> projectOpt = allProjects.stream()
+                    .filter(p -> p.getProjectID() == app.getProjectID())
+                    .findFirst();
+            if (projectOpt.isEmpty()) {
+                continue;
+            }
+            BTOProject project = projectOpt.get();
+            
+            // Apply filters:
+            if (maritalFilter != null && applicant.getMaritalStatus() != maritalFilter)
+                continue;
+            if (flatTypeFilter != null && !app.getFlatType().equalsIgnoreCase(flatTypeFilter))
+                continue;
+            if (minAge != null && applicant.getAge() < minAge)
+                continue;
+            if (maxAge != null && applicant.getAge() > maxAge)
+                continue;
+            if (neighbourhoodFilter != null &&
+                    !project.getNeighborhood().toLowerCase().contains(neighbourhoodFilter.toLowerCase()))
+                continue;
+                
+            filteredApps.add(app);
+        }
+        
+        return filteredApps;
+    }
 }
