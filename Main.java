@@ -3,7 +3,6 @@ import controllers.BTOProjectCTRL;
 import controllers.EnquiryCTRL;
 import controllers.OfficerApplicationCTRL;
 import controllers.UserCTRL;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -262,8 +261,8 @@ public class Main {
             }
             default -> {
                 System.out.println("You don't have permission to access this menu.");
-                return;
             }
+
         }
     }
 
@@ -367,142 +366,64 @@ public class Main {
                 }
                 case HDBOFFICER -> {
                     var availableProjects = projectCTRL.getFilteredProjects();
-                    switch (c) {
-
-                        case "1" -> { // Display All BTO Projects (ignore officer assignment and visibility)
-                            var allProjects = projectCTRL.getAllProjects();
-                            projectView.displayAllProject(allProjects);
-                        }
-                        case "2" -> {
-                            // exactly the same view as applicant
-                            // 1) prompt & save
-                            FilterSettings fs = projectView.promptFilterSettings(userCTRL.getCurrentUser(), sc);
-                            projectCTRL.updateUserFilterSettings(userCTRL.getCurrentUser(), fs);
-                            userCTRL.saveUserData();
-                            // convert to the single CSV string
-                            String filterCsv = fs.toCsv();
-
-                            // store it on the user
-                            userCTRL.updateFilterSettings(userCTRL.getCurrentUser(), filterCsv);
-
-                            // feedback
-                            System.out.println("Your filters have been saved: " + filterCsv);
-
-                            // 2) re‑fetch & display
-
-                            var filtered = projectCTRL.getFilteredProjectsForUser(userCTRL.getCurrentUser());
-                            projectView.displayAvailableForApplicant(userCTRL.getCurrentUser(), filtered);
-                        }
-                        case "3" -> { // Apply for a BTO Project
-                            try {
-                                String officerNRIC = userCTRL.getCurrentUser().getNRIC();
-                                var ms = userCTRL.getCurrentUser().getMaritalStatus();
-                                int age = userCTRL.getCurrentUser().getAge();
-
-                                // Only show visible projects, eligible by age/marital status, and not handled
-                                // by this officer
-                                var eligibleProjects = projectCTRL.getAllProjects().stream()
-                                        .filter(BTOProject::isVisibility)
-                                        .filter(p -> {
-                                            var pending = p.getPendingOfficer();
-                                            var approved = p.getApprovedOfficer();
-                                            boolean notPending = pending == null || pending.stream()
-                                                    .noneMatch(nric -> nric.equalsIgnoreCase(officerNRIC));
-                                            boolean notApproved = approved == null || approved.stream()
-                                                    .noneMatch(nric -> nric.equalsIgnoreCase(officerNRIC));
-                                            boolean flatEligible = false;
-                                            if (ms == MaritalState.SINGLE && age >= 35) {
-                                                flatEligible = p.getAvailable2Room() > 0;
-                                            } else if (ms == MaritalState.MARRIED && age >= 21) {
-                                                flatEligible = p.getAvailable2Room() > 0 || p.getAvailable3Room() > 0;
-                                            }
-                                            return notPending && notApproved && flatEligible;
-                                        })
-                                        .collect(Collectors.toList());
-
-                                if (eligibleProjects.isEmpty()) {
-                                    projectView.showMessage("No eligible BTO projects available for application.");
-                                    break;
-                                }
-
-                                projectView.displayEligibleProjectsForOfficer(eligibleProjects, ms, age);
-
-                                System.out.print("Enter project ID to apply: ");
-                                int projectId;
-                                try {
-                                    projectId = Integer.parseInt(sc.nextLine().trim());
-                                } catch (NumberFormatException e) {
-                                    projectView.showMessage("Invalid project ID.");
-                                    break;
-                                }
-
-                                var selected = eligibleProjects.stream()
-                                        .filter(p -> p.getProjectID() == projectId)
-                                        .findFirst();
-                                if (selected.isEmpty()) {
-                                    projectView.showMessage("Selected project is not eligible for application.");
-                                    break;
-                                }
-
-                                FlatType flatType = null;
-                                if (ms == MaritalState.SINGLE && age >= 35) {
-                                    System.out.println("Select flat type:");
-                                    System.out.println("1. 2-Room");
-                                    System.out.print("I want: ");
-                                    int flatChoice;
-                                    try {
-                                        flatChoice = Integer.parseInt(sc.nextLine().trim());
-                                    } catch (NumberFormatException e) {
-                                        projectView.showMessage("Invalid flat type choice.");
-                                        break;
-                                    }
-                                    if (flatChoice == 1) {
-                                        flatType = FlatType.TWOROOM;
-                                    } else {
-                                        projectView.showMessage("Invalid flat type choice for your marital status.");
-                                        break;
-                                    }
-                                } else if (ms == MaritalState.MARRIED && age >= 21) {
-                                    System.out.println("Select flat type:");
-                                    System.out.println("1. 2-Room");
-                                    System.out.println("2. 3-Room");
-                                    System.out.print("I want: ");
-                                    int flatChoice;
-                                    try {
-                                        flatChoice = Integer.parseInt(sc.nextLine().trim());
-                                    } catch (NumberFormatException e) {
-                                        projectView.showMessage("Invalid flat type choice.");
-                                        break;
-                                    }
-                                    if (flatChoice == 1) {
-                                        flatType = FlatType.TWOROOM;
-                                    } else if (flatChoice == 2) {
-                                        flatType = FlatType.THREEROOM;
-                                    } else {
-                                        projectView.showMessage("Invalid flat type choice.");
-                                        break;
-                                    }
-                                } else {
-                                    projectView.showMessage("You are not eligible to apply for any flat type.");
-                                    break;
-                                }
-
-                                boolean ok = applicationCTRL.apply(projectId, flatType);
-                                if (ok) {
-                                    projectView.showMessage("Application submitted! Status: PENDING.");
-                                }
-                            } catch (Exception e) {
-                                projectView.showMessage(
-                                        "An error occurred while applying for a BTO project: " + e.getMessage());
+                OUTER:
+                switch (c) {
+                    case "1" -> { // Display All BTO Projects (ignore officer assignment and visibility)
+                        var allProjects = projectCTRL.getAllProjects();
+                        projectView.displayAllProject(allProjects);
+                    }
+                    case "2" -> {
+                        // exactly the same view as applicant
+                        // 1) prompt & save
+                        FilterSettings fs = projectView.promptFilterSettings(userCTRL.getCurrentUser(), sc);
+                        projectCTRL.updateUserFilterSettings(userCTRL.getCurrentUser(), fs);
+                        userCTRL.saveUserData();
+                        // convert to the single CSV string
+                        String filterCsv = fs.toCsv();
+                        
+                        // store it on the user
+                        userCTRL.updateFilterSettings(userCTRL.getCurrentUser(), filterCsv);
+                        
+                        // feedback
+                        System.out.println("Your filters have been saved: " + filterCsv);
+                        
+                        // 2) re‑fetch & display
+                        
+                        var filtered = projectCTRL.getFilteredProjectsForUser(userCTRL.getCurrentUser());
+                        projectView.displayAvailableForApplicant(userCTRL.getCurrentUser(), filtered);
+                    }
+                    case "3" -> {
+                        // Apply for a BTO Project
+                        try {
+                            String officerNRIC = userCTRL.getCurrentUser().getNRIC();
+                            var ms = userCTRL.getCurrentUser().getMaritalStatus();
+                            int age = userCTRL.getCurrentUser().getAge();
+                            // Only show visible projects, eligible by age/marital status, and not handled
+                            // by this officer
+                            var eligibleProjects = projectCTRL.getAllProjects().stream()
+                                    .filter(BTOProject::isVisibility)
+                                    .filter(p -> {
+                                        var pending = p.getPendingOfficer();
+                                        var approved = p.getApprovedOfficer();
+                                        boolean notPending = pending == null || pending.stream()
+                                                .noneMatch(nric -> nric.equalsIgnoreCase(officerNRIC));
+                                        boolean notApproved = approved == null || approved.stream()
+                                                .noneMatch(nric -> nric.equalsIgnoreCase(officerNRIC));
+                                        boolean flatEligible = false;
+                                        if (ms == MaritalState.SINGLE && age >= 35) {
+                                            flatEligible = p.getAvailable2Room() > 0;
+                                        } else if (ms == MaritalState.MARRIED && age >= 21) {
+                                            flatEligible = p.getAvailable2Room() > 0 || p.getAvailable3Room() > 0;
+                                        }
+                                        return notPending && notApproved && flatEligible;
+                                    })
+                                    .collect(Collectors.toList());
+                            if (eligibleProjects.isEmpty()) {
+                                projectView.showMessage("No eligible BTO projects available for application.");
+                                break;
                             }
-                        }
-                        case "4" -> { // Submit Enquiry for a BTO project (officer acts as applicant)
-                            // Show available projects (use officer's filtered projects)
-                            projectView.displayAvailableForApplicant(
-                                    userCTRL.getCurrentUser(), availableProjects);
-
-                            // Get project selection
-                            System.out.print("Enter project ID to submit Enquiry: ");
+                            projectView.displayEligibleProjectsForOfficer(eligibleProjects, ms, age);
+                            System.out.print("Enter project ID to apply: ");
                             int projectId;
                             try {
                                 projectId = Integer.parseInt(sc.nextLine().trim());
@@ -510,41 +431,113 @@ public class Main {
                                 projectView.showMessage("Invalid project ID.");
                                 break;
                             }
-
-                            // Ensure projectId is in availableProjects
-                            boolean valid = availableProjects.stream()
-                                    .anyMatch(p -> p.getProjectID() == projectId);
-                            if (!valid) {
-                                projectView.showMessage("You can only submit enquiries for projects shown to you.");
+                            var selected = eligibleProjects.stream()
+                                    .filter(p -> p.getProjectID() == projectId)
+                                    .findFirst();
+                            if (selected.isEmpty()) {
+                                projectView.showMessage("Selected project is not eligible for application.");
                                 break;
                             }
-
-                            String enquiryText = enquiryView.promptEnquiryCreation(sc);
-                            Enquiry newEnquiry = enquiryCTRL.createEnquiry(projectId, enquiryText);
-                            enquiryView.displayEnquiry(newEnquiry);
-                        }
-                        case "5" -> { // Register as HDB Officer of a BTO Projects
-                            runOfficerApplicationMenu(sc, new OfficerApplicationCTRL(userCTRL.getCurrentUser()),
-                                    new OfficerApplicationView(), projectCTRL);
-                        }
-                        case "6" -> { // Display BTO Projects I'm handling
-                            try {
-                                var handledProjects = projectCTRL.getHandledProjects();
-                                if (handledProjects.isEmpty()) {
-                                    System.out.println("You are not handling any BTO projects.");
-                                } else {
-                                    projectView.displayAllProject(handledProjects);
+                            FlatType flatType = null;
+                            if (ms == MaritalState.SINGLE && age >= 35) {
+                                System.out.println("Select flat type:");
+                                System.out.println("1. 2-Room");
+                                System.out.print("I want: ");
+                                int flatChoice;
+                                try {
+                                    flatChoice = Integer.parseInt(sc.nextLine().trim());
+                                } catch (NumberFormatException e) {
+                                    projectView.showMessage("Invalid flat type choice.");
+                                    break;
                                 }
-                            } catch (Exception e) {
-                                System.out.println(
-                                        "An error occurred while displaying handled projects: " + e.getMessage());
+                                if (flatChoice == 1) {
+                                    flatType = FlatType.TWOROOM;
+                                } else {
+                                    projectView.showMessage("Invalid flat type choice for your marital status.");
+                                    break;
+                                }
+                            } else if (ms == MaritalState.MARRIED && age >= 21) {
+                                System.out.println("Select flat type:");
+                                System.out.println("1. 2-Room");
+                                System.out.println("2. 3-Room");
+                                System.out.print("I want: ");
+                                int flatChoice;
+                                try {
+                                    flatChoice = Integer.parseInt(sc.nextLine().trim());
+                                } catch (NumberFormatException e) {
+                                    projectView.showMessage("Invalid flat type choice.");
+                                    break;
+                                }
+                                switch (flatChoice) {
+                                    case 1 -> flatType = FlatType.TWOROOM;
+                                    case 2 -> flatType = FlatType.THREEROOM;
+                                    default -> {
+                                        projectView.showMessage("Invalid flat type choice.");
+                                        break OUTER;
+                                    }
+                                }
+                            } else {
+                                projectView.showMessage("You are not eligible to apply for any flat type.");
+                                break;
                             }
+                            boolean ok = applicationCTRL.apply(projectId, flatType);
+                            if (ok) {
+                                projectView.showMessage("Application submitted! Status: PENDING.");
+                            }
+                        }catch (Exception e) {
+                            projectView.showMessage(
+                                    "An error occurred while applying for a BTO project: " + e.getMessage());
                         }
-                        case "7" -> {
-                            return; // back to central menu
-                        }
-                        default -> System.out.println("Invalid choice, try again.");
                     }
+                    case "4" -> { // Submit Enquiry for a BTO project (officer acts as applicant)
+                        // Show available projects (use officer's filtered projects)
+                        projectView.displayAvailableForApplicant(
+                                userCTRL.getCurrentUser(), availableProjects);
+                        
+                        // Get project selection
+                        System.out.print("Enter project ID to submit Enquiry: ");
+                        int projectId;
+                        try {
+                            projectId = Integer.parseInt(sc.nextLine().trim());
+                        } catch (NumberFormatException e) {
+                            projectView.showMessage("Invalid project ID.");
+                            break;
+                        }
+                        
+                        // Ensure projectId is in availableProjects
+                        boolean valid = availableProjects.stream()
+                                .anyMatch(p -> p.getProjectID() == projectId);
+                        if (!valid) {
+                            projectView.showMessage("You can only submit enquiries for projects shown to you.");
+                            break;
+                        }
+                        
+                        String enquiryText = enquiryView.promptEnquiryCreation(sc);
+                        Enquiry newEnquiry = enquiryCTRL.createEnquiry(projectId, enquiryText);
+                        enquiryView.displayEnquiry(newEnquiry);
+                    }
+                    case "5" -> { // Register as HDB Officer of a BTO Projects
+                        runOfficerApplicationMenu(sc, new OfficerApplicationCTRL(userCTRL.getCurrentUser()),
+                                new OfficerApplicationView(), projectCTRL);
+                    }
+                    case "6" -> { // Display BTO Projects I'm handling
+                        try {
+                            var handledProjects = projectCTRL.getHandledProjects();
+                            if (handledProjects.isEmpty()) {
+                                System.out.println("You are not handling any BTO projects.");
+                            } else {
+                                projectView.displayAllProject(handledProjects);
+                            }
+                        } catch (Exception e) {
+                            System.out.println(
+                                    "An error occurred while displaying handled projects: " + e.getMessage());
+                        }
+                    }
+                    case "7" -> {
+                        return; // back to central menu
+                    }
+                    default -> System.out.println("Invalid choice, try again.");
+                }
                 }
                 case HDBMANAGER -> {
                     switch (c) {
