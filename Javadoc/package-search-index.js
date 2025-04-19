@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"boundaries"},{"l":"controllers"},{"l":"entity"},{"l":"entity.enumerations"},{"l":"entity.interfaces"},{"l":"entity.repositories"}];updateSearchResults();

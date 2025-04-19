@@ -160,7 +160,7 @@ public class BTOProjectView {
 	 * they’re eligible to view:
 	 * - Singles ≥35 see only 2‑Room
 	 * - Married ≥21 see both 2‑Room & 3‑Room
-	 * - Everyone else sees a “not eligible” message
+	 * - Everyone else sees a not eligible message
 	 */
 	public void displayAvailableForApplicant(User user, List<BTOProject> projects) {
 		// Determine eligibility
