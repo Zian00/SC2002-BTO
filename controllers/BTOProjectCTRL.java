@@ -173,7 +173,7 @@ public class BTOProjectCTRL {
 
     // FILTER SETTINGS
     /**
-     * apply both “visibility + eligibility” _and_ the user’s custom price/room
+     * apply both visibility + eligibility and the user’s custom price/room
      * filters
      */
     public List<BTOProject> getFilteredProjectsForUser(User user) {
@@ -202,7 +202,7 @@ public class BTOProjectCTRL {
         // 3) apply them
         return base.stream()
                 .filter(p -> {
-                    // room‐type filter?
+                    // room type filter
                     if (fs.getRoomType() != null) {
                         if (fs.getRoomType().equals("2-Room") && p.getAvailable2Room() == 0)
                             return false;
