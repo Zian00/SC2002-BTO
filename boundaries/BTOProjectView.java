@@ -1,5 +1,9 @@
 package boundaries;
 
+import entity.BTOProject;
+import entity.FilterSettings;
+import entity.User;
+import entity.enumerations.MaritalState;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -7,13 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import entity.BTOProject;
-import entity.FilterSettings;
-import entity.User;
-import entity.enumerations.MaritalState;
-
 public class BTOProjectView {
-	private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+	private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
 	public void displayApplicantMenu() {
 		System.out.println("\n=== BTO Project Menu ===");
@@ -278,7 +277,7 @@ public class BTOProjectView {
 	}
 
 	/**
-	 * Prompt for a date in dd/MM/yyyy. If defaultVal!=null and blank, returns
+	 * Prompt for a date in yyyy-MM-dd. If defaultVal!=null and blank, returns
 	 * defaultVal.
 	 */
 	private LocalDate promptDate(Scanner sc, String prompt, LocalDate defaultVal) {
@@ -290,7 +289,7 @@ public class BTOProjectView {
 			try {
 				return LocalDate.parse(in, DATE_FMT);
 			} catch (DateTimeParseException e) {
-				System.out.println("Invalid date. Use dd/MM/yyyy.");
+				System.out.println("Invalid date. Use yyyy-MM-dd.");
 			}
 		}
 	}
@@ -308,7 +307,7 @@ public class BTOProjectView {
 					return d;
 				}
 			} catch (DateTimeParseException e) {
-				System.out.println("Invalid date. Use dd/MM/yyyy.");
+				System.out.println("Invalid date. Use yyyy-MM-dd.");
 			}
 		}
 	}
@@ -345,14 +344,14 @@ public class BTOProjectView {
 		p.setThreeRoomPrice(
 				promptIntInRange(sc, "3-Room price: ", 0, Integer.MAX_VALUE, null));
 		// Ask for the opening date (must not be blank)
-		LocalDate open = promptDate(sc, "Application opening date (dd/MM/yyyy): ", null);
+		LocalDate open = promptDate(sc, "Application opening date (yyyy-MM-dd): ", null);
 		p.setApplicationOpeningDate(open.format(DATE_FMT));
 
 		// Use promptDateNotBefore to enforce:
 		// 1. Input is not blank
 		// 2. The date is on or after the opening date
 		LocalDate close = promptDateNotBefore(sc,
-				String.format("Application closing date (dd/MM/yyyy) [>= %s]: ", open.format(DATE_FMT)),
+				String.format("Application closing date (yyyy-MM-dd) [>= %s]: ", open.format(DATE_FMT)),
 				open);
 		p.setApplicationClosingDate(close.format(DATE_FMT));
 

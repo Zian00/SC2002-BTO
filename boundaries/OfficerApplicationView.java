@@ -1,9 +1,8 @@
 package boundaries;
 
-import java.util.List;
-
 import entity.BTOProject;
 import entity.OfficerApplication;
+import java.util.List;
 
 
 public class OfficerApplicationView {
@@ -12,8 +11,7 @@ public class OfficerApplicationView {
         System.out.println("\n=== Officer Application Menu ===");
         System.out.println("1. View All Officer Applications");
         System.out.println("2. Check Registration Status");
-        System.out.println("3. Register for a Project");
-        System.out.println("4. Back");
+        System.out.println("3. Back");
         System.out.print("Select an option: ");
     }
 

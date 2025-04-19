@@ -1,12 +1,6 @@
 package controllers;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
+import boundaries.OfficerApplicationView;
 import entity.BTOApplication;
 import entity.BTOProject;
 import entity.OfficerApplication;
@@ -15,6 +9,13 @@ import entity.enumerations.*;
 import entity.repositories.ApplicationCSVRepository;
 import entity.repositories.BTOProjectCSVRepository;
 import entity.repositories.OfficerApplicationCSVRepository;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class OfficerApplicationCTRL {
 
@@ -44,6 +45,90 @@ public class OfficerApplicationCTRL {
         this.officerApplicationList = officerRepo.readOfficerApplicationsFromCSV();
         this.btoApplicationList = appRepo.readApplicationFromCSV();
         this.projects = projRepo.readBTOProjectFromCSV();
+    }
+
+
+    // OFFICER APPLICATION SUB MENU (option 5)
+    // ===========================
+    public void runOfficerApplicationMenu(Scanner sc,
+            OfficerApplicationCTRL offAppCTRL,
+            OfficerApplicationView view,
+            BTOProjectCTRL projectCTRL) {
+        // Determine user role
+        Role userRole = offAppCTRL.getCurrentUserRole(); // Assuming User class has a getRole() method
+
+        switch (userRole) {
+            case HDBOFFICER -> {
+                // Officer role menu
+                while (true) {
+                    view.displayOfficerMenu(); // 1-4 + Back
+                    String choice = sc.nextLine().trim();
+                    switch (choice) {
+                        case "1" -> {
+                            // 1) View all *your* officer applications
+                            var mine = offAppCTRL.viewUserOfficerApplications();
+                            view.displayOfficerApplications(mine);
+                        }
+                        case "2" -> {
+                            // 2) Check registration status (i.e. show only PENDING if you like)
+                            var mine = offAppCTRL.viewUserOfficerApplications()
+                                    .stream()
+                                    .filter(a -> a.getStatus() == RegistrationStatus.PENDING
+                                            || a.getStatus() == RegistrationStatus.APPROVED)
+                                    .collect(Collectors.toList());
+                            view.displayOfficerApplications(mine);
+                        }
+                        case "3" -> {
+                            return; // Back to the officer's main menu
+                        }
+                        default -> System.out.println("Invalid choice, try again.");
+                    }
+                }
+            }
+            case HDBMANAGER -> {
+                // Manager role menu
+                while (true) {
+                    view.displayManagerMenu(); // 1-3 + Back
+                    String choice = sc.nextLine().trim();
+                    switch (choice) {
+                        case "1" -> {
+                            // 1) Display All Applications Handled By You
+                            var pendingApps = offAppCTRL.getPendingAndSuccessfullOfficerApplicationsForManager();
+                            view.displayManagerPendingApplications(pendingApps, projectCTRL.getAllProjects());
+
+                        }
+                        case "2" -> {
+                            // 2) Approval / Rejection for Application
+                            var pendingApps = offAppCTRL.getPendingOfficerApplicationsForManager();
+                            if (pendingApps.isEmpty()) {
+                                System.out.println("No pending applications to process.");
+                                continue;
+                            }
+                            view.displayManagerPendingApplications(pendingApps, projectCTRL.getAllProjects());
+
+                            System.out.print("Enter Application ID to process: ");
+                            int appId = Integer.parseInt(sc.nextLine().trim());
+                            System.out.print("Enter decision (A for Approve, R for Reject): ");
+                            String decision = sc.nextLine().trim();
+
+                            boolean success = offAppCTRL.processOfficerApplicationDecision(appId, decision);
+                            System.out.println(success
+                                    ? "Application processed successfully."
+                                    : "Failed to process application.");
+                        }
+
+                        case "3" -> {
+                            return; // Back to the manager's main menu
+                        }
+                        default -> System.out.println("Invalid choice, try again.");
+                    }
+                }
+            }
+            default -> {
+                System.out.println("You don't have permission to access this menu.");
+            }
+
+        }
     }
 
     /**

@@ -1,5 +1,5 @@
 ID,Project Name,Neighborhood,Type 1,Number of units for Type 1,Selling price for Type 1,Type 2,Number of units for Type 2,Selling price for Type 2,Application opening date,Application closing date,ManagerID,Officer Slot,Pending Officer by NRIC,Approved Officer by NRIC,Visibility
-1,Acacia Breeze,Fishun,2-Room,3,350000,3-Room,3,450000,15-02-25,20-03-25,T0000000G,8,"S6543210I,T1234567D,T1115566E,T7654321RE","T1111111G",FALSE
-2,Acacia Tree,Chua Chu Kai,2-Room,3,350000,3-Room,3,670000,16-02-25,21-03-25,T0000000G,10,"S6543210I","T0000000G",FALSE
-3,Birch Logging,Orchid,2-Room,3,350000,3-Room,4,400000,17-02-25,22-03-25,T0000000G,10,"T1111111G","T0000000G",FALSE
-14,Birch bird,BIRDY,2-Room,3,350000,3-Room,4,400000,20-04-25,21-04-25,T0000000G,10,"T1111111G","T0114158E",TRUE
+1,Pasir Rizz,Singapore,2-Room,2,500,3-Room,5,4000,2000-12-27,2024-11-10,T1234567E,9,"","",FALSE
+2,NTU,Boon Lay,2-Room,0,10000,3-Room,10,200000,2025-04-01,2025-05-20,T1234567E,5,"","",FALSE
+4,milk,Milky Malaysia,2-Room,1,9000,3-Room,2,9555,2028-04-04,2029-05-06,T1234567E,2,"","",FALSE
+5,Brown,Flower,2-Room,12,40,3-Room,2,90,2032-01-01,2032-01-01,T1234567E,2,"","",FALSE

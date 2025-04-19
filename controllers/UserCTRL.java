@@ -1,10 +1,18 @@
 package controllers;
 
-import java.util.List;
-
+import boundaries.ApplicantView;
+import boundaries.BTOApplicationView;
+import boundaries.BTOProjectView;
+import boundaries.EnquiryView;
+import boundaries.ManagerView;
+import boundaries.OfficerApplicationView;
+import boundaries.OfficerView;
+import boundaries.UserView;
 import entity.User;
 import entity.enumerations.Role;
 import entity.repositories.UserCSVRepository;
+import java.util.List;
+import java.util.Scanner;
 
 public class UserCTRL {
 
@@ -28,15 +36,109 @@ public class UserCTRL {
         userRepo.writeUserToCSV(this.userList);
     }
 
-  
+    // --------------------------------------------------------------------------------------------------
+    // Central Menu: Navigation for Logged-in Users
+    // --------------------------------------------------------------------------------------------------
+    public void runCentralMenu(Scanner sc, UserCTRL userCTRL) {
+        Role role = userCTRL.getCurrentUser().getRole();
+
+        // Instantiate Views
+        UserView baseView = switch (role) {
+            case APPLICANT -> new ApplicantView();
+            case HDBOFFICER -> new OfficerView();
+            case HDBMANAGER -> new ManagerView();
+        };
+        BTOProjectView projectView = new BTOProjectView();
+        BTOApplicationView btoApplicationView = new BTOApplicationView();
+        EnquiryView enquiryView = new EnquiryView();
+        OfficerApplicationView officerAppView = new OfficerApplicationView();
+
+        // Instantiate Controllers
+        BTOProjectCTRL projectCTRL = new BTOProjectCTRL(userCTRL.getCurrentUser());
+        BTOApplicationCTRL applicationCTRL = new BTOApplicationCTRL(userCTRL.getCurrentUser());
+        EnquiryCTRL enquiryCTRL = new EnquiryCTRL(userCTRL.getCurrentUser());
+        OfficerApplicationCTRL officerAppCTRL = new OfficerApplicationCTRL(userCTRL.getCurrentUser());
+
+        while (true) {
+            baseView.displayMenu();
+
+            String opt = sc.nextLine().trim();
+            // --- Common options 1–4 ---
+            switch (opt) {
+                case "1" ->
+                {
+                    // Update project visibility before filtering/displaying projects
+                    projectCTRL.updateProjectVisibility();
+                    projectCTRL.runProjectMenu(sc, userCTRL, projectCTRL, projectView, applicationCTRL, officerAppCTRL, officerAppView, enquiryView, enquiryCTRL);
+                }
+                case "2" -> applicationCTRL.runApplicationMenu(sc, userCTRL, projectCTRL, applicationCTRL, btoApplicationView);
+                case "3" -> enquiryCTRL.runEnquiryMenu(sc, userCTRL, projectCTRL, enquiryView, enquiryCTRL);
+                case "4" -> {
+                    handleChangePassword(sc, userCTRL);
+                    if (userCTRL.getCurrentUser() == null)
+                        return; // back to login
+                }
+            }
+
+            if (role != null) // --- Role‑specific extra options ---
+                switch (role) {
+                    case APPLICANT:
+                        switch (opt) {
+                            case "5" -> { // Logout
+                                userCTRL.setCurrentUser(null);
+                                baseView.displayLogout();
+                                return;
+                            }
+                        }
+                    case HDBOFFICER:
+                        switch (opt) {
+                            case "5" -> { // case "5" Enter Officer Application Menu
+                                officerAppCTRL.runOfficerApplicationMenu(sc, officerAppCTRL, officerAppView, projectCTRL);
+                            }
+                            case "6" -> { // Logout
+                                userCTRL.setCurrentUser(null);
+                                baseView.displayLogout();
+                                return;
+                            }
+                        }
+                        break;
+                    case HDBMANAGER:
+                        switch (opt) {
+                            // case "5" -> officerApplicationCTRL.
+                            case "5" -> {
+                                officerAppCTRL.runOfficerApplicationMenu(sc, officerAppCTRL, officerAppView, projectCTRL);
+                            }
+                            case "6" -> {
+                                // Logout
+                                userCTRL.setCurrentUser(null);
+                                baseView.displayLogout();
+                                return;
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
+        }
+    }
+
+    // --------------------------------------------------------------------------------------------------
+    // Change Password Handler
+    // --------------------------------------------------------------------------------------------------
+    public void handleChangePassword(Scanner sc, UserCTRL userCTRL) {
+        System.out.print("Enter new password: ");
+        String newPass = sc.nextLine().trim();
+        userCTRL.changePassword(newPass);
+    }
+
     /**
      * Login as before.
      */
-    public boolean login(String NRIC, String password, Role role) {
+    public boolean login(String NRIC, String password) {
         if (userList == null)
             loadUserData();
         for (User u : userList) {
-            if (u.getNRIC().equalsIgnoreCase(NRIC) && u.getPassword().equals(password) && u.getRole() == role) {
+            if (u.getNRIC().equalsIgnoreCase(NRIC) && u.getPassword().equals(password)) {
                 currentUser = u;
                 return true;
             }

@@ -1,5 +1,6 @@
 package controllers;
 
+import boundaries.BTOApplicationView;
 import entity.BTOApplication;
 import entity.BTOProject;
 import entity.Receipt;
@@ -8,12 +9,14 @@ import entity.enumerations.ApplicationStatus;
 import entity.enumerations.ApplicationType;
 import entity.enumerations.FlatType;
 import entity.enumerations.MaritalState;
+import entity.enumerations.Role;
 import entity.repositories.ApplicationCSVRepository;
 import entity.repositories.BTOProjectCSVRepository;
 import entity.repositories.ReceiptCSVRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Scanner;
 import java.util.stream.Collectors;
 
 public class BTOApplicationCTRL {
@@ -31,6 +34,310 @@ public class BTOApplicationCTRL {
         this.projRepo = new BTOProjectCSVRepository();
         this.applicationList = appRepo.readApplicationFromCSV();
         this.projects = projRepo.readBTOProjectFromCSV();
+    }
+
+        // --------------------------------------------------------------------------------------------------
+    // Application Menu for Users
+    // --------------------------------------------------------------------------------------------------
+    public void runApplicationMenu(Scanner sc, UserCTRL userCTRL, BTOProjectCTRL projectCTRL,
+            BTOApplicationCTRL applicationCTRL,
+            BTOApplicationView btoApplicationView) {
+        while (true) {
+            Role role = userCTRL.getCurrentUser().getRole();
+            switch (role) {
+                case APPLICANT -> btoApplicationView.displayApplicantMenu();
+                case HDBOFFICER -> btoApplicationView.displayOfficerMenu();
+                case HDBMANAGER -> btoApplicationView.displayManagerMenu();
+            }
+
+            String c = sc.nextLine().trim();
+            switch (role) {
+                case APPLICANT -> {
+
+                    switch (c) {
+                        case "1" -> { // Display All My Applications
+                            try {
+                                var apps = applicationCTRL.viewUserApplications();
+                                var projects = applicationCTRL.getProjects(); // retrieve projects list
+                                btoApplicationView.displayUserApplication(apps, userCTRL.getCurrentUser(), projects);
+                            } catch (Exception e) {
+                                System.out.println(
+                                        "An error occurred while retrieving your applications: " + e.getMessage());
+                            }
+                        }
+                        case "2" -> { // Withdraw my application
+                            try {
+                                var userApps = applicationCTRL.viewUserApplications();
+                                var projects = applicationCTRL.getProjects(); // retrieve projects list
+                                // Use the view method to display available pending applications
+                                if (!btoApplicationView.displayPendingApplications(userApps, projects)) {
+                                    break;
+                                }
+
+                                // Now prompt user for the application ID to withdraw
+                                System.out.print("Enter Application ID to withdraw: ");
+                                int appId = Integer.parseInt(sc.nextLine().trim());
+                                boolean success = applicationCTRL.withdraw(appId);
+                                if (success) {
+                                    System.out.println(
+                                            "Application withdrawn successfully. Application type updated to WITHDRAWAL and Status updated to PENDING.");
+                                } else {
+                                    System.out.println(
+                                            "Withdrawal failed. Please ensure the application exists and belongs to you.");
+                                }
+                            } catch (NumberFormatException nfe) {
+                                System.out.println("Invalid application ID. Please enter a valid number.");
+                            } catch (Exception e) {
+                                System.out.println(
+                                        "An error occurred while withdrawing your application: " + e.getMessage());
+                            }
+                        }
+                        case "3" -> { // back to central menu
+                            return;
+                        }
+                    }
+                }
+                case HDBOFFICER -> {
+                    switch (c) {
+                        case "1" -> { // Display All My Applications
+                            try {
+                                var apps = applicationCTRL.viewUserApplications();
+                                var projects = applicationCTRL.getProjects(); // retrieve projects list
+                                btoApplicationView.displayUserApplication(apps, userCTRL.getCurrentUser(), projects);
+                            } catch (Exception e) {
+                                System.out.println(
+                                        "An error occurred while retrieving your applications: " + e.getMessage());
+                            }
+
+                        }
+                        case "2" -> { // Withdraw my application
+                            try {
+                                var userApps = applicationCTRL.viewUserApplications();
+                                var projects = applicationCTRL.getProjects(); // retrieve projects list
+                                // Use the view method to display available pending applications
+                                if (!btoApplicationView.displayPendingApplications(userApps, projects)) {
+                                    break;
+                                }
+
+                                // Prompt the user for the application ID to withdraw
+                                System.out.print("Enter Application ID to withdraw: ");
+                                int appId = Integer.parseInt(sc.nextLine().trim());
+                                boolean success = applicationCTRL.withdraw(appId);
+                                if (success) {
+                                    System.out.println(
+                                            "Application withdrawn successfully. Application type updated to WITHDRAWAL and Status updated to PENDING.");
+                                } else {
+                                    System.out.println(
+                                            "Withdrawal failed. Please ensure the application exists and belongs to you.");
+                                }
+                            } catch (NumberFormatException nfe) {
+                                System.out.println("Invalid application ID. Please enter a valid number.");
+                            } catch (Exception e) {
+                                System.out.println(
+                                        "An error occurred while withdrawing your application: " + e.getMessage());
+                            }
+                        }
+                        case "3" -> { // Booking for successful applicant
+                            try {
+                                // Get successful applications handled by this officer.
+                                var officerApps = applicationCTRL.getApplicationsHandledByOfficer();
+                                // Retrieve all projects.
+                                var projects = applicationCTRL.getProjects();
+                                // Use view helper to display successful applications.
+                                if (!btoApplicationView.displaySuccessfulApplications(officerApps, projects)) {
+                                    break;
+                                }
+
+                                System.out.print("Enter Application ID to book: ");
+                                int appId = Integer.parseInt(sc.nextLine().trim());
+
+                                // Book and generate receipt.
+                                boolean booked = applicationCTRL.bookAndGenerateReceipt(appId, projectCTRL, userCTRL);
+                                if (booked) {
+                                    System.out.println("Booking confirmed and receipt generated successfully.");
+
+                                } else {
+                                    System.out.println(
+                                            "Booking failed: Please check the application details or flat availability.");
+                                }
+                            } catch (NumberFormatException nfe) {
+                                System.out.println("Invalid application ID. Please enter a valid number.");
+                            } catch (Exception e) {
+                                System.out.println("An error occurred while processing booking: " + e.getMessage());
+                            }
+                        }
+                        case "4" -> {
+                            return; // back to central menu
+                        }
+                    }
+                }
+                case HDBMANAGER -> {
+                    switch (c) {
+                        case "1" -> { // Display All Applications Handled By Me
+                            try {
+
+                                var managerApplications = applicationCTRL.getApplicationsHandledByManager();
+                                if (managerApplications == null || managerApplications.isEmpty()) {
+                                    System.out.println("No applications were found under your management.");
+                                } else {
+                                    btoApplicationView.displayAllApplications(managerApplications);
+                                }
+                            } catch (Exception e) {
+                                System.out
+                                        .println("An error occurred while retrieving applications handled by manager: "
+                                                + e.getMessage());
+                            }
+                        }
+                        case "2" -> { // Approval / Rejection for Application
+                            try {
+                                var pendingApps = applicationCTRL.getApplicationsHandledByManager().stream()
+                                        .filter(app -> app.getApplicationType() == ApplicationType.APPLICATION
+                                                && app.getStatus() == ApplicationStatus.PENDING)
+                                        .collect(Collectors.toList());
+
+                                if (pendingApps.isEmpty()) {
+                                    System.out.println("No pending applications available for approval or rejection.");
+                                    break;
+                                }
+
+                                System.out.println("\n=== Pending Applications for Approval/Rejection ===");
+                                for (BTOApplication app : pendingApps) {
+                                    System.out.println("Application ID: " + app.getApplicationId()
+                                            + " | Applicant: " + app.getApplicantNRIC()
+                                            + " | Flat Type Applying for: " + app.getFlatType()
+                                            + " | Status: " + app.getStatus());
+
+                                    BTOProject project = projectCTRL.getProjectById(app.getProjectID());
+                                    if (project != null) {
+                                        System.out.println("   -> Project Details: ID: " + project.getProjectID()
+                                                + ", Manager: " + project.getManagerID()
+                                                + ", Available 2-Room: " + project.getAvailable2Room()
+                                                + ", Available 3-Room: " + project.getAvailable3Room() + "\n");
+                                    } else {
+                                        System.out.println("   -> Project details not found for Project ID: "
+                                                + app.getProjectID());
+                                    }
+                                }
+
+                                System.out.print("Enter Application ID to process: ");
+                                String input = sc.nextLine().trim();
+                                int appId;
+                                try {
+                                    appId = Integer.parseInt(input);
+                                } catch (NumberFormatException e) {
+                                    System.out.println("Invalid application ID entered. Please enter a valid number.");
+                                    break;
+                                }
+
+                                System.out.print("Approve (A) or Reject (R) the application? ");
+                                String decision = sc.nextLine().trim();
+
+                                // Delegate the decision processing to the controller.
+                                boolean success = applicationCTRL.processApplicationDecision(appId, decision,
+                                        projectCTRL);
+                                if (success) {
+                                    System.out.println("Application decision processed successfully.");
+                                } else {
+                                    System.out.println("Application decision processing failed.");
+                                }
+                            } catch (Exception e) {
+                                System.out.println(
+                                        "An error occurred while processing the application: " + e.getMessage());
+                            }
+                        }
+
+                        case "3" -> { // Approval for Withdrawal of BTO Application (no need for rejection)
+                            try {
+                                var pendingWithdrawals = applicationCTRL.getApplicationsHandledByManager().stream()
+                                        .filter(app -> app.getApplicationType() == ApplicationType.WITHDRAWAL
+                                                && app.getStatus() == ApplicationStatus.PENDING)
+                                        .collect(Collectors.toList());
+
+                                if (pendingWithdrawals.isEmpty()) {
+                                    System.out.println("No pending withdrawal applications available for approval.");
+                                    break;
+                                }
+
+                                System.out.println("\n=== Pending Withdrawal Applications ===");
+                                for (BTOApplication app : pendingWithdrawals) {
+                                    System.out.println("Application ID: " + app.getApplicationId()
+                                            + " | Applicant: " + app.getApplicantNRIC()
+                                            + " | Flat Type: " + app.getFlatType()
+                                            + " | Status: " + app.getStatus());
+                                    System.out.println("--------------------------------------");
+                                }
+
+                                System.out.print("Enter Application ID for withdrawal approve: ");
+                                String input = sc.nextLine().trim();
+                                int appId;
+                                try {
+                                    appId = Integer.parseInt(input);
+                                } catch (NumberFormatException e) {
+                                    System.out.println("Invalid application ID entered. Please enter a valid number.");
+                                    break;
+                                }
+
+                                boolean success = applicationCTRL.approveWithdrawalApplication(appId, projectCTRL);
+                                if (!success) {
+                                    System.out.println("Withdrawal approval failed.");
+                                }
+                            } catch (Exception e) {
+                                System.out.println(
+                                        "An error occurred while processing the withdrawal: " + e.getMessage());
+                            }
+                        }
+                        case "4" -> { // Generate / Filter report of all APPLICANTS under projects handled by you
+                            try {
+                                var allManagerApps = applicationCTRL.getApplicationsHandledByManager();
+                                if (allManagerApps == null || allManagerApps.isEmpty()) {
+                                    System.out.println("No applications found under your management.");
+                                    break;
+                                }
+                                var allProjects = applicationCTRL.getProjects();
+                        
+                                MaritalState maritalFilter = btoApplicationView.promptMaritalStatusFilter(sc);
+                                String flatTypeFilter = btoApplicationView.promptFlatTypeFilter(sc);
+                                Integer minAge = btoApplicationView.promptMinAge(sc);
+                                Integer maxAge = btoApplicationView.promptMaxAge(sc);
+                                String neighbourhoodFilter = btoApplicationView.promptNeighbourhoodFilter(sc);
+                        
+                                List<BTOApplication> filteredApps = applicationCTRL.generateReport(
+                                        maritalFilter, flatTypeFilter, minAge, maxAge, neighbourhoodFilter, allProjects, userCTRL);
+                        
+                                if (filteredApps.isEmpty()) {
+                                    System.out.println("No applicants found matching the selected filters.");
+                                } else {
+                                    System.out.println("\n=== Filtered Applicant Report ===");
+                                    for (BTOApplication app : filteredApps) {
+                                        User applicant = userCTRL.getUserByNRIC(app.getApplicantNRIC());
+                                        Optional<BTOProject> projectOpt = allProjects.stream()
+                                                .filter(p -> p.getProjectID() == app.getProjectID())
+                                                .findFirst();
+                                        String projectName = projectOpt.map(BTOProject::getProjectName)
+                                                .orElse("Unknown");
+                                        String neighbourhood = projectOpt.map(BTOProject::getNeighborhood)
+                                                .orElse("Unknown");
+                                        System.out.println("Applicant: " + applicant.getName());
+                                        System.out.println("NRIC: " + applicant.getNRIC());
+                                        System.out.println("Age: " + applicant.getAge());
+                                        System.out.println("Marital: " + applicant.getMaritalStatus());
+                                        System.out.println("Flat: " + app.getFlatType());
+                                        System.out.println("Project: " + projectName);
+                                        System.out.println("Neighbourhood: " + neighbourhood);
+                                        System.out.println("Status: " + app.getStatus());
+                                        System.out.println("-------------------------------");
+                                    }
+                                    System.out.println("=== End of Report ===");
+                                }
+                            } catch (Exception e) {
+                                System.out.println("An error occurred while generating the report: " + e.getMessage());
+                            }
+                        }
+                    }
+                }
+                default -> System.out.println("Invalid choice, try again.");
+            }
+        }
     }
 
     /** 1) Show all applications by this user */

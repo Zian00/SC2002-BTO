@@ -1,7 +1,6 @@
 package boundaries;
 
 import controllers.UserCTRL;
-import entity.enumerations.Role;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
@@ -14,9 +13,8 @@ public class UserView {
 
         // Uncomment for actual run, for now use this user for testing
         // Change accordingly
-        String nric = "T0114158E";
-        String password = "aaa";
-        Role role = Role.valueOf("APPLICANT");
+        String nric = "T1234567E";
+        String password = "a";
 
         // System.out.print("NRIC (uppercase only): ");
         // String nric = sc.nextLine().trim();
@@ -39,21 +37,11 @@ public class UserView {
         // System.out.print("Password: ");
         // String password = sc.nextLine().trim();
 
-        // System.out.print("Role (APPLICANT, HDBOFFICER, HDBMANAGER): ");
-        // String roleInput = sc.nextLine().trim().toUpperCase();
-        // Role role;
-        // try {
-        // role = Role.valueOf(roleInput);
-        // } catch (IllegalArgumentException e) {
-        // System.out.println("Invalid role. Returning to main menu.");
-        // return false;
-        // }
-
-        if (userCTRL.login(nric, password, role)) {
+        if (userCTRL.login(nric, password)) {
             System.out.println("Login successful! Welcome, " + userCTRL.getCurrentUser().getName() + " [" + userCTRL.getCurrentUser().getRole()  +"]");
             return true;
         } else {
-            System.out.println("Invalid credentials or role. Returning to main menu.");
+            System.out.println("Invalid credentials. Returning to main menu.");
             return false;
         }
     }

@@ -1,19 +1,21 @@
 package controllers;
 
+import boundaries.EnquiryView;
+import entity.BTOProject;
+import entity.Enquiry;
+import entity.User;
+import entity.enumerations.Role;
+import entity.interfaces.IEnquiryResponse;
+import entity.interfaces.IEnquirySubmission;
+import entity.repositories.EnquiryCSVRepository;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import entity.BTOProject;
-import entity.Enquiry;
-import entity.User;
-import entity.interfaces.IEnquiryResponse;
-import entity.interfaces.IEnquirySubmission;
-import entity.repositories.EnquiryCSVRepository;
 
 public final class EnquiryCTRL implements IEnquiryResponse, IEnquirySubmission {
 
@@ -44,6 +46,220 @@ public final class EnquiryCTRL implements IEnquiryResponse, IEnquirySubmission {
 
     public List<Enquiry> getEnquiries() {
         return enquiries;
+    }
+
+    // --------------------------------------------------------------------------------------------------
+    // Enquiry Menu for Users
+    // --------------------------------------------------------------------------------------------------
+    public void runEnquiryMenu(Scanner sc, UserCTRL userCTRL, BTOProjectCTRL projectCTRL,
+            EnquiryView enquiryView, EnquiryCTRL enquiryCTRL) {
+        while (true) {
+            Role role = userCTRL.getCurrentUser().getRole();
+            var projectList = projectCTRL.getAllProjects();
+            switch (role) {
+                case APPLICANT -> enquiryView.displayApplicantMenu();
+                case HDBOFFICER -> enquiryView.displayOfficerMenu();
+                case HDBMANAGER -> enquiryView.displayManagerMenu();
+            }
+
+            String c = sc.nextLine().trim();
+            switch (role) {
+                case APPLICANT -> {
+                    var userEnquiries = enquiryCTRL.getFilteredEnquiriesByNRIC();
+                    switch (c) {
+                        case "1" -> { // Only display Enquiry by User
+                            enquiryView.displayFilteredEnquiries(projectList, userEnquiries);
+                        }
+                        case "2" -> { // Edit Selected Enquiry
+                            // Filter userEnquiries with no response and display
+                            var editableEnquiries = enquiryCTRL.getEditableEnquiriesByNRIC();
+                            if (editableEnquiries.isEmpty()) {
+                                enquiryView.showMessage("No editable enquiries found.");
+                                break;
+                            }
+                            enquiryView.displayFilteredEnquiries(projectList, editableEnquiries);
+                            // Get user selection on which enquiry to edit
+                            int selectedId = enquiryView.promptEnquirySelection(editableEnquiries, sc);
+                            Enquiry selected = enquiryCTRL.findEnquiryById(editableEnquiries, selectedId);
+                            if (selected == null) {
+                                enquiryView.showMessage("Invalid Enquiry ID selected.");
+                                break;
+                            }
+                            // Get new enquiry text to update
+                            String newText = enquiryView.promptNewEnquiryText(selected.getEnquiryText(), sc);
+                            if (newText == null || newText.isEmpty()) {
+                                enquiryView.showMessage("Enquiry update cancelled!");
+                            } else {
+                                if (enquiryCTRL.editEnquiry(selected, newText)) {
+                                    enquiryView.showMessage("Enquiry updated successfully!");
+                                    enquiryView.displayEnquiry(selected);
+                                } else {
+                                    enquiryView.showMessage("Failed to edit enquiry, please try again.");
+                                }
+                            }
+                        }
+                        case "3" -> { // Delete Enquiry
+                            // Filter userEnquiries with no response and display
+                            var editableEnquiries = enquiryCTRL.getEditableEnquiriesByNRIC();
+                            if (editableEnquiries.isEmpty()) {
+                                enquiryView.showMessage("No deletable enquiries found.");
+                                break;
+                            }
+                            enquiryView.displayFilteredEnquiries(projectList, editableEnquiries);
+                            // Get user selection on which enquiry to delete
+                            int selectedId = enquiryView.promptEnquirySelection(editableEnquiries, sc);
+                            Enquiry selected = enquiryCTRL.findEnquiryById(editableEnquiries, selectedId);
+                            if (selected == null) {
+                                enquiryView.showMessage("Invalid Enquiry ID selected.");
+                                break;
+                            }
+                            // Confirm deletion
+                            if (enquiryView.promptDeletionConfirmation(sc)) {
+                                enquiryCTRL.deleteEnquiry(selected);
+                                enquiryView.showMessage("Enquiry deleted successfully!");
+                            } else {
+                                enquiryView.showMessage("Deletion cancelled.");
+                            }
+                        }
+                        case "4" -> { // back to central menu
+                            return;
+                        }
+                    }
+                }
+                case HDBOFFICER -> {
+                    var userEnquiries = enquiryCTRL.getFilteredEnquiriesByNRIC();
+                    switch (c) {
+                        case "1" -> { // Only display Enquiry by User
+                            enquiryView.displayFilteredEnquiries(projectList, userEnquiries);
+                        }
+                        case "2" -> { // Edit Selected Enquiry
+                            // Filter userEnquiries with no response and display
+                            var editableEnquiries = enquiryCTRL.getEditableEnquiriesByNRIC();
+                            if (editableEnquiries.isEmpty()) {
+                                enquiryView.showMessage("No editable enquiries found.");
+                                break;
+                            }
+                            enquiryView.displayFilteredEnquiries(projectList, editableEnquiries);
+                            // Get user selection on which enquiry to edit
+                            int selectedId = enquiryView.promptEnquirySelection(editableEnquiries, sc);
+                            Enquiry selected = enquiryCTRL.findEnquiryById(editableEnquiries, selectedId);
+                            if (selected == null) {
+                                enquiryView.showMessage("Invalid Enquiry ID selected.");
+                                break;
+                            }
+                            // Get new enquiry text to update
+                            String newText = enquiryView.promptNewEnquiryText(selected.getEnquiryText(), sc);
+                            if (newText == null || newText.isEmpty()) {
+                                enquiryView.showMessage("Enquiry update cancelled!");
+                            } else {
+                                if (enquiryCTRL.editEnquiry(selected, newText)) {
+                                    enquiryView.showMessage("Enquiry updated successfully!");
+                                    enquiryView.displayEnquiry(selected);
+                                } else {
+                                    enquiryView.showMessage("Failed to edit enquiry, please try again.");
+                                }
+                            }
+                        }
+                        case "3" -> { // Delete Enquiry
+                            // Filter userEnquiries with no response and display
+                            var editableEnquiries = enquiryCTRL.getEditableEnquiriesByNRIC();
+                            if (editableEnquiries.isEmpty()) {
+                                enquiryView.showMessage("No deletable enquiries found.");
+                                break;
+                            }
+                            enquiryView.displayFilteredEnquiries(projectList, editableEnquiries);
+                            // Get user selection on which enquiry to delete
+                            int selectedId = enquiryView.promptEnquirySelection(editableEnquiries, sc);
+                            Enquiry selected = enquiryCTRL.findEnquiryById(editableEnquiries, selectedId);
+                            if (selected == null) {
+                                enquiryView.showMessage("Invalid Enquiry ID selected.");
+                                break;
+                            }
+                            // Confirm deletion
+                            if (enquiryView.promptDeletionConfirmation(sc)) {
+                                enquiryCTRL.deleteEnquiry(selected);
+                                enquiryView.showMessage("Enquiry deleted successfully!");
+                            } else {
+                                enquiryView.showMessage("Deletion cancelled.");
+                            }
+                        }
+                        case "4" -> { // Respond to Enquiries in-charge by User
+                            // Filter userManagedEnquiries with no response & Enquiry is in-chaged current
+                            // user and display
+                            var userManagedEnquiries = enquiryCTRL.getFilteredEnquiriesByOfficer(projectList);
+                            if (userManagedEnquiries.isEmpty()) {
+                                enquiryView.showMessage("No enquiries to respond to.");
+                                break;
+                            }
+                            enquiryView.displayAllEnquiries(projectList, userManagedEnquiries);
+                            // Get user selection on which enquiry to respond to
+                            int selectedId = enquiryView.promptEnquirySelection(userManagedEnquiries, sc);
+                            Enquiry selected = enquiryCTRL.findEnquiryById(userManagedEnquiries, selectedId);
+                            if (selected == null) {
+                                enquiryView.showMessage("Invalid Enquiry ID selected.");
+                                break;
+                            }
+                            // Get response text to update enquiry
+                            String responseText = enquiryView.promptResponseText(sc);
+                            if (responseText == null || responseText.isEmpty()) {
+                                enquiryView.showMessage("Response cancelled!");
+                            } else {
+                                if (enquiryCTRL.responseEnquiry(selected, responseText)) {
+                                    enquiryView.showMessage("Response added successfully!");
+                                    enquiryView.displayEnquiryWithResponse(selected);
+                                } else {
+                                    enquiryView.showMessage("Failed to add response, please try again.");
+                                }
+                            }
+
+                        }
+                        case "5" -> { // back to central menu
+                            return;
+                        }
+                    }
+                }
+                case HDBMANAGER -> {
+                    switch (c) {
+                        case "1" -> { // View All Enquiries
+                            enquiryView.displayAllEnquiries(projectList, enquiryCTRL.getEnquiries());
+                        }
+                        case "2" -> { // Respond to Enquiries in-charge by User
+                            // Filter userManagedEnquiries with no response & Enquiry is in-chaged current
+                            // user and display
+                            var userManagedEnquiries = enquiryCTRL.getFilteredEnquiriesByManager(projectList);
+                            if (userManagedEnquiries.isEmpty()) {
+                                enquiryView.showMessage("No enquiries to respond to.");
+                                break;
+                            }
+                            enquiryView.displayAllEnquiries(projectList, userManagedEnquiries);
+                            // Get user selection on which enquiry to respond to
+                            int selectedId = enquiryView.promptEnquirySelection(userManagedEnquiries, sc);
+                            Enquiry selected = enquiryCTRL.findEnquiryById(userManagedEnquiries, selectedId);
+                            if (selected == null) {
+                                enquiryView.showMessage("Invalid Enquiry ID selected.");
+                                break;
+                            }
+                            // Get response text to update enquiry
+                            String responseText = enquiryView.promptResponseText(sc);
+                            if (responseText == null || responseText.isEmpty()) {
+                                enquiryView.showMessage("Response cancelled!");
+                            } else {
+                                if (enquiryCTRL.responseEnquiry(selected, responseText)) {
+                                    enquiryView.showMessage("Response added successfully!");
+                                    enquiryView.displayEnquiryWithResponse(selected);
+                                } else {
+                                    enquiryView.showMessage("Failed to add response, please try again.");
+                                }
+                            }
+                        }
+                        case "3" -> { // back to central menu
+                            return;
+                        }
+                    }
+                }
+                default -> System.out.println("Invalid choice, try again.");
+            }
+        }
     }
     
     // Returns selected Enquiry
