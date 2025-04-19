@@ -449,59 +449,117 @@ public class OfficerApplicationCTRL {
      * @return List of eligible {@link BTOProject} objects.
      */
     public List<BTOProject> getEligibleOfficerProjects() {
-        return projects.stream()
-                .filter(p -> p.isVisibility() && p.getAvailableOfficerSlots() > 0)
-                .filter(p -> {
-                    // Not already applied for this project as applicant
-                    boolean notAppliedAsApplicant = btoApplicationList.stream()
-                            .noneMatch(a -> a.getApplicantNRIC().equals(currentUser.getNRIC()) &&
-                                    a.getProjectID() == p.getProjectID());
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    LocalDate currentDate = LocalDate.now();
 
-                    // Check if officer has any pending or approved applications for this project
-                    List<OfficerApplication> userApplicationsForThisProject = officerApplicationList.stream()
-                            .filter(a -> a.getOfficerNRIC().equals(currentUser.getNRIC()) &&
-                                    a.getProjectID() == p.getProjectID())
-                            .collect(Collectors.toList());
+    return projects.stream()
+            .filter(p -> {
+                LocalDate closingDate = LocalDate.parse(p.getApplicationClosingDate(), formatter);
+                boolean stillOpen = !closingDate.isBefore(currentDate);
+                boolean hasSlots = p.getAvailableOfficerSlots() > 0;
+                return stillOpen && hasSlots;
+            })
+            .filter(p -> {
+                // Not already applied for this project as applicant
+                boolean notAppliedAsApplicant = btoApplicationList.stream()
+                        .noneMatch(a -> a.getApplicantNRIC().equals(currentUser.getNRIC()) &&
+                                a.getProjectID() == p.getProjectID());
 
-                    // Officer can apply again only if all previous applications were rejected
-                    boolean canApplyToProject = userApplicationsForThisProject.isEmpty() ||
-                            userApplicationsForThisProject.stream()
-                                    .allMatch(a -> a.getStatus() == RegistrationStatus.REJECTED);
+                // Check if officer has any pending or approved applications for this project
+                List<OfficerApplication> userApplicationsForThisProject = officerApplicationList.stream()
+                        .filter(a -> a.getOfficerNRIC().equals(currentUser.getNRIC()) &&
+                                a.getProjectID() == p.getProjectID())
+                        .collect(Collectors.toList());
 
-                    // Check for overlapping commitments with approved applications
-                    boolean noApprovedOverlaps = projects.stream()
-                            .filter(other -> other.getApprovedOfficer() != null &&
-                                    other.getApprovedOfficer().contains(currentUser.getNRIC()))
-                            .noneMatch(other -> datesOverlap(other, p));
+                boolean canApplyToProject = userApplicationsForThisProject.isEmpty() ||
+                        userApplicationsForThisProject.stream()
+                                .allMatch(a -> a.getStatus() == RegistrationStatus.REJECTED);
 
-                    // Check for overlapping commitments with pending applications
-                    boolean noPendingOverlaps = officerApplicationList.stream()
-                            .filter(a -> a.getOfficerNRIC().equals(currentUser.getNRIC()) &&
-                                    a.getStatus() == RegistrationStatus.PENDING &&
-                                    a.getProjectID() != p.getProjectID()) // Exclude current project
-                            .noneMatch(a -> {
-                                // Find the project for this pending application
-                                BTOProject pendingProject = projects.stream()
-                                        .filter(proj -> proj.getProjectID() == a.getProjectID())
-                                        .findFirst()
-                                        .orElse(null);
+                // Check for overlapping commitments with approved applications
+                boolean noApprovedOverlaps = projects.stream()
+                        .filter(other -> other.getApprovedOfficer() != null &&
+                                other.getApprovedOfficer().contains(currentUser.getNRIC()))
+                        .noneMatch(other -> datesOverlap(other, p));
 
-                                return pendingProject != null && datesOverlap(pendingProject, p);
-                            });
-                    // if (!notAppliedAsApplicant)
-                    // System.out.println("Filtered out: already applicant for " +
-                    // p.getProjectID());
-                    // if (!canApplyToProject)
-                    // System.out.println("Filtered out: already officer for " + p.getProjectID());
-                    // if (!noApprovedOverlaps)
-                    // System.out.println("Filtered out: overlapping approved for " +
-                    // p.getProjectID());
-                    // if (!noPendingOverlaps)
-                    // System.out.println("Filtered out: overlapping pending for " +
-                    // p.getProjectID());
-                    return notAppliedAsApplicant && canApplyToProject && noApprovedOverlaps && noPendingOverlaps;
-                })
-                .collect(Collectors.toList());
+                // Check for overlapping commitments with pending applications
+                boolean noPendingOverlaps = officerApplicationList.stream()
+                        .filter(a -> a.getOfficerNRIC().equals(currentUser.getNRIC()) &&
+                                a.getStatus() == RegistrationStatus.PENDING &&
+                                a.getProjectID() != p.getProjectID())
+                        .noneMatch(a -> {
+                            BTOProject pendingProject = projects.stream()
+                                    .filter(proj -> proj.getProjectID() == a.getProjectID())
+                                    .findFirst()
+                                    .orElse(null);
+                            return pendingProject != null && datesOverlap(pendingProject, p);
+                        });
+
+                return notAppliedAsApplicant && canApplyToProject && noApprovedOverlaps && noPendingOverlaps;
+            })
+            .collect(Collectors.toList());
+
+
+    // public List<BTOProject> getEligibleOfficerProjects() {
+    //     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    //     LocalDate currentDate = LocalDate.now();
+    //     return projects.stream()
+    //             .filter(p -> {
+    //                 // Parse the closing date of the project
+    //                 LocalDate closingDate = LocalDate.parse(p.getApplicationClosingDate(), formatter);
+    //                 // Check if the closing date is not before the current date
+    //                 return !closingDate.isBefore(currentDate);
+    //             } && p.getAvailableOfficerSlots() > 0)
+    //             .filter(p -> {
+    //                 // Not already applied for this project as applicant
+    //                 boolean notAppliedAsApplicant = btoApplicationList.stream()
+    //                         .noneMatch(a -> a.getApplicantNRIC().equals(currentUser.getNRIC()) &&
+    //                                 a.getProjectID() == p.getProjectID());
+
+    //                 // Check if officer has any pending or approved applications for this project
+    //                 List<OfficerApplication> userApplicationsForThisProject = officerApplicationList.stream()
+    //                         .filter(a -> a.getOfficerNRIC().equals(currentUser.getNRIC()) &&
+    //                                 a.getProjectID() == p.getProjectID())
+    //                         .collect(Collectors.toList());
+
+    //                 // Officer can apply again only if all previous applications were rejected
+    //                 boolean canApplyToProject = userApplicationsForThisProject.isEmpty() ||
+    //                         userApplicationsForThisProject.stream()
+    //                                 .allMatch(a -> a.getStatus() == RegistrationStatus.REJECTED);
+
+    //                 // Check for overlapping commitments with approved applications
+    //                 boolean noApprovedOverlaps = projects.stream()
+    //                         .filter(other -> other.getApprovedOfficer() != null &&
+    //                                 other.getApprovedOfficer().contains(currentUser.getNRIC()))
+    //                         .noneMatch(other -> datesOverlap(other, p));
+
+    //                 // Check for overlapping commitments with pending applications
+    //                 boolean noPendingOverlaps = officerApplicationList.stream()
+    //                         .filter(a -> a.getOfficerNRIC().equals(currentUser.getNRIC()) &&
+    //                                 a.getStatus() == RegistrationStatus.PENDING &&
+    //                                 a.getProjectID() != p.getProjectID()) // Exclude current project
+    //                         .noneMatch(a -> {
+    //                             // Find the project for this pending application
+    //                             BTOProject pendingProject = projects.stream()
+    //                                     .filter(proj -> proj.getProjectID() == a.getProjectID())
+    //                                     .findFirst()
+    //                                     .orElse(null);
+
+    //                             return pendingProject != null && datesOverlap(pendingProject, p);
+    //                         });
+    //                 // if (!notAppliedAsApplicant)
+    //                 // System.out.println("Filtered out: already applicant for " +
+    //                 // p.getProjectID());
+    //                 // if (!canApplyToProject)
+    //                 // System.out.println("Filtered out: already officer for " + p.getProjectID());
+    //                 // if (!noApprovedOverlaps)
+    //                 // System.out.println("Filtered out: overlapping approved for " +
+    //                 // p.getProjectID());
+    //                 // if (!noPendingOverlaps)
+    //                 // System.out.println("Filtered out: overlapping pending for " +
+    //                 // p.getProjectID());
+    //                 return notAppliedAsApplicant && canApplyToProject && noApprovedOverlaps && noPendingOverlaps;
+    //             })
+    //             .collect(Collectors.toList());
     }
 
     /**
