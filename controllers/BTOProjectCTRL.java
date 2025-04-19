@@ -48,7 +48,6 @@ public class BTOProjectCTRL {
     // --------------------------------------------------------------------------------------------------
     // Projects Menu for Users
     // --------------------------------------------------------------------------------------------------
-
     /**
      * Runs the project menu for the current user, displaying options and routing
      * to the appropriate actions based on the user's role (applicant, officer, manager).
@@ -112,21 +111,27 @@ public class BTOProjectCTRL {
                                     userCTRL.getCurrentUser(), availableProjects);
 
                             // Get project selection
-                            System.out.print("Enter project ID to apply: ");
-                            int projectId = Integer.parseInt(sc.nextLine());
+                            try {
+                                System.out.print("Enter project ID to apply: ");
+                                int projectId = Integer.parseInt(sc.nextLine());
 
-                            // Get flat type selection
-                            System.out.println("Select flat type:");
-                            System.out.println("1. 2-Room");
-                            System.out.println("2. 3-Room");
-                            System.out.print("I want: ");
-                            int flatChoice = Integer.parseInt(sc.nextLine());
-                            FlatType flatType = (flatChoice == 1) ? FlatType.TWOROOM : FlatType.THREEROOM;
+                                // Get flat type selection
+                                System.out.println("Select flat type:");
+                                System.out.println("1. 2-Room");
+                                System.out.println("2. 3-Room");
+                                System.out.print("I want: ");
+                                int flatChoice = Integer.parseInt(sc.nextLine());
+                                FlatType flatType = (flatChoice == 1) ? FlatType.TWOROOM : FlatType.THREEROOM;
 
-                            // Submit application
-                            boolean ok = applicationCTRL.apply(projectId, flatType);
-                            if (ok) {
-                                System.out.println("Application submitted! Status: PENDING.");
+                                // Submit application
+                                boolean ok = applicationCTRL.apply(projectId, flatType);
+                                if (ok) {
+                                    System.out.println("Application submitted! Status: PENDING.");
+                                }   
+                            } catch (NumberFormatException e) {
+                                System.out.println("Invalid input. Please try again.");
+                            } catch (Exception e) {
+                                System.out.println("An error occurred: " + e.getMessage()); 
                             }
                         }
                         case "4" -> { // Submit Enquiry for a project
@@ -169,8 +174,7 @@ public class BTOProjectCTRL {
                         var allProjects = projectCTRL.getAllProjects();
                         projectView.displayAllProject(allProjects);
                     }
-                    case "2" -> {
-                        // exactly the same view as applicant
+                    case "2" -> { // Display all bto projects by filter
                         // 1) prompt & save
                         FilterSettings fs = projectView.promptFilterSettings(userCTRL.getCurrentUser(), sc);
                         projectCTRL.updateUserFilterSettings(userCTRL.getCurrentUser(), fs);

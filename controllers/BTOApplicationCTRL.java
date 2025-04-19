@@ -359,6 +359,9 @@ public class BTOApplicationCTRL {
                                 System.out.println("An error occurred while generating the report: " + e.getMessage());
                             }
                         }
+                        case "5" -> { // back to central menu
+                            return;
+                        }
                     }
                 }
                 default -> System.out.println("Invalid choice, try again.");
@@ -404,7 +407,7 @@ public class BTOApplicationCTRL {
             return false;
         }
 
-        // check eligibility
+        // Check eligibility for Age
         boolean eligible;
         if (currentUser.getMaritalStatus().name().equals("SINGLE")) {
             eligible = flatType == FlatType.TWOROOM && currentUser.getAge() >= 35;
@@ -413,6 +416,17 @@ public class BTOApplicationCTRL {
         }
         if (!eligible) {
             System.out.println("You are not eligible for " + flatType);
+            return false;
+        }
+
+        // Check available slots for room type
+        if(flatType == FlatType.TWOROOM && proj.getAvailable2Room()<=0){
+            eligible = false;
+        }else if(flatType == FlatType.THREEROOM && proj.getAvailable3Room()<=0){
+            eligible = false;
+        }
+        if (!eligible) {
+            System.out.println("There is no more slot for this flat type: " + flatType);
             return false;
         }
 

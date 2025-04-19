@@ -26,29 +26,29 @@ public class UserView {
 
         // Uncomment for actual run, for now use this user for testing
         // Change accordingly
-        String nric = "T1234567E";
-        String password = "a";
+        // String nric = "T1234567E";
+        // String password = "a";
 
-        // System.out.print("NRIC (uppercase only): ");
-        // String nric = sc.nextLine().trim();
+        System.out.print("NRIC (uppercase only): ");
+        String nric = sc.nextLine().trim();
 
-        // // enforce uppercase
-        // if (!nric.equals(nric.toUpperCase())) {
-        // System.out.println("Error: NRIC must be in uppercase.");
-        // return false;
-        // }
+        // enforce uppercase
+        if (!nric.equals(nric.toUpperCase())) {
+        System.out.println("Error: NRIC must be in uppercase.");
+        return false;
+        }
 
-        // // validate structure
-        // if (!NRIC_PATTERN.matcher(nric).matches()) {
-        // System.out.println("Invalid NRIC format. It must:");
-        // System.out.println("- Start with 'S' or 'T'");
-        // System.out.println("- Followed by exactly 7 digits");
-        // System.out.println("- End with an uppercase letter");
-        // return false;
-        // }
+        // validate structure
+        if (!NRIC_PATTERN.matcher(nric).matches()) {
+        System.out.println("Invalid NRIC format. It must:");
+        System.out.println("- Start with 'S' or 'T'");
+        System.out.println("- Followed by exactly 7 digits");
+        System.out.println("- End with an uppercase letter");
+        return false;
+        }
 
-        // System.out.print("Password: ");
-        // String password = sc.nextLine().trim();
+        System.out.print("Password: ");
+        String password = sc.nextLine().trim();
 
         if (userCTRL.login(nric, password)) {
             System.out.println("Login successful! Welcome, " + userCTRL.getCurrentUser().getName() + " [" + userCTRL.getCurrentUser().getRole()  +"]");

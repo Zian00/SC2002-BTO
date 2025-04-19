@@ -25,7 +25,11 @@ public class Main {
                     case "1" -> {
                         if (userView.loginFlow(sc, userCTRL)) {
                             // 2) Logged‑in Main menu
-                            userCTRL.runCentralMenu(sc, userCTRL);
+                            try {
+                                userCTRL.runCentralMenu(sc, userCTRL);
+                            } catch (Exception e) {
+                                System.out.println("An error occurred please log in again." + e.getMessage());
+                            }
                         }
                     }
                     case "2" -> {

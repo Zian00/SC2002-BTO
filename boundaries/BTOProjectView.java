@@ -274,7 +274,11 @@ public class BTOProjectView {
         while (true) {
             System.out.print(prompt);
             String in = sc.nextLine().trim();
-            if (!in.isEmpty()) {
+            if (in.contains(",")){
+                System.out.println("Cannot contain commas.");
+                continue;
+            }
+            else if(!in.isEmpty()) {
                 return in;
             }
 
