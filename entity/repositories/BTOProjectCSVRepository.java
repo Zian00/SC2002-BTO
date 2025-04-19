@@ -1,5 +1,6 @@
 package entity.repositories;
 
+import entity.BTOProject;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
@@ -8,8 +9,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-
-import entity.BTOProject;
 
 public class BTOProjectCSVRepository {
 
@@ -113,13 +112,11 @@ public class BTOProjectCSVRepository {
                 list.add(p);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Error reading ProjectList.csv: " + e.getMessage());
         }
         return list;
     }
     
-    // TODO: Implement writeBTOProjectToCSV if needed. DEFINITELY NEED
-
     public void writeBTOProjectToCSV(List<BTOProject> projects) {
         try (PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(CSV_FILE)))) {
             // header (match your CSV columns exactly)
