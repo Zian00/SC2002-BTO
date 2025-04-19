@@ -207,24 +207,24 @@ public class OfficerApplicationCTRL {
         boolean hasAppliedAsApplicant = btoApplicationList.stream()
                 .anyMatch(a -> a.getApplicantNRIC().equals(currentUser.getNRIC()) &&
                         a.getProjectID() == projectId);
-
+        
         if (hasAppliedAsApplicant) {
             System.out.println("Cannot register as officer for a project you've applied to as an applicant.");
             return false;
         }
-
+        
         // Check if already registered for this project as officer
         boolean alreadyRegistered = officerApplicationList.stream()
                 .anyMatch(a -> a.getOfficerNRIC().equals(currentUser.getNRIC()) &&
-                        a.getProjectID() == projectId);
-
+                        a.getProjectID() == projectId &&
+                        a.getStatus() != RegistrationStatus.REJECTED); // Allow reapplication if rejected
+        
         if (alreadyRegistered) {
             System.out.println("You've already registered as an officer for this project.");
             return false;
         }
-
-        // Check if already approved as officer for another project with overlapping
-        // dates
+        
+        // Check if already approved as officer for another project with overlapping dates
         boolean isOfficerElsewhere = false;
         for (BTOProject p : projects) {
             if (p.getApprovedOfficer() != null &&
@@ -422,7 +422,7 @@ public class OfficerApplicationCTRL {
      * @return true if the periods overlap, false otherwise.
      */
     private boolean datesOverlap(BTOProject p1, BTOProject p2) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
         LocalDate p1Start = LocalDate.parse(p1.getApplicationOpeningDate(), formatter);
         LocalDate p1End = LocalDate.parse(p1.getApplicationClosingDate(), formatter);
