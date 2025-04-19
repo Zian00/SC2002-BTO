@@ -1,11 +1,9 @@
 package views;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import models.BTOProject;
 import models.OfficerApplication;
-import models.User;
-import models.enumerations.RegistrationStatus;
+
 
 public class OfficerApplicationView {
 

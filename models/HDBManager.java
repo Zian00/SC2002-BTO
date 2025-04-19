@@ -10,7 +10,6 @@ public class HDBManager extends User {
 		super(NRIC, Name, password, age, maritalStatus, filterSettings, role);
 	}
 
-	private List<Integer> BTOProjectIDList;
 
 	public BTOProject getProjectById(List<BTOProject> projects, int id) {
         if (projects == null) return null;
@@ -19,14 +18,5 @@ public class HDBManager extends User {
                 .findFirst()
                 .orElse(null);
     }
-
-	/**
-	 * 
-	 * @param BTOProjectID
-	 */
-	public void setBTOProjectID(int BTOProjectID) {
-		// TODO - implement HDBManager.setBTOProjectID
-		throw new UnsupportedOperationException();
-	}
 
 }

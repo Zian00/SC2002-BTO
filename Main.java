@@ -1158,8 +1158,8 @@ public class Main {
                                         "An error occurred while processing the withdrawal: " + e.getMessage());
                             }
                         }
-                        case "4" -> {
-                            // Generate / Filter report of all APPLICANTS under projects handled by you
+                        case "4" -> { // Generate / Filter report of all APPLICANTS under projects handled by you
+                            
                             try {
                                 // 1. Get all applications under manager's projects
                                 var allManagerApps = applicationCTRL.getApplicationsHandledByManager();

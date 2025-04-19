@@ -1,6 +1,5 @@
 package models.repositories;
 
-import models.BTOApplication;
 import models.Receipt;
 
 import java.io.BufferedReader;
