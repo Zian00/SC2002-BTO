@@ -388,9 +388,7 @@ public class BTOApplicationCTRL {
         boolean hasApplied = applicationList.stream()
                 .anyMatch(a -> a.getApplicantNRIC().equals(currentUser.getNRIC())
                         && a.getApplicationType() == ApplicationType.APPLICATION);
-        System.out.println("[DEBUG]" + applicationList.stream()
-        .anyMatch(a -> a.getApplicantNRIC().equals(currentUser.getNRIC())
-                && a.getApplicationType() == ApplicationType.APPLICATION));
+       
         if (hasApplied) {
             System.out.println("Cannot apply for more than one project.");
             return false;

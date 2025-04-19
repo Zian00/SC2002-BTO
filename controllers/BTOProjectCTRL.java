@@ -608,7 +608,7 @@ public class BTOProjectCTRL {
             case APPLICANT -> {
                 MaritalState ms = currentUser.getMaritalStatus();
                 int age = currentUser.getAge();
-                System.out.println("Debug: MaritalState: " + ms + ", Age: " + age);
+               
                 if (ms == MaritalState.SINGLE && age >= 35) {
                     // Singles, 35 years old and above, can ONLY apply for 2-Room
                     filtered = projects.stream()
