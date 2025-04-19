@@ -87,7 +87,8 @@ public class Main {
             String opt = sc.nextLine().trim();
             // --- Common options 1–4 ---
             switch (opt) {
-                case "1" -> runProjectMenu(sc, userCTRL, projectCTRL, projectView, applicationCTRL, enquiryView, enquiryCTRL);
+                case "1" ->
+                    runProjectMenu(sc, userCTRL, projectCTRL, projectView, applicationCTRL, enquiryView, enquiryCTRL);
                 case "2" -> runApplicationMenu(sc, userCTRL, projectCTRL, applicationCTRL, btoApplicationView);
                 case "3" -> runEnquiryMenu(sc, userCTRL, projectCTRL, enquiryView, enquiryCTRL);
                 case "4" -> {
@@ -561,7 +562,7 @@ public class Main {
                             System.out.println("Your filters have been saved: " + filterCsv);
 
                             // 2) re‑fetch & display
-        
+
                             var filtered = projectCTRL.getFilteredProjectsForUser(userCTRL.getCurrentUser());
                             projectView.displayAvailableForApplicant(userCTRL.getCurrentUser(), filtered);
                         }
@@ -687,7 +688,7 @@ public class Main {
             }
         }
     }
-    
+
     // --------------------------------------------------------------------------------------------------
     // Enquiry Menu for Users
     // --------------------------------------------------------------------------------------------------
@@ -762,7 +763,7 @@ public class Main {
                             }
                         }
                         case "4" -> { // back to central menu
-                            return; 
+                            return;
                         }
                     }
                 }
@@ -824,7 +825,8 @@ public class Main {
                             }
                         }
                         case "4" -> { // Respond to Enquiries in-charge by User
-                            // Filter userManagedEnquiries with no response & Enquiry is in-chaged current user and display
+                            // Filter userManagedEnquiries with no response & Enquiry is in-chaged current
+                            // user and display
                             var userManagedEnquiries = enquiryCTRL.getFilteredEnquiriesByOfficer(projectList);
                             if (userManagedEnquiries.isEmpty()) {
                                 enquiryView.showMessage("No enquiries to respond to.");
@@ -850,10 +852,10 @@ public class Main {
                                     enquiryView.showMessage("Failed to add response, please try again.");
                                 }
                             }
-                            
+
                         }
-                        case "5" -> { // back to central menu 
-                            return; 
+                        case "5" -> { // back to central menu
+                            return;
                         }
                     }
                 }
@@ -863,7 +865,8 @@ public class Main {
                             enquiryView.displayAllEnquiries(projectList, enquiryCTRL.getEnquiries());
                         }
                         case "2" -> { // Respond to Enquiries in-charge by User
-                            // Filter userManagedEnquiries with no response & Enquiry is in-chaged current user and display
+                            // Filter userManagedEnquiries with no response & Enquiry is in-chaged current
+                            // user and display
                             var userManagedEnquiries = enquiryCTRL.getFilteredEnquiriesByManager(projectList);
                             if (userManagedEnquiries.isEmpty()) {
                                 enquiryView.showMessage("No enquiries to respond to.");
@@ -1150,8 +1153,12 @@ public class Main {
                                         "An error occurred while processing the withdrawal: " + e.getMessage());
                             }
                         }
-                        case "4" -> {
-                           // TODO Generate / Filter report of all APPLICANTS under projects handled by you
+                        case "4" ->
+                        // TODO Generate / Filter report of all APPLICANTS under projects handled by you
+                        {
+                            System.out.println("you have entered case 4 hdbmanager");
+                            // logic for generating / filtering report for all applicants
+                            // filter can be like "married applicants flat type"
                         }
                         case "5" -> {
                             return; // back to central menu
