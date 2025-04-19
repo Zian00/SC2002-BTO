@@ -174,16 +174,17 @@ public class BTOApplicationView {
      * @return the MaritalState if valid input is provided; otherwise, null.
      */
 	public MaritalState promptMaritalStatusFilter(Scanner sc) {
-        System.out.print("Filter by Marital Status (MARRIED or SINGLE) or press Enter for all: ");
-        String input = sc.nextLine().trim().toUpperCase();
-        if (input.isEmpty() || input.equals("ALL")) {
-            return null;
-        }
-        try {
-            return MaritalState.valueOf(input);
-        } catch (IllegalArgumentException e) {
-            System.out.println("Invalid marital status. No filter applied.");
-            return null;
+        while (true) {
+            System.out.print("Filter by Marital Status (MARRIED or SINGLE) or press Enter for all: ");
+            String input = sc.nextLine().trim().toUpperCase();
+            if (input.isEmpty() || input.equals("ALL")) {
+                return null;
+            }
+            try {
+                return MaritalState.valueOf(input);
+            } catch (IllegalArgumentException e) {
+                System.out.println("Invalid marital status. Please enter either 'MARRIED' or 'SINGLE'.");
+            }
         }
     }
 
@@ -195,16 +196,17 @@ public class BTOApplicationView {
      * @return the flat type as a String if valid input is provided; otherwise, null.
      */
     public String promptFlatTypeFilter(Scanner sc) {
-        System.out.print("Filter by Flat Type (TWOROOM or THREEROOM) or press Enter for all: ");
-        String input = sc.nextLine().trim().toUpperCase();
-        if (input.isEmpty() || input.equals("ALL")) {
-            return null;
+        while (true) {
+            System.out.print("Filter by Flat Type (TWOROOM or THREEROOM) or press Enter for all: ");
+            String input = sc.nextLine().trim().toUpperCase();
+            if (input.isEmpty() || input.equals("ALL")) {
+                return null;
+            }
+            if (input.equals("TWOROOM") || input.equals("THREEROOM")) {
+                return input;
+            }
+            System.out.println("Invalid flat type. Please enter either 'TWOROOM' or 'THREEROOM'.");
         }
-        if (input.equals("TWOROOM") || input.equals("THREEROOM")) {
-            return input;
-        }
-        System.out.println("Invalid flat type. No filter applied.");
-        return null;
     }
 
     /**
@@ -215,16 +217,17 @@ public class BTOApplicationView {
      * @return the minimum age as an Integer if valid input is provided; otherwise, null.
      */
     public Integer promptMinAge(Scanner sc) {
-        System.out.print("Filter by Minimum Age or press Enter for all: ");
-        String input = sc.nextLine().trim();
-        if (input.isEmpty()){
-            return null;
-        }
-        try {
-            return Integer.valueOf(input);
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid minimum age. No filter applied.");
-            return null;
+        while (true) {
+            System.out.print("Filter by Maximum Age or press Enter for all: ");
+            String input = sc.nextLine().trim();
+            if (input.isEmpty()){
+                return null;
+            }
+            try {
+                return Integer.valueOf(input);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid maximum age. Please enter a valid number.");
+            }
         }
     }
 
