@@ -4,5 +4,8 @@
         "plaintext": false,
         "markdown": false,
         "scminput": false
-    }
+    },
+    "docwriter.style": "Javadoc",
+    "docwriter.progress.trackMethods": false,
+    "docwriter.progress.trackClasses": true
 }

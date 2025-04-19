@@ -16,10 +16,6 @@ public class Applicant extends User {
 		return this.applicationID;
 	}
 
-	/**
-	 * 
-	 * @param applicationID
-	 */
 	public void setApplicationID(int applicationID) {
 		this.applicationID = applicationID;
 	}

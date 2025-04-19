@@ -19,15 +19,30 @@ import java.util.Optional;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
+/**
+ * Controller class for managing BTO applications in the BTO system.
+ * <p>
+ * Handles application submission, withdrawal, approval/rejection, booking, and report generation.
+ * Provides role-based application menus for applicants, officers, and managers.
+ * </p>
+ */
 public class BTOApplicationCTRL {
 
+    /** List of all BTO applications loaded from the repository. */
     private List<BTOApplication> applicationList;
+    /** List of all BTO projects loaded from the repository. */
     private List<BTOProject> projects;
+    /** The currently logged-in user. */
     private User currentUser;
+    /** Repository for reading/writing application data. */
     private ApplicationCSVRepository appRepo = new ApplicationCSVRepository();
+    /** Repository for reading/writing project data. */
     private BTOProjectCSVRepository projRepo = new BTOProjectCSVRepository();
 
-    /** Load all applications and projects, keep track of the logged‑in user */
+    /**
+     * Loads all applications and projects, and keeps track of the logged-in user.
+     * @param currentUser The currently logged-in user.
+     */
     public BTOApplicationCTRL(User currentUser) {
         this.currentUser = currentUser;
         this.appRepo = new ApplicationCSVRepository();
@@ -36,9 +51,20 @@ public class BTOApplicationCTRL {
         this.projects = projRepo.readBTOProjectFromCSV();
     }
 
-        // --------------------------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------------
     // Application Menu for Users
     // --------------------------------------------------------------------------------------------------
+
+    /**
+     * Runs the application menu for the current user, displaying options and routing
+     * to the appropriate actions based on the user's role (applicant, officer, manager).
+     *
+     * @param sc Scanner for user input.
+     * @param userCTRL The UserCTRL instance.
+     * @param projectCTRL The BTOProjectCTRL instance.
+     * @param applicationCTRL This BTOApplicationCTRL instance.
+     * @param btoApplicationView The BTOApplicationView for displaying menus and results.
+     */
     public void runApplicationMenu(Scanner sc, UserCTRL userCTRL, BTOProjectCTRL projectCTRL,
             BTOApplicationCTRL applicationCTRL,
             BTOApplicationView btoApplicationView) {
@@ -340,7 +366,10 @@ public class BTOApplicationCTRL {
         }
     }
 
-    /** 1) Show all applications by this user */
+    /**
+     * Shows all applications by the currently logged-in user.
+     * @return List of {@link BTOApplication} objects for the user.
+     */
     public List<BTOApplication> viewUserApplications() {
         return applicationList.stream()
                 .filter(a -> a.getApplicantNRIC().equals(currentUser.getNRIC()))
@@ -348,11 +377,12 @@ public class BTOApplicationCTRL {
     }
 
     /**
-     * 2) Apply for a project
-     * – only one application total
-     * – enforces flat‑type eligibility
+     * Submits a new application for a BTO project if eligible.
+     * Only one application is allowed per user.
+     * @param projectId The project ID to apply for.
+     * @param flatType The flat type to apply for.
+     * @return true if application was successful, false otherwise.
      */
-
     public boolean apply(int projectId, FlatType flatType) {
         // already applied?
         boolean hasApplied = applicationList.stream()
@@ -403,13 +433,9 @@ public class BTOApplicationCTRL {
     }
 
     /**
-     * 3) Withdraw an application
-     * – only if it belongs to this user
-     * 
-     * An application is considered withdrawn if:
-     * - its status is UNSUCCESSFUL and its application type is WITHDRAWAL.
-     * If the application type is WITHDRAWAL but the status is PENDING,
-     * then withdrawal is still processing.
+     * Withdraws an application by its ID if it belongs to the current user.
+     * @param applicationId The application ID to withdraw.
+     * @return true if withdrawal was successful, false otherwise.
      */
     public boolean withdraw(int applicationId) {
         try {
@@ -443,7 +469,10 @@ public class BTOApplicationCTRL {
         }
     }
 
-    /** Utility to pick the next unique application ID */
+    /**
+     * Utility to pick the next unique application ID.
+     * @return The next available application ID.
+     */
     private int getNextProjectID() {
         return applicationList.stream()
                 .mapToInt(BTOApplication::getApplicationId)
@@ -451,9 +480,9 @@ public class BTOApplicationCTRL {
                 .orElse(0) + 1;
     }
 
-    /*
-     * Manager menu -> BTO Application Menu -> 1) Display All Applications Handled
-     * By You
+    /**
+     * Gets all applications handled by the current manager.
+     * @return List of {@link BTOApplication} objects.
      */
     public List<BTOApplication> getApplicationsHandledByManager() {
         return applicationList.stream()
@@ -464,9 +493,9 @@ public class BTOApplicationCTRL {
     }
 
     /**
-     * Retrieves all applications for which the associated project's approved
-     * officer list
+     * Retrieves all applications for which the associated project's approved officer list
      * contains the current officer's NRIC.
+     * @return List of {@link BTOApplication} objects.
      */
     public List<BTOApplication> getApplicationsHandledByOfficer() {
         String officerNRIC = currentUser.getNRIC();
@@ -480,11 +509,9 @@ public class BTOApplicationCTRL {
     }
 
     /**
-     * Manager menu -> BTO Application Menu -> 2) Approval / Rejection for
-     * Application
-     * 
+     * Updates the status of an application.
      * @param applicationId The ID of the application to update.
-     * @param newStatus     The new status (e.g., "SUCCESSFUL" or "UNSUCCESSFUL").
+     * @param newStatus The new status ("SUCCESSFUL" or "UNSUCCESSFUL").
      * @return true if updated successfully, false otherwise.
      */
     public boolean updateApplicationStatus(int applicationId, String newStatus) {
@@ -512,6 +539,13 @@ public class BTOApplicationCTRL {
 
     }
 
+    /**
+     * Processes an application decision (approve or reject) for a manager.
+     * @param appId The application ID to process.
+     * @param decision "A" for approve, "R" for reject.
+     * @param projectCTRL The BTOProjectCTRL instance.
+     * @return true if processed successfully, false otherwise.
+     */
     public boolean processApplicationDecision(int appId, String decision, BTOProjectCTRL projectCTRL) {
 
         // Retrieve the application from applicationList
@@ -574,6 +608,12 @@ public class BTOApplicationCTRL {
         return false;
     }
 
+    /**
+     * Books a flat for a successful application and updates the application status to BOOKED.
+     * @param applicationId The application ID to book.
+     * @param projectCTRL The BTOProjectCTRL instance.
+     * @return true if booking was successful, false otherwise.
+     */
     public boolean bookApplication(int applicationId, BTOProjectCTRL projectCTRL) {
 
         // Retrieve the application
@@ -642,6 +682,11 @@ public class BTOApplicationCTRL {
         return true;
     }
 
+    /**
+     * Gets an application by its ID.
+     * @param applicationId The application ID.
+     * @return The {@link BTOApplication} object, or null if not found.
+     */
     public BTOApplication getApplicationById(int applicationId) {
         return applicationList.stream()
                 .filter(app -> app.getApplicationId() == applicationId)
@@ -649,10 +694,21 @@ public class BTOApplicationCTRL {
                 .orElse(null);
     }
 
+    /**
+     * Gets the list of all BTO projects.
+     * @return List of {@link BTOProject} objects.
+     */
     public List<BTOProject> getProjects() {
         return projects;
     }
 
+    /**
+     * Books a successful application and generates a receipt for the applicant.
+     * @param appId The application ID to book.
+     * @param projectCTRL The BTOProjectCTRL instance.
+     * @param userCTRL The UserCTRL instance.
+     * @return true if booking and receipt generation were successful, false otherwise.
+     */
     public boolean bookAndGenerateReceipt(int appId, BTOProjectCTRL projectCTRL, UserCTRL userCTRL) {
         try {
             // Only allow booking for applications handled by this officer
@@ -732,6 +788,12 @@ public class BTOApplicationCTRL {
         }
     }
 
+    /**
+     * Approves a withdrawal application and updates flat availability.
+     * @param appId The withdrawal application ID.
+     * @param projectCTRL The BTOProjectCTRL instance.
+     * @return true if withdrawal was approved, false otherwise.
+     */
     public boolean approveWithdrawalApplication(int appId, BTOProjectCTRL projectCTRL) {
         // Find the pending withdrawal application
         Optional<BTOApplication> appOpt = applicationList.stream()
@@ -777,7 +839,17 @@ public class BTOApplicationCTRL {
         return true;
     }
 
-    // Takes in filter parameters and returns the filtered list
+    /**
+     * Generates a filtered report of all applicants under projects handled by the current manager.
+     * @param maritalFilter Marital status filter.
+     * @param flatTypeFilter Flat type filter.
+     * @param minAge Minimum age filter.
+     * @param maxAge Maximum age filter.
+     * @param neighbourhoodFilter Neighbourhood filter.
+     * @param allProjects List of all BTO projects.
+     * @param userCTRL The UserCTRL instance.
+     * @return List of filtered {@link BTOApplication} objects.
+     */
     public List<BTOApplication> generateReport(
             MaritalState maritalFilter,
             String flatTypeFilter,

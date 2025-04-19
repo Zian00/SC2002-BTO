@@ -12,30 +12,66 @@ public class BTOApplication {
     private String flatType;
 
     // getters & setters for each field:
-    public int getApplicationId() { return applicationId; }
-    public void setApplicationId(int id) { this.applicationId = id; }
+    public int getApplicationId() {
+        return applicationId;
+    }
 
-    public String getApplicantNRIC() { return applicantNRIC; }
-    public void setApplicantNRIC(String nric) { this.applicantNRIC = nric; }
+    public void setApplicationId(int id) {
+        this.applicationId = id;
+    }
 
-    public int getProjectID() { return projectID; }
-    public void setProjectID(int pid) { this.projectID = pid; }
+    public String getApplicantNRIC() {
+        return applicantNRIC;
+    }
 
-    public ApplicationType getApplicationType() { return applicationType; }
-    public void setApplicationType(ApplicationType t) { this.applicationType = t; }
+    public void setApplicantNRIC(String nric) {
+        this.applicantNRIC = nric;
+    }
 
-    public ApplicationStatus getStatus() { return status; }
-    public void setStatus(ApplicationStatus s) { this.status = s; }
+    public int getProjectID() {
+        return projectID;
+    }
 
-    public String getFlatType() { return flatType; }
-    public void setFlatType(String ft) { this.flatType = ft; }
+    public void setProjectID(int pid) {
+        this.projectID = pid;
+    }
 
+    public ApplicationType getApplicationType() {
+        return applicationType;
+    }
+
+    public void setApplicationType(ApplicationType t) {
+        this.applicationType = t;
+    }
+
+    public ApplicationStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ApplicationStatus s) {
+        this.status = s;
+    }
+
+    public String getFlatType() {
+        return flatType;
+    }
+
+    public void setFlatType(String ft) {
+        this.flatType = ft;
+    }
+
+    /**
+     * The `toString` method overrides the default implementation to return a formatted string
+     * representation of the object's attributes.
+     * 
+     * @return The `toString()` method is being overridden to return a formatted string containing the
+     * application ID, project ID, application type, status, and flat type.
+     */
     @Override
     public String toString() {
         return String.format(
                 "AppID:%d Project:%d Type:%s Status:%s Flat:%s",
                 applicationId, projectID, applicationType, status, flatType);
     }
-    
-    
+
 }

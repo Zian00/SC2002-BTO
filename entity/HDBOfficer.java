@@ -1,4 +1,5 @@
 package entity;
+
 import entity.enumerations.MaritalState;
 import entity.enumerations.Role;
 
@@ -8,7 +9,5 @@ public class HDBOfficer extends Applicant {
 			String filterSettings, Role role) {
 		super(NRIC, Name, password, age, maritalStatus, filterSettings, role);
 	}
-
-
 
 }

@@ -61,6 +61,13 @@ public class OfficerApplication {
         this.projectLocation = location;
     }
 
+    /**
+     * The `toString` method overrides the default behavior to return a formatted string representation
+     * of an OfficerApplication object's attributes.
+     * 
+     * @return A formatted string containing the officer application ID, project ID, project name,
+     * project location, and status.
+     */
     @Override
     public String toString() {
         return String.format(

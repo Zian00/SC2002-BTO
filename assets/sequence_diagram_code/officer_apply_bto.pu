@@ -1,0 +1,33 @@
+@startuml
+
+actor Officer as "HDB Officer"
+participant UserView
+participant UserCTRL
+participant BTOProjectView
+participant BTOProjectCTRL
+participant BTOApplicationCTRL
+
+== Login ==
+Officer -> UserView: loginFlow()
+UserView -> UserCTRL: login(nric, password)
+UserCTRL --> UserView: login result
+UserView -> Officer: displayMenu()
+
+== Navigate to BTO Project Menu ==
+Officer -> BTOProjectView: displayOfficerMenu()
+BTOProjectView -> Officer: show menu options
+
+== Apply for a BTO Project ==
+Officer -> BTOProjectCTRL: applyForBTO()
+BTOProjectCTRL -> BTOProjectView: displayEligibleProjectsForOfficer(projects, ms, age)
+BTOProjectView -> Officer: show eligible projects
+
+Officer -> BTOProjectCTRL: select project ID, flat type
+BTOProjectCTRL -> BTOApplicationCTRL: apply(projectId, flatType, officer)
+BTOApplicationCTRL -> BTOApplicationCTRL: check eligibility & duplicates
+BTOApplicationCTRL -> BTOApplicationCTRL: create application
+BTOApplicationCTRL --> BTOProjectCTRL: application result
+
+BTOProjectCTRL -> BTOProjectView: showMessage("Application submitted! Status: PENDING.")
+BTOProjectView -> Officer: confirmation
+@enduml

@@ -17,24 +17,43 @@ import java.util.Optional;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
+/**
+ * Controller class for managing officer applications in the BTO system.
+ * <p>
+ * Handles officer registration for BTO projects, application approval/rejection,
+ * eligibility checks, and provides officer application-related menus for both
+ * officers and managers.
+ * </p>
+ */
 public class OfficerApplicationCTRL {
 
+    /** List of all officer applications loaded from the repository. */
     private List<OfficerApplication> officerApplicationList;
+    /** List of all BTO applications loaded from the repository. */
     private List<BTOApplication> btoApplicationList;
+    /** List of all BTO projects loaded from the repository. */
     private List<BTOProject> projects;
+    /** The currently logged-in user. */
     private User currentUser;
+    /** Repository for officer applications. */
     private OfficerApplicationCSVRepository officerRepo;
+    /** Repository for BTO applications. */
     private ApplicationCSVRepository appRepo;
+    /** Repository for BTO projects. */
     private BTOProjectCSVRepository projRepo;
 
     /**
-     * Load all applications and projects, keep track of the logged-in user
+     * Gets the role of the current user.
+     * @return The {@link Role} of the current user.
      */
-
     public Role getCurrentUserRole() {
         return currentUser.getRole();
     }
 
+    /**
+     * Constructs a new OfficerApplicationCTRL and loads all relevant data.
+     * @param currentUser The currently logged-in user.
+     */
     public OfficerApplicationCTRL(User currentUser) {
         this.currentUser = currentUser;
         this.officerRepo = new OfficerApplicationCSVRepository();
@@ -47,9 +66,15 @@ public class OfficerApplicationCTRL {
         this.projects = projRepo.readBTOProjectFromCSV();
     }
 
-
-    // OFFICER APPLICATION SUB MENU (option 5)
-    // ===========================
+    /**
+     * Runs the officer application menu for the current user, displaying options
+     * and routing to the appropriate actions based on the user's role (officer or manager).
+     *
+     * @param sc Scanner for user input.
+     * @param offAppCTRL This controller instance.
+     * @param view The OfficerApplicationView for displaying menus and results.
+     * @param projectCTRL The BTOProjectCTRL for accessing project data.
+     */
     public void runOfficerApplicationMenu(Scanner sc,
             OfficerApplicationCTRL offAppCTRL,
             OfficerApplicationView view,
@@ -132,7 +157,9 @@ public class OfficerApplicationCTRL {
     }
 
     /**
-     * View all officer applications submitted by current user
+     * Returns all officer applications submitted by the current user,
+     * with project information attached.
+     * @return List of {@link OfficerApplication} objects for the current user.
      */
     public List<OfficerApplication> viewUserOfficerApplications() {
         List<OfficerApplication> userApplications = officerApplicationList.stream()
@@ -159,10 +186,10 @@ public class OfficerApplicationCTRL {
     }
 
     /**
-     * Register as an officer for a project if eligible
-     * 
-     * @param projectId The project to register for
-     * @return true if registration was successful, false otherwise
+     * Registers the current user as an officer for a given project if eligible.
+     *
+     * @param projectId The project to register for.
+     * @return true if registration was successful, false otherwise.
      */
     public boolean registerAsOfficer(int projectId) {
         // Find the project
@@ -243,7 +270,8 @@ public class OfficerApplicationCTRL {
     }
 
     /**
-     * Get all pending officer applications for projects managed by current user
+     * Gets all pending officer applications for projects managed by the current user.
+     * @return List of pending {@link OfficerApplication} objects.
      */
     public List<OfficerApplication> getPendingOfficerApplicationsForManager() {
         List<Integer> managedProjectIds = projects.stream()
@@ -258,11 +286,11 @@ public class OfficerApplicationCTRL {
     }
 
     /**
-     * Process an officer application decision (approve/reject)
-     * 
-     * @param applicationId ID of the application to process
-     * @param decision      "A" for approve, "R" for reject
-     * @return true if successful, false otherwise
+     * Processes an officer application decision (approve or reject) for a manager.
+     *
+     * @param applicationId ID of the application to process.
+     * @param decision "A" for approve, "R" for reject.
+     * @return true if successful, false otherwise.
      */
     public boolean processOfficerApplicationDecision(int applicationId, String decision) {
         // Find the application
@@ -368,10 +396,10 @@ public class OfficerApplicationCTRL {
     }
 
     /**
-     * Check if current user is an approved officer for a project
-     * 
-     * @param projectId Project to check
-     * @return true if user is an approved officer, false otherwise
+     * Checks if the current user is an approved officer for a given project.
+     *
+     * @param projectId Project to check.
+     * @return true if user is an approved officer, false otherwise.
      */
     public boolean isApprovedOfficerForProject(int projectId) {
         BTOProject project = projects.stream()
@@ -387,7 +415,11 @@ public class OfficerApplicationCTRL {
     }
 
     /**
-     * Check if dates overlap between two projects
+     * Checks if the application periods of two projects overlap.
+     *
+     * @param p1 The first project.
+     * @param p2 The second project.
+     * @return true if the periods overlap, false otherwise.
      */
     private boolean datesOverlap(BTOProject p1, BTOProject p2) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -402,7 +434,8 @@ public class OfficerApplicationCTRL {
     }
 
     /**
-     * Get the next available officer application ID
+     * Gets the next available officer application ID.
+     * @return The next officer application ID as an integer.
      */
     private int getNextOfficerApplicationID() {
         return officerApplicationList.stream()
@@ -412,10 +445,8 @@ public class OfficerApplicationCTRL {
     }
 
     /**
-     * Get all projects user can apply to be an officer for
-     */
-    /**
-     * Get all projects user can apply to be an officer for
+     * Gets all projects the user can apply to be an officer for, based on eligibility.
+     * @return List of eligible {@link BTOProject} objects.
      */
     public List<BTOProject> getEligibleOfficerProjects() {
         return projects.stream()
@@ -473,6 +504,10 @@ public class OfficerApplicationCTRL {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Gets all pending and approved officer applications for projects managed by the current user.
+     * @return List of {@link OfficerApplication} objects.
+     */
     public List<OfficerApplication> getPendingAndSuccessfullOfficerApplicationsForManager() {
         List<Integer> managedProjectIds = projects.stream()
                 .filter(p -> p.getManagerID().equals(currentUser.getNRIC()))

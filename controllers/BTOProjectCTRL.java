@@ -20,21 +20,49 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
+/**
+ * Controller class for managing BTO projects in the BTO system.
+ * <p>
+ * Handles project creation, editing, deletion, filtering, and visibility updates.
+ * Provides role-based project menus and supports applicant, officer, and manager flows.
+ * </p>
+ */
 public class BTOProjectCTRL {
 
+    /** List of all BTO projects loaded from the repository. */
     private List<BTOProject> projects;
+    /** The currently logged-in user. */
     private User currentUser;
+    /** Repository for reading/writing BTO project data. */
     private BTOProjectCSVRepository repo = new BTOProjectCSVRepository();
 
+    /**
+     * Constructs a BTOProjectCTRL for the given user and loads project data.
+     * @param currentUser The currently logged-in user.
+     */
     public BTOProjectCTRL(User currentUser) {
         this.currentUser = currentUser;
         this.projects = repo.readBTOProjectFromCSV();
     }
 
-    
     // --------------------------------------------------------------------------------------------------
     // Projects Menu for Users
     // --------------------------------------------------------------------------------------------------
+
+    /**
+     * Runs the project menu for the current user, displaying options and routing
+     * to the appropriate actions based on the user's role (applicant, officer, manager).
+     *
+     * @param sc Scanner for user input.
+     * @param userCTRL The UserCTRL instance.
+     * @param projectCTRL This BTOProjectCTRL instance.
+     * @param projectView The BTOProjectView for displaying menus and results.
+     * @param applicationCTRL The BTOApplicationCTRL for handling applications.
+     * @param officerAppCTRL The OfficerApplicationCTRL for officer applications.
+     * @param officerAppView The OfficerApplicationView for officer application UI.
+     * @param enquiryView The EnquiryView for enquiry UI.
+     * @param enquiryCTRL The EnquiryCTRL for handling enquiries.
+     */
     public void runProjectMenu(Scanner sc, UserCTRL userCTRL, BTOProjectCTRL projectCTRL,
             BTOProjectView projectView, BTOApplicationCTRL applicationCTRL,
             OfficerApplicationCTRL officerAppCTRL ,OfficerApplicationView officerAppView,
@@ -161,8 +189,7 @@ public class BTOProjectCTRL {
                         var filtered = projectCTRL.getFilteredProjectsForUser(userCTRL.getCurrentUser());
                         projectView.displayAvailableForApplicant(userCTRL.getCurrentUser(), filtered);
                     }
-                    case "3" -> {
-                        // Apply for a BTO Project
+                    case "3" -> { // Apply for a BTO Project
                         try {
                             String officerNRIC = userCTRL.getCurrentUser().getNRIC();
                             var ms = userCTRL.getCurrentUser().getMaritalStatus();
@@ -285,8 +312,8 @@ public class BTOProjectCTRL {
                         Enquiry newEnquiry = enquiryCTRL.createEnquiry(projectId, enquiryText);
                         enquiryView.displayEnquiry(newEnquiry);
                     }
-                    case "5" -> {
-                        // 3) Register as officer
+                    case "5" -> { // Register as officer
+                        
                         var elig = officerAppCTRL.getEligibleOfficerProjects();
                         officerAppView.displayEligibleProjects(elig);
 
@@ -485,7 +512,11 @@ public class BTOProjectCTRL {
         }
     }
 
-    /** For manager: get any project by ID */
+    /**
+     * For manager: get any project by ID.
+     * @param id The project ID.
+     * @return The {@link BTOProject} with the specified ID, or null if not found.
+     */
     public BTOProject getProjectById(int id) {
         // If current user is a manager, use their method (for possible future logic)
         if (currentUser instanceof HDBManager manager) {
@@ -498,7 +529,10 @@ public class BTOProjectCTRL {
                 .orElse(null);
     }
 
-    /** Returns max existing ID + 1 (dont need to manually key in) */
+    /**
+     * Returns the next available project ID (max existing ID + 1).
+     * @return The next project ID.
+     */
     public int getNextProjectID() {
         return projects.stream()
                 .mapToInt(BTOProject::getProjectID)
@@ -506,13 +540,22 @@ public class BTOProjectCTRL {
                 .orElse(0) + 1;
     }
 
-    /** Create a new project */
+    /**
+     * Creates a new BTO project and persists it.
+     * @param p The new {@link BTOProject} to add.
+     */
     public void createProject(BTOProject p) {
         projects.add(p);
         repo.writeBTOProjectToCSV(projects);
     }
 
-    /** Edit an existing project: replace fields on the found object */
+    /**
+     * Edits an existing project by replacing its fields with those from the updated object.
+     * Only managers can edit projects.
+     * @param projectId The ID of the project to edit.
+     * @param updated The updated {@link BTOProject} object.
+     * @return true if the project was updated, false otherwise.
+     */
     public boolean editProject(int projectId, BTOProject updated) {
         BTOProject existing = null;
         // only manager can edit project
@@ -539,7 +582,11 @@ public class BTOProjectCTRL {
         return true;
     }
 
-    /** Delete a project by ID */
+    /**
+     * Deletes a project by its ID.
+     * @param projectId The ID of the project to delete.
+     * @return true if the project was deleted, false otherwise.
+     */
     public boolean deleteProject(int projectId) {
         boolean removed = projects.removeIf(p -> p.getProjectID() == projectId);
         if (removed) {
@@ -549,10 +596,10 @@ public class BTOProjectCTRL {
     }
 
     /**
-     * Filters projects based on the current user's role.
-     * For Applicants and HDB Officers, the logic is the same (only visible
-     * projects).
-     * For HDB Managers, only projects managed by the manager are returned.
+     * Filters projects based on the current user's role and eligibility.
+     * Applicants and HDB Officers see only visible and eligible projects.
+     * Managers see only projects they manage.
+     * @return List of filtered {@link BTOProject} objects.
      */
     public List<BTOProject> getFilteredProjects() {
         Role role = currentUser.getRole();
@@ -618,13 +665,19 @@ public class BTOProjectCTRL {
         return filtered;
     }
 
+    /**
+     * Returns a copy of all BTO projects.
+     * @return List of all {@link BTOProject} objects.
+     */
     public List<BTOProject> getAllProjects() {
         // return a copy so callers can’t edit the internal list
         return new ArrayList<>(projects);
     }
 
-    // HDBOfficer gethandled projects filter
-    // gets approvedofficer NRIC match and ignores visibility
+    /**
+     * Returns a list of BTO projects handled by the current officer (approved officer).
+     * @return List of handled {@link BTOProject} objects.
+     */
     public List<BTOProject> getHandledProjects() {
         String me = currentUser.getNRIC();
         return projects.stream()
@@ -634,10 +687,10 @@ public class BTOProjectCTRL {
                 .collect(Collectors.toList());
     }
 
-    // FILTER SETTINGS
     /**
-     * apply both visibility + eligibility and the user’s custom price/room
-     * filters
+     * Returns a list of projects filtered by both eligibility and the user's custom filter settings.
+     * @param user The user whose filter settings to apply.
+     * @return List of filtered {@link BTOProject} objects.
      */
     public List<BTOProject> getFilteredProjectsForUser(User user) {
         // 1) existing filter (visibility, marital/age)
@@ -686,23 +739,22 @@ public class BTOProjectCTRL {
                 .collect(Collectors.toList());
     }
 
-    /** save new filter settings back to the user record + CSV */
+    /**
+     * Saves new filter settings back to the user record and CSV.
+     * @param user The user whose filter settings are to be updated.
+     * @param fs The new {@link FilterSettings}.
+     */
     public void updateUserFilterSettings(User user, FilterSettings fs) {
         user.setFilterSettings(fs.toCsv());
         // assume UserCTRL has saveUserData()
         new UserCTRL().saveUserData();
     }
-    // stubs for edit/delete…
-    // public void editProject() {
-    // throw new UnsupportedOperationException();
-    // }
 
-    // public void deleteProject() {
-    // throw new UnsupportedOperationException();
-    // }
-
-    
-    //TURN PROJECT VISIBILITY TO FALSE AFTER IT PASSES OUR DATE
+    /**
+     * Updates project visibility based on the current date and each project's application period.
+     * Projects outside their application period are set to invisible.
+     * Changes are persisted to the CSV file.
+     */
     public void updateProjectVisibility() {
         // use the correct date format as in our file ("yyyy-MM-dd")
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -722,10 +774,21 @@ public class BTOProjectCTRL {
         saveProjects();
     }
 
+    /**
+     * Persists the current list of projects to the CSV file.
+     */
     public void saveProjects() {
         repo.writeBTOProjectToCSV(projects);
     }
 
+    /**
+     * Returns a list of projects the officer is eligible to apply for as an officer,
+     * based on NRIC, marital status, and age.
+     * @param officerNRIC The NRIC of the officer.
+     * @param ms The marital status of the officer.
+     * @param age The age of the officer.
+     * @return List of eligible {@link BTOProject} objects.
+     */
     public List<BTOProject> getEligibleProjectsForOfficerApplication(String officerNRIC, MaritalState ms, int age) {
         return projects.stream()
                 .filter(p -> {

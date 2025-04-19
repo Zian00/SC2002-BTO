@@ -16,6 +16,15 @@ public class UserCSVRepository {
 
     private static final String CSV_FILE = "assets/userList.csv";
 
+    /**
+     * The function reads user data from a CSV file, parses the data, and creates
+     * User objects based on
+     * the information read.
+     * 
+     * @return The method `readUserFromCSV` returns a `List<User>` containing user
+     *         objects read from a
+     *         CSV file.
+     */
     public List<User> readUserFromCSV() {
         List<User> users = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(CSV_FILE))) {
@@ -27,8 +36,9 @@ public class UserCSVRepository {
             while ((line = br.readLine()) != null) {
                 if (line.trim().isEmpty())
                     continue;
-                String[] tokens = line.split(",", 7); //im trying sth
-                // String[] tokens = line.split(",", -1); // Filter Settings is default as blank so -1 to prevent field getting deleted
+                String[] tokens = line.split(",", 7); // im trying sth
+                // String[] tokens = line.split(",", -1); // Filter Settings is default as blank
+                // so -1 to prevent field getting deleted
                 // Ensure tokens length is correct
                 if (tokens.length < 7) {
                     System.out.println("Skipping invalid record: " + line);
@@ -56,7 +66,15 @@ public class UserCSVRepository {
         return users;
     }
 
-    
+    /**
+     * The `writeUserToCSV` function writes a list of User objects to a CSV file,
+     * handling special
+     * cases like commas in the filter settings.
+     * 
+     * @param users A list of User objects containing information such as name,
+     *              NRIC, age, marital
+     *              status, password, role, and filter settings.
+     */
     public void writeUserToCSV(List<User> users) {
         try (PrintWriter pw = new PrintWriter(new FileWriter(CSV_FILE))) {
             // 1) Header
@@ -71,13 +89,13 @@ public class UserCSVRepository {
                     fs = "\"" + fs + "\"";
                 }
                 pw.printf("%s,%s,%d,%s,%s,%s,%s%n",
-                    user.getName(),
-                    user.getNRIC(),
-                    user.getAge(),
-                    user.getMaritalStatus(),
-                    user.getPassword(),
-                    user.getRole(),
-                    fs            // <- use the local filtersettings
+                        user.getName(),
+                        user.getNRIC(),
+                        user.getAge(),
+                        user.getMaritalStatus(),
+                        user.getPassword(),
+                        user.getRole(),
+                        fs // <- use the local filtersettings
                 );
             }
         } catch (IOException e) {

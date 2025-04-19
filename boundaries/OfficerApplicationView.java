@@ -4,9 +4,18 @@ import entity.BTOProject;
 import entity.OfficerApplication;
 import java.util.List;
 
-
+/**
+ * View class for officer application interactions in the BTO system.
+ * <p>
+ * Provides menu displays and output methods for officers and managers to view,
+ * check, and manage officer applications for BTO projects.
+ * </p>
+ */
 public class OfficerApplicationView {
 
+    /**
+     * Displays the main menu options for HDB Officers in the officer application module.
+     */
     public void displayOfficerMenu() {
         System.out.println("\n=== Officer Application Menu ===");
         System.out.println("1. View All Officer Applications");
@@ -15,6 +24,9 @@ public class OfficerApplicationView {
         System.out.print("Select an option: ");
     }
 
+    /**
+     * Displays the main menu options for HDB Managers in the officer application module.
+     */
     public void displayManagerMenu() {
         System.out.println("\n=== Officer Application Menu ===");
         System.out.println("1. Display All Pending/Successful Applications Managed By You");
@@ -24,10 +36,9 @@ public class OfficerApplicationView {
     }
 
     /**
-     * Displays all applications submitted by a specific officer
-     * 
-     * @param officerApplicationList List of officer applications by the current
-     *                               user
+     * Displays all applications submitted by a specific officer.
+     *
+     * @param officerApplicationList List of officer applications by the current user.
      */
     public void displayOfficerApplications(List<OfficerApplication> officerApplicationList) {
         if (officerApplicationList.isEmpty()) {
@@ -48,9 +59,9 @@ public class OfficerApplicationView {
     }
 
     /**
-     * Displays available projects that an officer can apply for
-     * 
-     * @param eligibleProjects List of projects officer can apply to
+     * Displays available projects that an officer can apply for.
+     *
+     * @param eligibleProjects List of projects officer can apply to.
      */
     public void displayEligibleProjects(List<BTOProject> eligibleProjects) {
         if (eligibleProjects.isEmpty()) {
@@ -70,11 +81,10 @@ public class OfficerApplicationView {
     }
 
     /**
-     * Displays pending applications for projects managed by a specific manager
-     * 
-     * @param pendingApplications List of pending applications for manager's
-     *                            projects
-     * @param projects            List of all BTO projects for reference
+     * Displays pending applications for projects managed by a specific manager.
+     *
+     * @param pendingApplications List of pending applications for manager's projects.
+     * @param projects            List of all BTO projects for reference.
      */
     public void displayManagerPendingApplications(List<OfficerApplication> pendingApplications,
             List<BTOProject> projects) {
@@ -101,10 +111,10 @@ public class OfficerApplicationView {
     }
 
     /**
-     * Displays all officer applications in the system
-     * 
-     * @param officerApplicationList Complete list of all officer applications
-     * @param projects               List of all BTO projects for reference
+     * Displays all officer applications in the system.
+     *
+     * @param officerApplicationList Complete list of all officer applications.
+     * @param projects               List of all BTO projects for reference.
      */
     public void displayAllApplications(List<OfficerApplication> officerApplicationList, List<BTOProject> projects) {
         if (officerApplicationList.isEmpty()) {

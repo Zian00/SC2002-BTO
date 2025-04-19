@@ -1,0 +1,24 @@
+@startuml
+actor Officer as "HDB Officer"
+participant BTOProjectView
+participant BTOProjectCTRL
+participant OfficerApplicationCTRL
+participant OfficerApplicationView
+
+== Officer selects "Register as HDB Officer of a BTO Project" ==
+Officer -> BTOProjectView: displayOfficerMenu()
+BTOProjectView -> Officer: show menu options
+
+Officer -> BTOProjectCTRL: runProjectMenu(..., "5")
+BTOProjectCTRL -> OfficerApplicationCTRL: getEligibleOfficerProjects()
+OfficerApplicationCTRL -> OfficerApplicationView: displayEligibleProjects(eligibleProjects)
+OfficerApplicationView -> Officer: show eligible projects
+
+Officer -> BTOProjectCTRL: enter Project ID to register
+BTOProjectCTRL -> OfficerApplicationCTRL: registerAsOfficer(projectId)
+OfficerApplicationCTRL -> OfficerApplicationCTRL: check eligibility, overlaps, slots
+OfficerApplicationCTRL -> OfficerApplicationCTRL: create OfficerApplication, update project, persist
+OfficerApplicationCTRL --> BTOProjectCTRL: registration result
+
+BTOProjectCTRL -> Officer: show registration status
+@enduml

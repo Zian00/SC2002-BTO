@@ -3,6 +3,9 @@ import controllers.UserCTRL;
 import java.util.Scanner;
 
 public class Main {
+
+    // This `main` method is the entry point of the Java program. Here's a breakdown
+    // of what it does:
     public static void main(String[] args) {
         try (Scanner sc = new Scanner(System.in)) {
             UserCTRL userCTRL = new UserCTRL();

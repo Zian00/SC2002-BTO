@@ -17,12 +17,26 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Controller class for managing enquiries in the BTO system.
+ * <p>
+ * Handles creation, editing, deletion, and response to enquiries.
+ * Supports role-based enquiry menu navigation for applicants, officers, and managers.
+ * Implements both {@link IEnquirySubmission} and {@link IEnquiryResponse} interfaces.
+ * </p>
+ */
 public final class EnquiryCTRL implements IEnquiryResponse, IEnquirySubmission {
 
+    /** List of all enquiries loaded from the repository. */
     private List<Enquiry> enquiries;
+    /** The currently logged-in user. */
     private final User currentUser;
+    /** Repository for reading/writing enquiry data. */
     private final EnquiryCSVRepository enquiryRepo = new EnquiryCSVRepository();
-    
+
+    /**
+     * Loads enquiry data from the CSV repository into the enquiries list.
+     */
     public void loadEnquiryData() {
         try {
             enquiries = enquiryRepo.readEnquiriesFromCSV();
@@ -31,6 +45,9 @@ public final class EnquiryCTRL implements IEnquiryResponse, IEnquirySubmission {
         }
     }
 
+    /**
+     * Saves the current enquiries list to the CSV repository.
+     */
     public void saveEnquiryData() {
         try {
             enquiryRepo.writeEnquiriesToCSV(enquiries);
@@ -38,12 +55,20 @@ public final class EnquiryCTRL implements IEnquiryResponse, IEnquirySubmission {
             System.err.println("Failed to save enquiry data: " + e.getMessage());
         }
     }
-    
+
+    /**
+     * Constructs an EnquiryCTRL for the given user and loads enquiry data.
+     * @param currentUser The currently logged-in user.
+     */
     public EnquiryCTRL(User currentUser) {
         this.currentUser = currentUser;
         loadEnquiryData();
     }
 
+    /**
+     * Gets the list of all enquiries.
+     * @return List of {@link Enquiry} objects.
+     */
     public List<Enquiry> getEnquiries() {
         return enquiries;
     }
@@ -51,6 +76,17 @@ public final class EnquiryCTRL implements IEnquiryResponse, IEnquirySubmission {
     // --------------------------------------------------------------------------------------------------
     // Enquiry Menu for Users
     // --------------------------------------------------------------------------------------------------
+
+    /**
+     * Runs the enquiry menu for the current user, displaying options and routing
+     * to the appropriate actions based on the user's role (applicant, officer, manager).
+     *
+     * @param sc           Scanner for user input.
+     * @param userCTRL     The UserCTRL instance.
+     * @param projectCTRL  The BTOProjectCTRL instance.
+     * @param enquiryView  The EnquiryView for displaying menus and results.
+     * @param enquiryCTRL  This EnquiryCTRL instance.
+     */
     public void runEnquiryMenu(Scanner sc, UserCTRL userCTRL, BTOProjectCTRL projectCTRL,
             EnquiryView enquiryView, EnquiryCTRL enquiryCTRL) {
         while (true) {
@@ -261,8 +297,13 @@ public final class EnquiryCTRL implements IEnquiryResponse, IEnquirySubmission {
             }
         }
     }
-    
-    // Returns selected Enquiry
+
+    /**
+     * Finds an enquiry by its ID from a given list.
+     * @param enquiries List of enquiries to search.
+     * @param selectedId The enquiry ID to find.
+     * @return The {@link Enquiry} if found, otherwise null.
+     */
     public Enquiry findEnquiryById(List<Enquiry> enquiries, int selectedId) {
         return enquiries.stream()
                 .filter(e -> e.getEnquiryId() == selectedId)
@@ -270,7 +311,10 @@ public final class EnquiryCTRL implements IEnquiryResponse, IEnquirySubmission {
                 .orElse(null);
     }
 
-    // Returns a list of filtered enquiries by logged in user
+    /**
+     * Returns a list of enquiries submitted by the currently logged-in user.
+     * @return List of {@link Enquiry} objects.
+     */
     public List<Enquiry> getFilteredEnquiriesByNRIC() {
     if (enquiries == null) {
         return new ArrayList<>();
@@ -281,7 +325,12 @@ public final class EnquiryCTRL implements IEnquiryResponse, IEnquirySubmission {
             .collect(Collectors.toList());
     }
 
-    // Returns a list of filtered enquiries by logged in user (Role: Manager)
+    /**
+     * Returns a list of enquiries for projects managed by the current manager user,
+     * which have not yet been responded to.
+     * @param projectList List of all BTO projects.
+     * @return List of {@link Enquiry} objects.
+     */
     public List<Enquiry> getFilteredEnquiriesByManager(List<BTOProject> projectList) {
         if (enquiries == null) {
             return new ArrayList<>();
@@ -303,8 +352,13 @@ public final class EnquiryCTRL implements IEnquiryResponse, IEnquirySubmission {
                         && (e.getResponse() == null || e.getResponse().isEmpty()))
             .collect(Collectors.toList());
     }
-    
-    // Returns a list of filtered enquiries by logged in user (Role: Officer)
+
+    /**
+     * Returns a list of enquiries for projects managed by the current officer user,
+     * which have not yet been responded to.
+     * @param projectList List of all BTO projects.
+     * @return List of {@link Enquiry} objects.
+     */
     public List<Enquiry> getFilteredEnquiriesByOfficer(List<BTOProject> projectList) {
         if (enquiries == null) {
             return new ArrayList<>();
@@ -328,7 +382,10 @@ public final class EnquiryCTRL implements IEnquiryResponse, IEnquirySubmission {
             .collect(Collectors.toList());
     }
 
-    // Returns a list of filtered enquiries by logged in user and that it has not been responded yet
+    /**
+     * Returns a list of editable enquiries (not yet responded) submitted by the current user.
+     * @return List of {@link Enquiry} objects.
+     */
     public List<Enquiry> getEditableEnquiriesByNRIC() {
         if (enquiries == null) {
             return new ArrayList<>();
@@ -341,9 +398,10 @@ public final class EnquiryCTRL implements IEnquiryResponse, IEnquirySubmission {
     }
 
     /**
-     * Creates a new enquiry.
-     * @param projectId the project ID this enquiry is associated with
-     * @param message   the enquiry message text
+     * Creates a new enquiry for a given project with the specified message.
+     * @param projectId The project ID this enquiry is associated with.
+     * @param message   The enquiry message text.
+     * @return The created {@link Enquiry} object, or null if creation failed.
      */
     @Override
     public Enquiry createEnquiry(int projectId, String message) {
@@ -386,7 +444,12 @@ public final class EnquiryCTRL implements IEnquiryResponse, IEnquirySubmission {
         }
     }
 
-    // Update existing enquiry with new enquiry text
+    /**
+     * Edits the text of a given enquiry object.
+     * @param enquiry The enquiry to edit.
+     * @param newText The updated text for the enquiry.
+     * @return true if the enquiry was successfully edited, false otherwise.
+     */
     @Override
     public boolean editEnquiry(Enquiry enquiry, String newText) {
         if(enquiries != null){
@@ -412,7 +475,11 @@ public final class EnquiryCTRL implements IEnquiryResponse, IEnquirySubmission {
         return false;
     }
 
-    // Delete existing enquiry
+    /**
+     * Deletes the specified enquiry.
+     * @param enquiry The enquiry to delete.
+     * @return true if the enquiry was successfully deleted, false otherwise.
+     */
     @Override
     public boolean deleteEnquiry(Enquiry enquiry) {
         if (enquiries != null) {
@@ -429,6 +496,12 @@ public final class EnquiryCTRL implements IEnquiryResponse, IEnquirySubmission {
         return false;
     }
 
+    /**
+     * Adds a response to the specified enquiry.
+     * @param enquiry The enquiry to respond to.
+     * @param response The response text.
+     * @return true if the response was successfully added, false otherwise.
+     */
     @Override
     public boolean responseEnquiry(Enquiry enquiry, String response) {
         if(enquiries != null){

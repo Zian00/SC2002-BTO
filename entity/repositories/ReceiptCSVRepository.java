@@ -16,8 +16,14 @@ public class ReceiptCSVRepository {
 
 	private static final String CSV_FILE = "assets/receipt.csv";
 
-	/*
-	 * Reads receipts from CSV_FILE and returns a List of Receipt objects.
+	/**
+	 * The function `loadReceipts` reads data from a CSV file and populates a list
+	 * of Receipt objects with
+	 * the parsed information.
+	 * 
+	 * @return The method `loadReceipts()` returns a List of Receipt objects loaded
+	 *         from a CSV file. If
+	 *         the file does not exist, an empty list is returned.
 	 */
 	public List<Receipt> loadReceipts() {
 		List<Receipt> receipts = new ArrayList<>();
@@ -86,7 +92,14 @@ public class ReceiptCSVRepository {
 	}
 
 	/**
-	 * Writes the given receipt to the CSV file (in append mode).
+	 * The `writeReceiptCSV` function writes receipt information to a CSV file,
+	 * including a header if the
+	 * file is empty or does not exist.
+	 * 
+	 * @param receipt The `writeReceiptCSV` method you provided is used to write
+	 *                receipt information to a
+	 *                CSV file. The parameters of the `Receipt` object that are
+	 *                being written to the CSV file include:
 	 */
 	public void writeReceiptCSV(Receipt receipt) {
 		File file = new File(CSV_FILE);
@@ -118,7 +131,15 @@ public class ReceiptCSVRepository {
 	}
 
 	/**
-	 * Returns the next receipt ID by reading the current CSV file.
+	 * The function getNextReceiptID() returns the next available receipt ID by
+	 * loading existing receipts
+	 * and incrementing the maximum ID by 1.
+	 * 
+	 * @return The `getNextReceiptID` method returns the next available receipt ID
+	 *         by loading existing
+	 *         receipts, extracting the maximum receipt ID, and incrementing it by
+	 *         1. If there are no existing
+	 *         receipts, it will return 1 as the initial receipt ID.
 	 */
 	public int getNextReceiptID() {
 		List<Receipt> receipts = loadReceipts(); // you must implement loadReceipts() to read and return the receipts

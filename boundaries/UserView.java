@@ -4,10 +4,23 @@ import controllers.UserCTRL;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
+/**
+ * View class for user authentication and main menu interactions in the BTO system.
+ * <p>
+ * Handles login, logout, and displays common menu options for users.
+ * </p>
+ */
 public class UserView {
-    // must start with S or T, then 7 digits, then an uppercase letter
+    /** Pattern for validating NRIC: must start with S or T, then 7 digits, then an uppercase letter. */
     private static final Pattern NRIC_PATTERN = Pattern.compile("^[ST]\\d{7}[A-Z]$");
 
+    /**
+     * Handles the login flow for a user, including NRIC and password validation.
+     *
+     * @param sc       The Scanner object for user input.
+     * @param userCTRL The UserCTRL instance for authentication.
+     * @return true if login is successful, false otherwise.
+     */
     public boolean loginFlow(Scanner sc, UserCTRL userCTRL) {
         displayLogin();
 
@@ -46,19 +59,25 @@ public class UserView {
         }
     }
 
-    /** Show the login header */
+    /**
+     * Displays the login header.
+     */
     public void displayLogin() {
         System.out.println("=== HDB Hub Login ===");
         System.out.println("Please enter your credentials below:");
     }
 
-    /** Show the logout confirmation */
+    /**
+     * Displays the logout confirmation message.
+     */
     public void displayLogout() {
         System.out.println("\n=== Logout ===");
         System.out.println("You have been successfully logged out. Goodbye!");
     }
 
-    /** Show the common menu options */
+    /**
+     * Displays the common main menu options for users.
+     */
     public void displayMenu() {
         System.out.println("\n=== Main Menu ===");
         System.out.println("1. Change Password");
