@@ -91,7 +91,13 @@ public class Main {
             // --- Common options 1–4 ---
             switch (opt) {
                 case "1" ->
+                {
+                    // Update project visibility before filtering/displaying projects - bryan
+                    projectCTRL.updateProjectVisibility();
+                    // Then persist the changes to the CSV file
+                    projectCTRL.saveProjects();
                     runProjectMenu(sc, userCTRL, projectCTRL, projectView, applicationCTRL, enquiryView, enquiryCTRL);
+                }
                 case "2" -> runApplicationMenu(sc, userCTRL, projectCTRL, applicationCTRL, btoApplicationView);
                 case "3" -> runEnquiryMenu(sc, userCTRL, projectCTRL, enquiryView, enquiryCTRL);
                 case "4" -> {

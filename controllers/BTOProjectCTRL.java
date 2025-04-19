@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import entity.BTOProject;
 import entity.FilterSettings;
@@ -135,8 +137,10 @@ public class BTOProjectCTRL {
                         .filter(p -> {
                             var approved = p.getApprovedOfficer();
                             var pending = p.getPendingOfficer();
-                            boolean notApproved = approved == null || approved.stream().noneMatch(nric -> nric.equalsIgnoreCase(officerNRIC));
-                            boolean notPending = pending == null || pending.stream().noneMatch(nric -> nric.equalsIgnoreCase(officerNRIC));
+                            boolean notApproved = approved == null
+                                    || approved.stream().noneMatch(nric -> nric.equalsIgnoreCase(officerNRIC));
+                            boolean notPending = pending == null
+                                    || pending.stream().noneMatch(nric -> nric.equalsIgnoreCase(officerNRIC));
                             boolean flatEligible = false;
                             if (ms == MaritalState.SINGLE && age >= 35) {
                                 flatEligible = p.getAvailable2Room() > 0;
@@ -239,6 +243,24 @@ public class BTOProjectCTRL {
     // public void deleteProject() {
     // throw new UnsupportedOperationException();
     // }
+
+    
+    //TURN PROJECT VISIBILITY TO FALSE AFTER IT PASSES OUR DATE
+    public void updateProjectVisibility() {
+        // use the correct date format as in our file ("dd-MM-yy")
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yy");
+        for (BTOProject project : getAllProjects()) {
+            try {
+                LocalDate closingDate = LocalDate.parse(project.getApplicationClosingDate(), formatter);
+                if (LocalDate.now().isAfter(closingDate)) {
+                    project.setVisibility(false);
+                }
+            } catch (Exception e) {
+                System.out.println("Error parsing date for project "
+                        + project.getProjectID() + ": " + e.getMessage());
+            }
+        }
+    }
 
     public void saveProjects() {
         repo.writeBTOProjectToCSV(projects);
