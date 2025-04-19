@@ -2,7 +2,6 @@ package boundaries;
 
 import controllers.UserCTRL;
 import entity.enumerations.Role;
-
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
@@ -17,7 +16,7 @@ public class UserView {
         // Change accordingly
         String nric = "T0000000G";
         String password = "aaa";
-        Role role = Role.valueOf("HDBOFFICER");
+        Role role = Role.valueOf("HDBMANAGER");
 
         // System.out.print("NRIC (uppercase only): ");
         // String nric = sc.nextLine().trim();
