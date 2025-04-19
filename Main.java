@@ -1150,7 +1150,13 @@ public class Main {
                                         "An error occurred while processing the withdrawal: " + e.getMessage());
                             }
                         }
-                        case "4" -> {
+                        case "4" ->
+                            {
+                            System.out.println("you have entered case 4 hdbmanager");
+                                //logic for generating / filtering report for all applicants
+                                //filter can be like "married applicants flat type"
+                            }
+                        case "5" -> {
                             return; // back to central menu
                         }
                     }
