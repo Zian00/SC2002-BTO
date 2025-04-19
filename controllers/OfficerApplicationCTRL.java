@@ -6,14 +6,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import models.BTOApplication;
-import models.BTOProject;
-import models.OfficerApplication;
-import models.User;
-import models.enumerations.*;
-import models.repositories.ApplicationCSVRepository;
-import models.repositories.BTOProjectCSVRepository;
-import models.repositories.OfficerApplicationCSVRepository;
+
+import entity.BTOApplication;
+import entity.BTOProject;
+import entity.OfficerApplication;
+import entity.User;
+import entity.enumerations.*;
+import entity.repositories.ApplicationCSVRepository;
+import entity.repositories.BTOProjectCSVRepository;
+import entity.repositories.OfficerApplicationCSVRepository;
 
 public class OfficerApplicationCTRL {
 

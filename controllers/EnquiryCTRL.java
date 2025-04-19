@@ -7,12 +7,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import models.BTOProject;
-import models.Enquiry;
-import models.User;
-import models.interfaces.IEnquiryResponse;
-import models.interfaces.IEnquirySubmission;
-import models.repositories.EnquiryCSVRepository;
+
+import entity.BTOProject;
+import entity.Enquiry;
+import entity.User;
+import entity.interfaces.IEnquiryResponse;
+import entity.interfaces.IEnquirySubmission;
+import entity.repositories.EnquiryCSVRepository;
 
 public final class EnquiryCTRL implements IEnquiryResponse, IEnquirySubmission {
 

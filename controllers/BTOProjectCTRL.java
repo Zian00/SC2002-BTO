@@ -4,13 +4,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import models.BTOProject;
-import models.FilterSettings;
-import models.HDBManager;
-import models.User;
-import models.enumerations.MaritalState;
-import models.enumerations.Role;
-import models.repositories.BTOProjectCSVRepository;
+
+import entity.BTOProject;
+import entity.FilterSettings;
+import entity.HDBManager;
+import entity.User;
+import entity.enumerations.MaritalState;
+import entity.enumerations.Role;
+import entity.repositories.BTOProjectCSVRepository;
 
 public class BTOProjectCTRL {
 

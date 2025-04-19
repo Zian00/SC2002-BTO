@@ -3,16 +3,17 @@ package controllers;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import models.BTOApplication;
-import models.BTOProject;
-import models.Receipt;
-import models.User;
-import models.enumerations.ApplicationStatus;
-import models.enumerations.ApplicationType;
-import models.enumerations.FlatType;
-import models.repositories.ApplicationCSVRepository;
-import models.repositories.BTOProjectCSVRepository;
-import models.repositories.ReceiptCSVRepository;
+
+import entity.BTOApplication;
+import entity.BTOProject;
+import entity.Receipt;
+import entity.User;
+import entity.enumerations.ApplicationStatus;
+import entity.enumerations.ApplicationType;
+import entity.enumerations.FlatType;
+import entity.repositories.ApplicationCSVRepository;
+import entity.repositories.BTOProjectCSVRepository;
+import entity.repositories.ReceiptCSVRepository;
 
 public class BTOApplicationCTRL {
 
