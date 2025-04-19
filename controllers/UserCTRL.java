@@ -56,7 +56,6 @@ public class UserCTRL {
     // --------------------------------------------------------------------------------------------------
     // Central Menu: Navigation for Logged-in Users
     // --------------------------------------------------------------------------------------------------
-
     /**
      * Runs the central menu for the currently logged-in user, displaying options
      * and routing to the appropriate controllers and views based on the user's role.
@@ -149,7 +148,6 @@ public class UserCTRL {
     // --------------------------------------------------------------------------------------------------
     // Change Password Handler
     // --------------------------------------------------------------------------------------------------
-
     /**
      * Handles the password change process for the current user.
      * Prompts for a new password and updates it.
