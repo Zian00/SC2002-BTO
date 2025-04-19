@@ -1,9 +1,10 @@
 package controllers;
 
 import java.util.List;
-import models.User;
-import models.enumerations.Role;
-import models.repositories.UserCSVRepository;
+
+import entity.User;
+import entity.enumerations.Role;
+import entity.repositories.UserCSVRepository;
 
 public class UserCTRL {
 
