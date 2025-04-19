@@ -1,0 +1,131 @@
+@startuml
+
+class User {
+  NRIC               : String
+  name               : String
+  password           : String
+  age                : int
+  maritalStatus      : MaritalState
+  filterSettings     : String
+  role               : Role
+}
+
+class HDBManager
+
+class BTOProject {
+  projectID               : int
+  projectName             : String
+  projectLocation         : String
+  approvedOfficer         : List<String>
+  pendingOfficer          : List<String>
+  visibility              : boolean
+  availableOfficerSlots   : int
+  applicationOpeningDate  : LocalDate
+  applicationClosingDate  : LocalDate
+}
+
+class BTOApplication {
+  applicationId     : int
+  applicantNRIC     : String
+  projectID         : int
+  flatType          : FlatType
+  status            : ApplicationStatus
+  type              : ApplicationType
+}
+
+class OfficerApplication {
+  officerApplicationId : int
+  officerNRIC          : String
+  projectID            : int
+  status               : RegistrationStatus
+}
+
+class Enquiry {
+  enquiryId        : int
+  enquiryText      : String
+  response         : String
+  applicantNRIC    : String
+  projectId        : int
+  timestamp        : LocalDateTime
+}
+
+class FilterSettings {
+  roomType : String
+  minPrice : Integer
+  maxPrice : Integer
+}
+
+enum MaritalState
+enum Role
+enum FlatType
+enum ApplicationStatus
+enum ApplicationType
+enum RegistrationStatus
+
+class UserCSVRepository
+class BTOProjectCSVRepository
+class ApplicationCSVRepository
+class OfficerApplicationCSVRepository
+class EnquiryCSVRepository
+
+interface IEnquirySubmission
+interface IEnquiryResponse
+
+class UserCTRL
+class BTOProjectCTRL
+class BTOApplicationCTRL
+class OfficerApplicationCTRL
+class EnquiryCTRL
+
+class UserView
+class ApplicantView
+class OfficerView
+class ManagerView
+class BTOProjectView
+class BTOApplicationView
+class OfficerApplicationView
+class EnquiryView
+
+class Main
+
+'—— Inheritance ——
+HDBManager --|> User
+ApplicantView --|> UserView
+OfficerView   --|> ApplicantView
+ManagerView   --|> UserView
+
+'—— Associations ——
+UserCTRL                --> User
+UserCTRL                --> UserCSVRepository
+UserCTRL                --> UserView
+
+BTOProjectCTRL          --> BTOProject
+BTOProjectCTRL          --> BTOProjectCSVRepository
+BTOProjectCTRL          --> BTOProjectView
+
+BTOApplicationCTRL      --> BTOApplication
+BTOApplicationCTRL      --> ApplicationCSVRepository
+BTOApplicationCTRL      --> BTOProjectCSVRepository
+BTOApplicationCTRL      --> BTOApplicationView
+
+OfficerApplicationCTRL  --> OfficerApplication
+OfficerApplicationCTRL  --> OfficerApplicationCSVRepository
+OfficerApplicationCTRL  --> OfficerApplicationView
+
+EnquiryCTRL             --> IEnquirySubmission
+EnquiryCTRL             --> IEnquiryResponse
+EnquiryCTRL             --> Enquiry
+EnquiryCTRL             --> EnquiryCSVRepository
+EnquiryCTRL             --> EnquiryView
+
+User             --> MaritalState
+User             --> Role
+BTOProject       --> FlatType
+BTOApplication   --> ApplicationStatus
+BTOApplication   --> ApplicationType
+OfficerApplication --> RegistrationStatus
+
+Main             --> UserCTRL
+Main             --> UserView
+
+@enduml
