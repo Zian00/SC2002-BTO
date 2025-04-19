@@ -1151,6 +1151,9 @@ public class Main {
                             }
                         }
                         case "4" -> {
+                           // TODO Generate / Filter report of all APPLICANTS under projects handled by you
+                        }
+                        case "5" -> {
                             return; // back to central menu
                         }
                     }

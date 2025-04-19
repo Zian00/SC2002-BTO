@@ -33,7 +33,8 @@ public class BTOApplicationView {
 		System.out.println("1. Display All Applications Handled By You");
 		System.out.println("2. Approval / Rejection for Application");
 		System.out.println("3. Approval for Withdrawal");
-		System.out.println("4. Back");
+		System.out.println("4. Generate / Filter report of all APPLICANTS under projects handled by you");
+		System.out.println("5. Back");
 		System.out.print("Select an option: ");
 	}
 
