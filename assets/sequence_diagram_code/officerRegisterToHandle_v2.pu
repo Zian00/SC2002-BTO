@@ -1,0 +1,154 @@
+@startuml
+' Title for the diagram
+title HDB Officer Registers to Handle BTO Project Flow (Success & Failure Cases)
+
+' === Participants ===
+actor "HDB Officer" as Officer
+participant UserCTRL
+participant BTOProjectCTRL
+participant BTOProjectView
+participant OfficerApplicationCTRL
+participant OfficerApplicationView
+participant "System.out" as Console <<Boundary>>
+database Database <<Represents CSV Repositories>>
+
+' === Flow begins (officer already logged‑in) ===
+Officer -> UserCTRL : Selects "1" (Project Menu)
+activate UserCTRL
+UserCTRL -> BTOProjectCTRL : runProjectMenu(sc, userCTRL, projectCTRL, projectView, applicationCTRL, officerAppCTRL, officerAppView, enquiryView, enquiryCTRL)
+activate BTOProjectCTRL
+deactivate UserCTRL
+
+' ===== Project‑menu loop =====
+loop Project Menu Loop [while true in runProjectMenu for HDBOFFICER]
+    BTOProjectCTRL -> BTOProjectView : displayOfficerMenu()
+    activate BTOProjectView
+    BTOProjectView -> Officer : Show Officer Project Menu (Options 1‑7)
+    deactivate BTOProjectView
+
+    BTOProjectCTRL -> Console : Prompt for choice
+    activate Console
+    Console -> Officer : Display prompt
+    deactivate Console
+    Officer -> BTOProjectCTRL : Enters choice (e.g., "5")
+
+    ' keep project‑visibility maintenance on every iteration
+    BTOProjectCTRL -> BTOProjectCTRL : updateProjectVisibility()
+    activate BTOProjectCTRL
+    BTOProjectCTRL -> Database : Read project data (if needed)
+    BTOProjectCTRL -> BTOProjectCTRL : Check dates, update visibility
+    BTOProjectCTRL -> BTOProjectCTRL : saveProjects()
+    BTOProjectCTRL -> Database : Write updated project data
+    Database --> BTOProjectCTRL
+    deactivate BTOProjectCTRL
+
+    alt User selects "5" (Register as officer)
+        ' ---------- Officer‑registration flow ----------
+        BTOProjectCTRL -> OfficerApplicationCTRL : getEligibleOfficerProjects()
+        activate OfficerApplicationCTRL
+        note right of OfficerApplicationCTRL
+            Checks projects based on: open period, slots, not applicant,
+            not already officer (unless rejected), and no date overlaps.
+        end note
+        OfficerApplicationCTRL -> Database : Read projects & application lists
+        activate Database
+        Database --> OfficerApplicationCTRL : Data
+        deactivate Database
+        OfficerApplicationCTRL --> BTOProjectCTRL : elig (List<BTOProject>)
+        deactivate OfficerApplicationCTRL
+
+        BTOProjectCTRL -> OfficerApplicationView : displayEligibleProjects(elig)
+        activate OfficerApplicationView
+        OfficerApplicationView -> Officer : Show list (or “none”)
+        deactivate OfficerApplicationView
+
+        alt elig.isEmpty() [Failure 1: none available]
+            BTOProjectCTRL -> Console : Print "No eligible projects to register for."
+            activate Console
+            Console -> Officer : Display message
+            deactivate Console
+
+        else Projects available
+            ' ----- project‑selection loop -----
+            loop Project Selection Loop
+                BTOProjectCTRL -> Console : Prompt "Enter Project ID to register:"
+                activate Console
+                Console -> Officer : Display prompt
+                deactivate Console
+                Officer -> BTOProjectCTRL : pid_input
+
+                alt Try parsing input
+                    BTOProjectCTRL -> BTOProjectCTRL : Parse/validate pid
+                    alt isValidProject
+                        break
+                    else Invalid Project ID [Failure 2]
+                        BTOProjectCTRL -> Console : Print "Invalid Project ID. Returning to menu."
+                        activate Console
+                        Console -> Officer : Display error
+                        deactivate Console
+                        break
+                    end alt
+                else NumberFormatException [Failure 3]
+                    BTOProjectCTRL -> Console : Print "Invalid input. Please enter a number."
+                    activate Console
+                    Console -> Officer : Display error
+                    deactivate Console
+                    break
+                end alt
+            end loop
+
+            opt Valid Project ID selected
+                BTOProjectCTRL -> OfficerApplicationCTRL : registerAsOfficer(pid)
+                activate OfficerApplicationCTRL
+                note right of OfficerApplicationCTRL
+                    Further checks: applicant?, already officer?,
+                    overlaps, free slots…
+                end note
+                OfficerApplicationCTRL -> Database : Read project & lists
+                activate Database
+                Database --> OfficerApplicationCTRL : Data
+                deactivate Database
+
+                alt All checks pass
+                    OfficerApplicationCTRL -> OfficerApplicationCTRL : create OfficerApplication (PENDING)
+                    OfficerApplicationCTRL -> Database : write officerApplicationList
+                    activate Database
+                    Database --> OfficerApplicationCTRL
+                    deactivate Database
+                    OfficerApplicationCTRL -> Database : write projects list
+                    activate Database
+                    Database --> OfficerApplicationCTRL
+                    deactivate Database
+                    OfficerApplicationCTRL --> BTOProjectCTRL : ok = true
+                else Any check fails [Failure 4]
+                    OfficerApplicationCTRL -> Console : Print specific failure reason
+                    activate Console
+                    Console -> Officer : Display error
+                    deactivate Console
+                    OfficerApplicationCTRL --> BTOProjectCTRL : ok = false
+                end alt
+                deactivate OfficerApplicationCTRL
+
+                alt ok == true
+                    BTOProjectCTRL -> Console : Print "Registration submitted (status PENDING)."
+                    activate Console
+                    Console -> Officer : Display success
+                    deactivate Console
+                else ok == false
+                    BTOProjectCTRL -> Console : Print "Registration failed."
+                    activate Console
+                    Console -> Officer : Display generic failure
+                    deactivate Console
+                end alt
+            end opt
+        end alt  ' projects available / not available
+
+    else User selects "7" (Return)
+        BTOProjectCTRL --> UserCTRL : Return
+        deactivate BTOProjectCTRL
+        break
+    else Other project‑menu option
+        BTOProjectCTRL -> BTOProjectCTRL : Handle other option…
+    end alt
+end loop  ' ===== end project‑menu loop =====
+@enduml

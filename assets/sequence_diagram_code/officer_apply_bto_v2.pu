@@ -1,0 +1,268 @@
+@startuml
+' Title for the diagram
+title HDB Officer Applies for BTO Project Flow (Success & Failure Cases)
+
+' === Participants ===
+actor "HDB Officer (Applicant)" as User
+participant Main
+participant UserView
+participant UserCTRL
+participant BTOProjectCTRL
+participant BTOProjectView
+participant BTOApplicationCTRL
+participant "System.out" as Console <<Boundary>>
+database Database <<Represents CSV Repositories>>
+
+' === Application starts ===
+User -> Main : Run application
+activate Main
+
+' ---------- Load data ----------
+Main -> UserCTRL : create()
+activate UserCTRL
+Main -> UserView : create()
+activate UserView
+Main -> UserCTRL : loadUserData()
+UserCTRL -> Database : Read user data (UserCSVRepository)
+Database --> UserCTRL : User Data
+deactivate UserCTRL
+deactivate UserView
+
+' ---------- Main menu ----------
+loop Main Menu Loop [while true in Main.main]
+  Main -> Console : Print "=== HDB Hub ===" menu
+  activate Console
+  Console -> User : Show "1. Login", "2. Exit"
+  deactivate Console
+  Main -> Console : Prompt "Select an option: "
+  activate Console
+  Console -> User : Display prompt
+  deactivate Console
+  User -> Main : Enters choice (e.g., "1")
+
+  alt User selects "1" (Login)
+    ' ----- Login flow -----
+    Main -> UserView : loginFlow(sc, userCTRL)
+    activate UserView
+    UserView -> User : Prompt for NRIC/Password
+    User -> UserView : Enters credentials
+    UserView -> UserCTRL : login(NRIC, password)
+    activate UserCTRL
+    alt Authentication Success (login returns true)
+        UserCTRL --> UserView : true
+        deactivate UserCTRL
+        UserView --> Main : true
+        deactivate UserView
+
+        ' ----- Central menu -----
+        Main -> UserCTRL : runCentralMenu(sc, userCTRL)
+        activate UserCTRL
+        UserCTRL -> BTOProjectCTRL : new BTOProjectCTRL(currentUser)
+        activate BTOProjectCTRL
+        BTOProjectCTRL -> Database : Read project data (BTOProjectCSVRepository)
+        Database --> BTOProjectCTRL : Project List
+        deactivate BTOProjectCTRL
+        UserCTRL -> BTOApplicationCTRL : new BTOApplicationCTRL(currentUser)
+        activate BTOApplicationCTRL
+        BTOApplicationCTRL -> Database : Read application data (ApplicationCSVRepository)
+        Database --> BTOApplicationCTRL : Application List
+        BTOApplicationCTRL -> Database : Read project data (BTOProjectCSVRepository)
+        Database --> BTOApplicationCTRL : Project List
+        deactivate BTOApplicationCTRL
+
+        loop Central Menu Loop [while true in runCentralMenu]
+            UserCTRL -> UserView : displayMenu()
+            activate UserView
+            UserView -> User : Show Officer Menu (1-6)
+            deactivate UserView
+            UserCTRL -> Console : Prompt for choice
+            activate Console
+            Console -> User : Display prompt
+            deactivate Console
+            User -> UserCTRL : Enters choice (e.g., "1")
+
+            alt User selects "1" (Project Menu)
+                UserCTRL -> BTOProjectCTRL : runProjectMenu(...)
+                activate BTOProjectCTRL
+
+                loop Project Menu Loop [while true in runProjectMenu for HDBOFFICER]
+                    BTOProjectCTRL -> BTOProjectView : displayOfficerMenu()
+                    activate BTOProjectView
+                    BTOProjectView -> User : Show Officer Project Menu (1-7)
+                    deactivate BTOProjectView
+                    BTOProjectCTRL -> Console : Prompt for choice
+                    activate Console
+                    Console -> User : Display prompt
+                    deactivate Console
+                    User -> BTOProjectCTRL : Enters choice (e.g., "3")
+
+                    BTOProjectCTRL -> BTOProjectCTRL : updateProjectVisibility()
+                    activate BTOProjectCTRL
+                    BTOProjectCTRL -> Database : Read project data (if needed)
+                    BTOProjectCTRL -> BTOProjectCTRL : Check dates, update visibility flags
+                    BTOProjectCTRL -> BTOProjectCTRL : saveProjects()
+                    BTOProjectCTRL -> Database : Write updated project data
+                    Database --> BTOProjectCTRL
+                    deactivate BTOProjectCTRL
+
+                    alt User selects "3" (Apply for BTO)
+                        ' ======== BTO Application Flow via Project Menu ========
+                        BTOProjectCTRL -> UserCTRL : getCurrentUser()
+                        UserCTRL --> BTOProjectCTRL : currentUser (Officer)
+
+                        ' 1. Filter Eligible Projects
+                        BTOProjectCTRL -> BTOProjectCTRL : getAllProjects()
+                        BTOProjectCTRL -> BTOProjectCTRL : Filter => eligibleProjects
+                        note right of BTOProjectCTRL
+                            Checks: project visibility, NRIC not already handling,
+                            flat availability, marital/age eligibility…
+                        end note
+
+                        alt eligibleProjects.isEmpty() [Failure Case 1]
+                            BTOProjectCTRL -> BTOProjectView : showMessage("No eligible BTO projects available for application.")
+                            activate BTOProjectView
+                            BTOProjectView -> User : Display message
+                            deactivate BTOProjectView
+                        else Projects Available
+                            ' 2. Display & select project
+                            BTOProjectCTRL -> BTOProjectView : displayEligibleProjectsForOfficer(...)
+                            activate BTOProjectView
+                            BTOProjectView -> User : Show list
+                            deactivate BTOProjectView
+                            BTOProjectCTRL -> Console : Prompt "Enter project ID to apply: "
+                            activate Console
+                            Console -> User : Display prompt
+                            deactivate Console
+                            User -> BTOProjectCTRL : Project ID input
+
+                            alt Try Parsing Project ID
+                                BTOProjectCTRL -> BTOProjectCTRL : Parse & validate
+                                alt Project ID valid & eligible
+                                    ' 3. Select flat type
+                                    BTOProjectCTRL -> Console : Prompt flat type
+                                    activate Console
+                                    Console -> User : Display options
+                                    deactivate Console
+                                    User -> BTOProjectCTRL : Flat type choice
+
+                                    alt Try Parsing Flat Choice
+                                        BTOProjectCTRL -> BTOProjectCTRL : Parse & validate
+                                        alt Valid Flat Type selected
+                                            ' 4. Apply
+                                            BTOProjectCTRL -> BTOApplicationCTRL : apply(projectId, flatType)
+                                            activate BTOApplicationCTRL
+
+                                            ' --- BTOApplicationCTRL.apply ---
+                                            BTOApplicationCTRL -> Database : Read applicationList
+                                            BTOApplicationCTRL -> BTOApplicationCTRL : Already applied?
+                                            alt Already Applied [Failure 6]
+                                                BTOApplicationCTRL -> Console : Print "Cannot apply for more than one project."
+                                                activate Console
+                                                Console -> User : Display error
+                                                deactivate Console
+                                                BTOApplicationCTRL --> BTOProjectCTRL : false
+                                            else Not Applied Yet
+                                                BTOApplicationCTRL -> Database : Read projects list
+                                                BTOApplicationCTRL -> BTOApplicationCTRL : Find project
+                                                alt Project Not Found [Failure 7]
+                                                    BTOApplicationCTRL -> Console : Print "Project not found or not available."
+                                                    activate Console
+                                                    Console -> User : Display error
+                                                    deactivate Console
+                                                    BTOApplicationCTRL --> BTOProjectCTRL : false
+                                                else Project Found
+                                                    BTOApplicationCTRL -> BTOApplicationCTRL : Eligibility check
+                                                    alt Not Eligible [Failure 8]
+                                                        BTOApplicationCTRL -> Console : Print "You are not eligible for " + flatType
+                                                        activate Console
+                                                        Console -> User : Display error
+                                                        deactivate Console
+                                                        BTOApplicationCTRL --> BTOProjectCTRL : false
+                                                    else Eligible
+                                                        BTOApplicationCTRL -> BTOApplicationCTRL : Create BTOApplication (PENDING)
+                                                        BTOApplicationCTRL -> Database : Write applicationList
+                                                        Database --> BTOApplicationCTRL : OK
+                                                        BTOApplicationCTRL --> BTOProjectCTRL : true
+                                                    end alt
+                                                end alt
+                                            end alt
+                                            deactivate BTOApplicationCTRL
+
+                                            ' 5. Result
+                                            alt ok == true
+                                                BTOProjectCTRL -> Console : Print "Application submitted! Status: PENDING."
+                                                activate Console
+                                                Console -> User : Display success
+                                                deactivate Console
+                                            else
+                                                ' Specific error already shown
+                                            end alt
+                                        else Invalid Flat Type [Failure 5]
+                                            BTOProjectCTRL -> BTOProjectView : showMessage("Invalid flat type choice for your marital status.")
+                                            activate BTOProjectView
+                                            BTOProjectView -> User : Display error
+                                            deactivate BTOProjectView
+                                        end alt
+                                    else NumberFormatException Flat Choice [Failure 4]
+                                        BTOProjectCTRL -> BTOProjectView : showMessage("Invalid flat type choice.")
+                                        activate BTOProjectView
+                                        BTOProjectView -> User : Display error
+                                        deactivate BTOProjectView
+                                    end alt
+                                else Project ID not eligible [Failure 3]
+                                    BTOProjectCTRL -> BTOProjectView : showMessage("Selected project is not eligible for application.")
+                                    activate BTOProjectView
+                                    BTOProjectView -> User : Display error
+                                    deactivate BTOProjectView
+                                end alt
+                            else NumberFormatException Project ID [Failure 2]
+                                BTOProjectCTRL -> BTOProjectView : showMessage("Invalid project ID.")
+                                activate BTOProjectView
+                                BTOProjectView -> User : Display error
+                                deactivate BTOProjectView
+                            end alt
+                        end alt
+                    else User selects "7" (Return)
+                        BTOProjectCTRL --> UserCTRL : Return
+                        deactivate BTOProjectCTRL
+                        break
+                    else Other Project Option
+                        BTOProjectCTRL -> BTOProjectCTRL : Handle option...
+                    end alt
+                end loop
+            else User selects "6" (Logout - Officer)
+                UserCTRL -> UserCTRL : setCurrentUser(null)
+                UserCTRL -> UserView : displayLogout()
+                activate UserView
+                UserView -> User : Show "Logged out."
+                deactivate UserView
+                UserCTRL --> Main
+                deactivate UserCTRL
+                break
+            else Other Central Menu Option
+                UserCTRL -> UserCTRL : Handle option...
+            end alt
+        end loop
+    else Authentication Failed
+        UserCTRL --> UserView : false
+        deactivate UserCTRL
+        UserView -> User : "Invalid username or password."
+        UserView --> Main : false
+        deactivate UserView
+    end alt
+
+  else User selects "2" (Exit)
+    Main -> Console : Print "Exiting... Goodbye!"
+    activate Console
+    Console -> User : Display message
+    deactivate Console
+    deactivate Main
+    break
+  else Invalid Main Menu Choice
+    Main -> Console : Print "Invalid choice, please try again."
+    activate Console
+    Console -> User : Display message
+    deactivate Console
+  end alt
+end loop
+@enduml
