@@ -1,6 +1,6 @@
 ID,Project Name,Neighborhood,Type 1,Number of units for Type 1,Selling price for Type 1,Type 2,Number of units for Type 2,Selling price for Type 2,Application opening date,Application closing date,ManagerID,Officer Slot,Pending Officer by NRIC,Approved Officer by NRIC,Visibility
-1,Pasir Rizz,Singapore,2-Room,2,500,3-Room,5,4000,2000-12-27,2024-11-10,T1234567E,9,"","",FALSE
-2,NTU,Boon Lay,2-Room,1,10000,3-Room,10,200000,2025-04-01,2025-05-20,T1234567E,5,"","",TRUE
+1,Pasir Rizz,Singapore,2-Room,2,500,3-Room,2,4000,2000-12-27,2024-11-10,T1234567E,9,"","",FALSE
+2,NTU,Boon Lay,2-Room,2,10000,3-Room,10,200000,2025-04-01,2025-05-20,T1234567E,5,"","",TRUE
 4,milk,Milky Malaysia,2-Room,1,9000,3-Room,2,9555,2028-04-04,2029-05-06,T1234567E,2,"T1234567C","",FALSE
 5,Brown,Flower,2-Room,12,40,3-Room,2,90,2032-01-01,2032-01-01,T1234567E,2,"T1234567C","",FALSE
 6,Poppop,lop,2-Room,1,1,3-Room,1,1,2025-04-01,2025-05-01,T1234567F,1,"","",TRUE

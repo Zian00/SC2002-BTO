@@ -1,9 +1,8 @@
 package entity;
 
-import java.util.List;
-
 import entity.enumerations.MaritalState;
 import entity.enumerations.Role;
+import java.util.List;
 
 public class HDBManager extends User {
 
