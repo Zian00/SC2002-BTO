@@ -237,7 +237,7 @@ public class BTOApplicationView {
      */
     public Integer promptMinAge(Scanner sc) {
         while (true) {
-            System.out.print("Filter by Maximum Age or press Enter for all: ");
+            System.out.print("Filter by Minimum Age or press Enter for all: ");
             String input = sc.nextLine().trim();
             if (input.isEmpty()){
                 return null;
