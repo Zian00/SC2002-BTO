@@ -286,14 +286,15 @@ public class UserCTRL {
         boolean hasUpper = false;
         boolean hasLower = false;
         boolean hasDigit = false;
+        boolean hasForbiddenChar = false;
         final int MIN_LENGTH = 8;
 
-        if (newPassword == null || newPassword.length() < MIN_LENGTH) {
-            System.out.println("Password change failed. New password must be at least " + MIN_LENGTH + " characters long.");
-            return false;
-        }
-
         for (char c : newPassword.toCharArray()) {
+            // Check for forbidden characters: comma, double quotes, or newline characters
+            if (c == ',' || c == '\"' || c == '\n' || c == '\r') {
+                hasForbiddenChar = true;
+            }
+            // Check for uppercase, lowercase, and digit
             if (Character.isUpperCase(c)) {
                 hasUpper = true;
             } else if (Character.isLowerCase(c)) {
@@ -307,11 +308,13 @@ public class UserCTRL {
             }
         }
 
-        if (!(hasUpper && hasLower && hasDigit)) {
+        if (hasForbiddenChar || !(hasUpper && hasLower && hasDigit && newPassword.length() >= MIN_LENGTH)) {
             System.out.println("Password change failed. New password must contain:");
+            System.out.println("- At least " + MIN_LENGTH +" Characters Long");
             System.out.println("- At least one uppercase letter (A-Z)");
             System.out.println("- At least one lowercase letter (a-z)");
             System.out.println("- At least one number (0-9)");
+            System.out.println("- And DOES NOT contain any special characters like (Comma, Double Quotes or Newline Characters)");
             return false;
         }
 
