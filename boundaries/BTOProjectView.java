@@ -14,11 +14,12 @@ import java.util.Scanner;
 /**
  * View class for BTO project interactions in the BTO system.
  * <p>
- * Provides menu displays, prompts, and output methods for applicants, officers, and managers
- * to view, filter, create, edit, and manage BTO projects.
+ * Provides menu displays, prompts, and output methods for applicants, officers,
+ * and managers to view, filter, create, edit, and manage BTO projects.
  * </p>
  */
 public class BTOProjectView {
+
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     /**
@@ -56,17 +57,19 @@ public class BTOProjectView {
     public void displayManagerMenu() {
         System.out.println("\n=== BTO Project Menu ===");
         System.out.println("1. Display All BTO Projects");
-        System.out.println("2. Display filtered BTO Projects");
-        System.out.println("3. Display My BTO Projects");
-        System.out.println("4. Add BTO Project");
-        System.out.println("5. Edit BTO Project");
-        System.out.println("6. Delete BTO Project");
-        System.out.println("7. Back");
+        System.out.println("2. Display Filtered All BTO Projects");
+        System.out.println("3. Display Filtered My BTO Projects");
+        System.out.println("4. Display My BTO Projects");
+        System.out.println("5. Add BTO Project");
+        System.out.println("6. Edit BTO Project");
+        System.out.println("7. Delete BTO Project");
+        System.out.println("8. Back");
         System.out.print("Select an option: ");
     }
 
     /**
      * Displays all projects with divider lines.
+     *
      * @param projects the list of BTOProject objects to display
      */
     public void displayAllProject(List<BTOProject> projects) {
@@ -94,6 +97,7 @@ public class BTOProjectView {
 
     /**
      * Displays projects managed by the manager.
+     *
      * @param projects the list of BTOProject objects managed by the manager
      */
     public void displayManagerProjects(List<BTOProject> projects) {
@@ -113,6 +117,7 @@ public class BTOProjectView {
 
     /**
      * Displays only the project ID and name for each project.
+     *
      * @param projects the list of BTOProject objects
      */
     public void displayProjectIdNameList(List<BTOProject> projects) {
@@ -128,7 +133,9 @@ public class BTOProjectView {
     }
 
     /**
-     * Displays available projects for applicant with no filter, based on eligibility.
+     * Displays available projects for applicant with no filter, based on
+     * eligibility.
+     *
      * @param user the user viewing the projects
      * @param projects the list of BTOProject objects
      */
@@ -180,7 +187,9 @@ public class BTOProjectView {
     }
 
     /**
-     * Displays projects for an Applicant, showing only the room-types they’re eligible to view.
+     * Displays projects for an Applicant, showing only the room-types they’re
+     * eligible to view.
+     *
      * @param user the applicant user
      * @param projects the list of BTOProject objects
      */
@@ -252,6 +261,7 @@ public class BTOProjectView {
 
     /**
      * Prompts the user to enter a project ID.
+     *
      * @param sc Scanner for user input
      * @return the entered project ID
      */
@@ -267,6 +277,7 @@ public class BTOProjectView {
 
     /**
      * Prompts the user to enter a non-empty string.
+     *
      * @param sc Scanner for user input
      * @param prompt the prompt message
      * @return the entered non-empty string
@@ -275,11 +286,10 @@ public class BTOProjectView {
         while (true) {
             System.out.print(prompt);
             String in = sc.nextLine().trim();
-            if (in.contains(",")){
+            if (in.contains(",")) {
                 System.out.println("Cannot contain commas.");
                 continue;
-            }
-            else if(!in.isEmpty()) {
+            } else if (!in.isEmpty()) {
                 return in;
             }
 
@@ -289,6 +299,7 @@ public class BTOProjectView {
 
     /**
      * Prompts the user to enter an integer in a specified range.
+     *
      * @param sc Scanner for user input
      * @param prompt the prompt message
      * @param min minimum value
@@ -301,8 +312,9 @@ public class BTOProjectView {
             System.out.print(prompt);
             String in = sc.nextLine().trim();
             // if user just presses enter, the doesnt edit at all
-            if (in.isEmpty() && defaultVal != null)
+            if (in.isEmpty() && defaultVal != null) {
                 return defaultVal;
+            }
             try {
                 int v = Integer.parseInt(in);
                 if (v < min || v > max) {
@@ -318,6 +330,7 @@ public class BTOProjectView {
 
     /**
      * Prompts the user to enter a date in yyyy-MM-dd format.
+     *
      * @param sc Scanner for user input
      * @param prompt the prompt message
      * @param defaultVal default value if input is blank
@@ -327,8 +340,9 @@ public class BTOProjectView {
         while (true) {
             System.out.print(prompt);
             String in = sc.nextLine().trim();
-            if (in.isEmpty() && defaultVal != null)
+            if (in.isEmpty() && defaultVal != null) {
                 return defaultVal;
+            }
             try {
                 return LocalDate.parse(in, DATE_FMT);
             } catch (DateTimeParseException e) {
@@ -339,6 +353,7 @@ public class BTOProjectView {
 
     /**
      * Prompts the user to enter a date not before a minimum date.
+     *
      * @param sc Scanner for user input
      * @param prompt the prompt message
      * @param minDate the minimum allowed date
@@ -363,6 +378,7 @@ public class BTOProjectView {
 
     /**
      * Prompts the user to enter a boolean value.
+     *
      * @param sc Scanner for user input
      * @param prompt the prompt message
      * @param defaultVal default value if input is blank
@@ -372,8 +388,9 @@ public class BTOProjectView {
         while (true) {
             System.out.print(prompt);
             String in = sc.nextLine().trim().toLowerCase();
-            if (in.isEmpty() && defaultVal != null)
+            if (in.isEmpty() && defaultVal != null) {
                 return defaultVal;
+            }
             if (in.equals("true") || in.equals("false")) {
                 return Boolean.parseBoolean(in);
             }
@@ -383,6 +400,7 @@ public class BTOProjectView {
 
     /**
      * Prompts the user to create a new BTO project.
+     *
      * @param sc Scanner for user input
      * @return the created BTOProject object
      */
@@ -427,6 +445,7 @@ public class BTOProjectView {
 
     /**
      * Prompts the user to edit details of an existing BTO project.
+     *
      * @param sc Scanner for user input
      * @param p the BTOProject to edit
      */
@@ -502,6 +521,7 @@ public class BTOProjectView {
 
     /**
      * Displays a message to the user.
+     *
      * @param msg the message to display
      */
     public void showMessage(String msg) {
@@ -510,6 +530,7 @@ public class BTOProjectView {
 
     /**
      * Displays projects handled by the officer.
+     *
      * @param projects the list of BTOProject objects handled by the officer
      */
     public void displayHandledProjects(List<BTOProject> projects) {
@@ -527,6 +548,7 @@ public class BTOProjectView {
 
     /**
      * Prompts the user to enter filter settings for projects.
+     *
      * @param user the user setting the filters
      * @param sc Scanner for user input
      * @return the entered FilterSettings
@@ -544,32 +566,49 @@ public class BTOProjectView {
         System.out.println("Existing filters:");
         System.out.println(" Room type: "
                 + (displayedRoomType == null || displayedRoomType.isEmpty() ? "any" : displayedRoomType));
-        System.out.println("  Minimum price: $" +
-                (existing.getMinPrice() == null ? "none" : existing.getMinPrice()));
-        System.out.println("  Maximum price: $" +
-                (existing.getMaxPrice() == null ? "none" : existing.getMaxPrice()));
+        System.out.println("  Minimum price: $"
+                + (existing.getMinPrice() == null ? "none" : existing.getMinPrice()));
+        System.out.println("  Maximum price: $"
+                + (existing.getMaxPrice() == null ? "none" : existing.getMaxPrice()));
         System.out.println();
 
         System.out.print("Apply new filters? (y/N): ");
-        if (!sc.nextLine().trim().equalsIgnoreCase("y")) {
-            return existing; // keep old
+        String answer = sc.nextLine().trim();
+        while (!answer.equalsIgnoreCase("y")
+                && !answer.equalsIgnoreCase("n")
+                && !answer.isEmpty()) { // consider blank as "n"
+            System.out.println("Invalid input. Please enter 'y' for yes or 'n' for no.");
+            System.out.print("Apply new filters? (y/N): ");
+            answer = sc.nextLine().trim();
+        }
+        if (!answer.equalsIgnoreCase("y")) {
+            return existing; // keep old filters
         }
 
         // 2) choose room
         String roomType = null;
+        OUTER:
         while (true) {
             System.out.print("Room type? 1)2-Room  2)3-Room  0)any: ");
             String in = sc.nextLine().trim();
-            if ("1".equals(in)) {
-                roomType = "2-Room";
-                break;
-            } else if ("2".equals(in)) {
-                roomType = "3-Room";
-                break;
-            } else if ("0".equals(in)) {
-                break;
-            } else {
+            if (null == in) {
                 System.out.println("Choose 1,2 or 0.");
+            } else {
+                switch (in) {
+                    case "1" -> {
+                        roomType = "2-Room";
+                        break OUTER;
+                    }
+                    case "2" -> {
+                        roomType = "3-Room";
+                        break OUTER;
+                    }
+                    case "0" -> {
+                        break OUTER;
+                    }
+                    default ->
+                        System.out.println("Choose 1,2 or 0.");
+                }
             }
         }
 
@@ -578,13 +617,14 @@ public class BTOProjectView {
         while (true) {
             System.out.print("Minimum price (blank=none): ");
             String in = sc.nextLine().trim();
-            if (in.isEmpty())
+            if (in.isEmpty()) {
                 break;
+            }
             try {
                 int v = Integer.parseInt(in);
-                if (v < 0)
-                    System.out.println("Cannot be negative.");
-                else {
+                if (v < 0) {
+                    System.out.println("Cannot be negative."); 
+                }else {
                     minP = v;
                     break;
                 }
@@ -598,15 +638,16 @@ public class BTOProjectView {
         while (true) {
             System.out.print("Maximum price (blank=none): ");
             String in = sc.nextLine().trim();
-            if (in.isEmpty())
+            if (in.isEmpty()) {
                 break;
+            }
             try {
                 int v = Integer.parseInt(in);
-                if (v < 0)
-                    System.out.println("Cannot be negative.");
-                else if (minP != null && v < minP)
-                    System.out.println("Must be ≥ minimum price.");
-                else {
+                if (v < 0) {
+                    System.out.println("Cannot be negative."); 
+                }else if (minP != null && v < minP) {
+                    System.out.println("Must be ≥ minimum price."); 
+                }else {
                     maxP = v;
                     break;
                 }
@@ -619,7 +660,9 @@ public class BTOProjectView {
     }
 
     /**
-     * Displays eligible BTO projects for officer application, based on marital status and age.
+     * Displays eligible BTO projects for officer application, based on marital
+     * status and age.
+     *
      * @param projects the list of eligible BTOProject objects
      * @param ms the marital status of the officer
      * @param age the age of the officer

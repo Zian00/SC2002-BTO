@@ -1,5 +1,8 @@
 package entity.repositories;
 
+import entity.User;
+import entity.enumerations.MaritalState;
+import entity.enumerations.Role;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -7,10 +10,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-
-import entity.User;
-import entity.enumerations.MaritalState;
-import entity.enumerations.Role;
 
 public class UserCSVRepository {
 
@@ -62,7 +61,7 @@ public class UserCSVRepository {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println("Loaded " + users.size() + " user(s).");
+        // System.out.println("Loaded " + users.size() + " user(s).");
         return users;
     }
 
