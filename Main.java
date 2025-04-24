@@ -1,5 +1,7 @@
 import boundaries.UserView;
 import controllers.UserCTRL;
+import entity.interfaces.IApplicantRepository;
+import entity.repositories.ApplicantCSVRepository;
 import java.util.Scanner;
 
 public class Main {
@@ -8,7 +10,8 @@ public class Main {
     // of what it does:
     public static void main(String[] args) {
         try (Scanner sc = new Scanner(System.in)) {
-            UserCTRL userCTRL = new UserCTRL();
+            IApplicantRepository repo = new ApplicantCSVRepository();
+            UserCTRL userCTRL = new UserCTRL(repo);
             UserView userView = new UserView(); // Create a UserView instance
             userCTRL.loadUserData();
 

@@ -12,11 +12,11 @@ import entity.Applicant;
 import entity.User;
 import entity.enumerations.MaritalState;
 import entity.enumerations.Role;
+import entity.interfaces.IApplicantRepository;
+import entity.repositories.ApplicantCSVRepository;
 import entity.repositories.UserCSVRepository;
 import java.util.List;
 import java.util.Scanner;
-import entity.interfaces.IApplicantRepository;
-import entity.repositories.ApplicantCSVRepository;
 // No need for regex import if using character checks
 
 /**
@@ -27,7 +27,6 @@ import entity.repositories.ApplicantCSVRepository;
  * </p>
  */
 public class UserCTRL {
-
     /** List of all users loaded from the repository. */
     private List<User> userList;
     /** The currently logged-in user. */
@@ -36,7 +35,18 @@ public class UserCTRL {
     private final UserCSVRepository userRepo = new UserCSVRepository();
 
     //repo for applicant
-    private final IApplicantRepository applicantRepository = new ApplicantCSVRepository();
+    private final IApplicantRepository applicantRepository;
+    
+    // Default Constructor
+    public UserCTRL() {
+        this(new ApplicantCSVRepository());
+    }
+
+    //used for creation of user
+    public UserCTRL(IApplicantRepository applicantRepository) {
+        this.applicantRepository = applicantRepository;
+    }
+    
     /**
      * Loads user data from the CSV repository into the user list.
      */
@@ -58,11 +68,6 @@ public class UserCTRL {
             }
         }
         userRepo.writeUserToCSV(this.userList);
-    }
-
-    //used for creation of user
-    public UserCTRL() {
-       
     }
 
   /**
@@ -91,8 +96,7 @@ public class UserCTRL {
             } else {
                 break;
             }
-    }
-
+        }
 
         // Get Name with validation
         String name;
@@ -101,8 +105,8 @@ public class UserCTRL {
             name = sc.nextLine().trim();
             if (name.isEmpty()) {
                 System.out.println("Name cannot be blank.");
-            } else if (name.matches(".*\\d.*")) {
-                System.out.println("Name cannot contain numbers.");
+            } else if (!name.matches("^[A-Z][a-z]*( [A-Z][a-z]*)*$")) {
+                System.out.println("Name must contain only alphabets with each word starting with a capital letter.");
             } else {
                 break;
             }
@@ -154,15 +158,17 @@ public class UserCTRL {
         String password = "Passw0rd";
 
         /// Create Applicant object
-    Applicant applicant = new Applicant(nric, name, password, age, maritalStatus, "", role, applicantRepository);
+        Applicant applicant = new Applicant(nric, name, password, age, maritalStatus, "", role, applicantRepository);
 
-    // Save the applicant using the ApplicantCSVRepository
-    try {
-        applicant.save();
-        System.out.println("Account created successfully!");
-    } catch (Exception e) {
-        System.out.println("An error occurred while saving the account: " + e.getMessage());
-    }
+        // Save the applicant using the ApplicantCSVRepository
+        try {
+            applicant.save();
+            System.out.println("Account created successfully!");
+        } catch (Exception e) {
+            System.out.println("An error occurred while saving the account: " + e.getMessage());
+        }
+
+        loadUserData();
     }
 
     // --------------------------------------------------------------------------------------------------
@@ -230,15 +236,15 @@ public class UserCTRL {
             // --- Role-specific extra options ---
             if (!optionHandled && role != null) {
                 switch (role) {
-                    case APPLICANT:
+                    case APPLICANT -> {
                         if ("5".equals(opt)) { // Logout
                             userCTRL.setCurrentUser(null);
                             baseView.displayLogout();
                             keepRunning = false; // Exit loop
                             optionHandled = true;
                         }
-                        break;
-                    case HDBOFFICER:
+                    }
+                    case HDBOFFICER -> {
                         if ("5".equals(opt)) { // Enter Officer Application Menu
                             officerAppCTRL.runOfficerApplicationMenu(sc, officerAppCTRL, officerAppView, projectCTRL);
                             optionHandled = true;
@@ -248,8 +254,8 @@ public class UserCTRL {
                             keepRunning = false; // Exit loop
                             optionHandled = true;
                         }
-                        break;
-                    case HDBMANAGER:
+                    }
+                    case HDBMANAGER -> {
                         if ("5".equals(opt)) { // Enter Officer Application Menu
                             officerAppCTRL.runOfficerApplicationMenu(sc, officerAppCTRL, officerAppView, projectCTRL);
                             optionHandled = true;
@@ -259,12 +265,12 @@ public class UserCTRL {
                             keepRunning = false; // Exit loop
                             optionHandled = true;
                         }
-                        break;
-                    default:
-                        // Should not happen with defined roles, but good practice
-                        break;
+                    }
+                    default -> {
+                    }
                 }
-            }
+                // Should not happen with defined roles, but good practice
+                            }
 
             // If no valid option was handled (common or role-specific)
             if (!optionHandled && keepRunning) { // Check keepRunning to avoid message after logout
