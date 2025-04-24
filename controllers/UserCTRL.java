@@ -65,6 +65,15 @@ public class UserCTRL {
        
     }
 
+  /**
+   * The `createNewAccount` function in Java prompts the user to input details for a new account,
+   * validates the input, creates an `Applicant` object, and saves it using an
+   * `ApplicantCSVRepository`.
+   * 
+   * @param sc The `sc` parameter in the `createNewAccount` method is of type `Scanner`. It is used to
+   * read input from the user during the account creation process. The `Scanner` class in Java is used
+   * for obtaining input of primitive types like int, double, etc., and strings from the
+   */
     public void createNewAccount(Scanner sc) {
         System.out.println("\n=== Create New Account ===");
 
@@ -77,10 +86,13 @@ public class UserCTRL {
                 System.out.println("NRIC cannot be blank.");
             } else if (!nric.matches("^[TS]\\d{7}[A-Z]$")) {
                 System.out.println("Invalid NRIC format. Please ensure it starts with T or S, followed by 7 digits, and ends with a capital letter.");
+            } else if (getUserByNRIC(nric) != null) { // Check for duplicate NRIC
+                System.out.println("This NRIC is already registered. Please enter a different NRIC.");
             } else {
                 break;
             }
-        }
+    }
+
 
         // Get Name with validation
         String name;

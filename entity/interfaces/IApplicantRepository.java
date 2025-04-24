@@ -1,3 +1,7 @@
+// This code snippet is defining an interface in Java named `IApplicantRepository` that specifies the
+// methods that a class implementing this interface must provide. The interface has two methods:
+// 1. `getAllApplicants()`: This method is expected to return a list of `Applicant` objects.
+// 2. `saveApplicant(Applicant applicant)`: This method is used to save an `Applicant` object.
 package entity.interfaces;
 
 import entity.Applicant;

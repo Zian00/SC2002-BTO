@@ -1,3 +1,6 @@
+// The `package boundaries;` statement at the beginning of the Java file is declaring the package name
+// for this particular Java class. In Java, packages are used to organize classes into namespaces,
+// providing a way to group related classes together.
 package boundaries;
 
 import entity.BTOProject;
