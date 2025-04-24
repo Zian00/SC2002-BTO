@@ -30,7 +30,8 @@ public class BTOProjectView {
         System.out.println("2. Display filtered BTO Projects");
         System.out.println("3. Apply for a BTO Project");
         System.out.println("4. Submit Enquiry for a BTO project");
-        System.out.println("5. Back");
+        System.out.println("5. Display My Past BTO Applicaitons");
+        System.out.println("6. Back");
         System.out.print("Select an option: ");
     }
 

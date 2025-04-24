@@ -1,131 +1,501 @@
-@startuml
+@startuml SC2002-BTO Class Diagram
 
-class User {
-  NRIC               : String
-  name               : String
-  password           : String
-  age                : int
-  maritalStatus      : MaritalState
-  filterSettings     : String
-  role               : Role
+skinparam classAttributeIconSize 0
+' hide empty members ' Uncomment this if you want to hide classes with only attributes/no methods shown
+
+' --- Enums ---
+
+enum MaritalState {
+  SINGLE
+  MARRIED
+  DIVORCED
+  WIDOWED
 }
 
-class HDBManager
+enum Role {
+  APPLICANT
+  OFFICER
+  MANAGER
+}
+
+enum FlatType {
+  TWO_ROOM
+  THREE_ROOM
+  FOUR_ROOM
+  FIVE_ROOM
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  BALLOTING
+  SUCCESSFUL
+  UNSUCCESSFUL
+}
+
+enum ApplicationType {
+  SINGLE
+  JOINT
+}
+
+enum RegistrationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+' --- Interfaces ---
+
+interface IEnquirySubmission {
+  + submitEnquiry(enquiry: Enquiry): boolean
+}
+
+interface IEnquiryResponse {
+  + provideResponse(enquiryId: int, response: String): boolean
+  + viewPendingEnquiries(projectId: int): List<Enquiry>
+}
+
+' --- Classes ---
+
+class User {
+  - NRIC               : String
+  - name               : String
+  - password           : String  // Stored as hash ideally
+  - age                : int
+  - maritalStatus      : MaritalState
+  - filterSettings     : FilterSettings
+  - role               : Role
+  --
+  + getNRIC(): String
+  + getName(): String
+  + setName(name: String): void
+  + getAge(): int
+  + setAge(age: int): void
+  + getMaritalStatus(): MaritalState
+  + setMaritalStatus(status: MaritalState): void
+  + getFilterSettings(): FilterSettings
+  + setFilterSettings(settings: FilterSettings): void
+  + getRole(): Role
+  + setRole(role: Role): void // Might be restricted logic
+  + changePassword(oldPassword: String, newPassword: String): boolean
+  + updateProfile(details: Map): void
+  + verifyPassword(passwordAttempt: String): boolean // Added for login
+}
+
+class HDBManager {
+  // Inherits attributes & methods from User
+  --
+  + manageProjects(): void
+  + manageOfficers(): void
+  + viewSystemReports(): void
+}
 
 class BTOProject {
-  projectID               : int
-  projectName             : String
-  projectLocation         : String
-  approvedOfficer         : List<String>
-  pendingOfficer          : List<String>
-  visibility              : boolean
-  availableOfficerSlots   : int
-  applicationOpeningDate  : LocalDate
-  applicationClosingDate  : LocalDate
+  - projectID               : int
+  - projectName             : String
+  - projectLocation         : String
+  - approvedOfficer         : List<String> // List of Officer NRICs
+  - pendingOfficer          : List<String> // List of Officer NRICs
+  - visibility              : boolean
+  - availableOfficerSlots   : int
+  - applicationOpeningDate  : LocalDate
+  - applicationClosingDate  : LocalDate
+  --
+  + getProjectID(): int
+  + getProjectName(): String
+  + setProjectName(name: String): void
+  + getProjectLocation(): String
+  + setProjectLocation(location: String): void
+  + getApprovedOfficers(): List<String>
+  + getPendingOfficers(): List<String>
+  + isVisible(): boolean
+  + setVisibility(isVisible: boolean): void
+  + getAvailableOfficerSlots(): int
+  + setAvailableOfficerSlots(count: int): void
+  + getApplicationOpeningDate(): LocalDate
+  + setApplicationOpeningDate(date: LocalDate): void
+  + getApplicationClosingDate(): LocalDate
+  + setApplicationClosingDate(date: LocalDate): void
+  + addApprovedOfficer(officerNRIC: String): boolean
+  + removeApprovedOfficer(officerNRIC: String): boolean
+  + addPendingOfficer(officerNRIC: String): boolean
+  + removePendingOfficer(officerNRIC: String): boolean
+  + isApplicationOpen(): boolean
 }
 
 class BTOApplication {
-  applicationId     : int
-  applicantNRIC     : String
-  projectID         : int
-  flatType          : FlatType
-  status            : ApplicationStatus
-  type              : ApplicationType
+  - applicationId     : int
+  - applicantNRIC     : String
+  - projectID         : int
+  - flatType          : FlatType
+  - status            : ApplicationStatus
+  - type              : ApplicationType
+  --
+  + getApplicationId(): int
+  + getApplicantNRIC(): String
+  + getProjectID(): int
+  + getFlatType(): FlatType
+  + setFlatType(type: FlatType): void // Maybe only set at creation?
+  + getStatus(): ApplicationStatus
+  + setStatus(newStatus: ApplicationStatus): void
+  + getType(): ApplicationType
+  + setType(type: ApplicationType): void // Maybe only set at creation?
 }
 
 class OfficerApplication {
-  officerApplicationId : int
-  officerNRIC          : String
-  projectID            : int
-  status               : RegistrationStatus
+  - officerApplicationId : int
+  - officerNRIC          : String
+  - projectID            : int
+  - status               : RegistrationStatus
+  --
+  + getOfficerApplicationId(): int
+  + getOfficerNRIC(): String
+  + getProjectID(): int
+  + getStatus(): RegistrationStatus
+  + setStatus(newStatus: RegistrationStatus): void
 }
 
 class Enquiry {
-  enquiryId        : int
-  enquiryText      : String
-  response         : String
-  applicantNRIC    : String
-  projectId        : int
-  timestamp        : LocalDateTime
+  - enquiryId        : int
+  - enquiryText      : String
+  - response         : String
+  - applicantNRIC    : String
+  - projectId        : int
+  - timestamp        : LocalDateTime
+  --
+  + getEnquiryId(): int
+  + getEnquiryText(): String
+  + setEnquiryText(text: String): void
+  + getResponse(): String
+  + setResponse(responseText: String): void
+  + getApplicantNRIC(): String
+  + getProjectId(): int
+  + getTimestamp(): LocalDateTime
 }
 
 class FilterSettings {
-  roomType : String
-  minPrice : Integer
-  maxPrice : Integer
+  - roomType : String  // Or potentially FlatType enum
+  - minPrice : Integer
+  - maxPrice : Integer
+  --
+  + getRoomType(): String
+  + setRoomType(type: String): void
+  + getMinPrice(): Integer
+  + setMinPrice(price: Integer): void
+  + getMaxPrice(): Integer
+  + setMaxPrice(price: Integer): void
 }
 
-enum MaritalState
-enum Role
-enum FlatType
-enum ApplicationStatus
-enum ApplicationType
-enum RegistrationStatus
+' --- Repository Classes (Data Access) ---
 
-class UserCSVRepository
-class BTOProjectCSVRepository
-class ApplicationCSVRepository
-class OfficerApplicationCSVRepository
-class EnquiryCSVRepository
+class UserCSVRepository {
+  - filePath: String
+  --
+  + findUserByNRIC(nric: String): User
+  + saveUser(user: User): void
+  + updateUser(user: User): void
+  + loadAllUsers(): List<User>
+  + deleteUser(nric: String): boolean
+}
 
-interface IEnquirySubmission
-interface IEnquiryResponse
+class BTOProjectCSVRepository {
+  - filePath: String
+  --
+  + findProjectById(id: int): BTOProject
+  + findProjectByName(name: String): BTOProject
+  + saveProject(project: BTOProject): void
+  + updateProject(project: BTOProject): void
+  + loadAllProjects(): List<BTOProject>
+  + deleteProject(id: int): boolean
+}
 
-class UserCTRL
-class BTOProjectCTRL
-class BTOApplicationCTRL
-class OfficerApplicationCTRL
-class EnquiryCTRL
+class ApplicationCSVRepository {
+  - filePath: String
+  --
+  + findApplicationById(id: int): BTOApplication
+  + findApplicationsByNRIC(nric: String): List<BTOApplication>
+  + findApplicationsByProject(projectId: int): List<BTOApplication>
+  + saveApplication(application: BTOApplication): void
+  + updateApplication(application: BTOApplication): void
+  + loadAllApplications(): List<BTOApplication>
+  + deleteApplication(id: int): boolean
+}
 
-class UserView
-class ApplicantView
-class OfficerView
-class ManagerView
-class BTOProjectView
-class BTOApplicationView
-class OfficerApplicationView
-class EnquiryView
+class OfficerApplicationCSVRepository {
+  - filePath: String
+  --
+  + findOfficerApplicationById(id: int): OfficerApplication
+  + findOfficerApplicationsByNRIC(nric: String): List<OfficerApplication>
+  + findOfficerApplicationsByProject(projectId: int): List<OfficerApplication>
+  + saveOfficerApplication(application: OfficerApplication): void
+  + updateOfficerApplication(application: OfficerApplication): void
+  + loadAllOfficerApplications(): List<OfficerApplication>
+  + deleteOfficerApplication(id: int): boolean
+}
 
-class Main
+class EnquiryCSVRepository {
+  - filePath: String
+  --
+  + findEnquiryById(id: int): Enquiry
+  + findEnquiriesByNRIC(nric: String): List<Enquiry>
+  + findEnquiriesByProject(projectId: int): List<Enquiry>
+  + saveEnquiry(enquiry: Enquiry): void
+  + updateEnquiry(enquiry: Enquiry): void
+  + loadAllEnquiries(): List<Enquiry>
+  + deleteEnquiry(id: int): boolean
+}
 
-'—— Inheritance ——
+' --- Controller Classes (Business Logic/Coordination) ---
+
+class UserCTRL {
+  - userRepo: UserCSVRepository
+  - userView: UserView
+  - currentUser: User
+  --
+  + login(nric: String, password: String): boolean
+  + logout(): void
+  + registerUser(details: Map): User
+  + viewProfile(): void
+  + updateProfile(details: Map): boolean
+  + changePassword(oldPassword: String, newPassword: String): boolean
+  + getCurrentUser(): User
+  + getCurrentUserRole(): Role
+}
+
+class BTOProjectCTRL {
+  - projectRepo: BTOProjectCSVRepository
+  - projectView: BTOProjectView
+  --
+  + createProject(details: Map): BTOProject
+  + viewAllProjects(): void
+  + viewProjectDetails(projectId: int): void
+  + updateProjectDetails(projectId: int, details: Map): boolean
+  + setProjectVisibility(projectId: int, isVisible: boolean): boolean
+  + getVisibleProjects(): List<BTOProject>
+  + assignOfficerToProject(projectId: int, officerNRIC: String): boolean // Added for Manager
+  + approvePendingOfficer(projectId: int, officerNRIC: String): boolean // Added for Manager
+}
+
+class BTOApplicationCTRL {
+  - applicationRepo: ApplicationCSVRepository
+  - projectRepo: BTOProjectCSVRepository // Dependency to check project status/dates
+  - applicationView: BTOApplicationView
+  --
+  + submitApplication(applicantNRIC: String, projectId: int, flatType: FlatType, type: ApplicationType): BTOApplication
+  + viewMyApplications(applicantNRIC: String): void
+  + viewApplicationDetails(applicationId: int): void
+  + withdrawApplication(applicationId: int): boolean
+  + viewApplicationsForProject(projectId: int): void // Likely for Officer/Manager
+  + updateApplicationStatus(applicationId: int, status: ApplicationStatus): boolean // Likely for Officer/Manager
+}
+
+class OfficerApplicationCTRL {
+  - officerAppRepo: OfficerApplicationCSVRepository
+  - officerAppView: OfficerApplicationView
+  - projectRepo: BTOProjectCSVRepository // Needed to update project officer lists
+  --
+  + applyAsOfficer(officerNRIC: String, projectId: int): OfficerApplication
+  + viewMyOfficerApplications(officerNRIC: String): void
+  + viewPendingOfficerApplications(projectId: int): void // For Manager
+  + approveOfficerApplication(officerApplicationId: int): boolean // For Manager
+  + rejectOfficerApplication(officerApplicationId: int): boolean // For Manager
+}
+
+class EnquiryCTRL { // This controller might use or implement the interfaces
+  - enquiryRepo: EnquiryCSVRepository
+  - enquiryView: EnquiryView
+  // - enquirySubmitter: IEnquirySubmission // Could hold an object implementing the interface
+  // - enquiryResponder: IEnquiryResponse // Could hold an object implementing the interface
+  --
+  ' Methods potentially implementing IEnquirySubmission (if EnquiryCTRL implements it)
+  + submitEnquiry(enquiry: Enquiry): boolean
+  ' Methods potentially implementing IEnquiryResponse (if EnquiryCTRL implements it)
+  + provideResponse(enquiryId: int, response: String): boolean
+  + viewPendingEnquiries(projectId: int): List<Enquiry>
+  ' Other Controller methods
+  + viewMyEnquiries(applicantNRIC: String): void
+  + viewEnquiryDetails(enquiryId: int): void
+  + viewEnquiriesForProject(projectId: int): void // For Officer/Manager
+}
+
+' --- View Classes (User Interface) ---
+
+class UserView {
+  + displayLoginPrompt(): Map<String, String> // Returns NRIC, password
+  + displayRegistrationForm(): Map<String, Object> // Returns user details
+  + displayUserProfile(user: User): void
+  + displayUpdateProfileForm(user: User): Map<String, Object>
+  + displayChangePasswordForm(): Map<String, String> // old, new passwords
+  + displayMessage(message: String): void
+  + displayMainMenu(role: Role): int // Returns user choice
+  + getInputString(prompt: String): String
+  + getInputInt(prompt: String): int
+  + getInputChar(prompt: String): char
+  + displayError(message: String): void
+  + pressEnterToContinue(): void
+}
+
+class ApplicantView { ' Inherits from UserView
+  + displayApplicantMenu(): int
+  + displayProjectList(projects: List<BTOProject>): void
+  + displayApplicationForm(project: BTOProject): Map<String, Object> // Returns flat type, app type etc.
+  + displayApplicationList(applications: List<BTOApplication>): void
+  + displayApplicationDetails(application: BTOApplication): void
+  + displayEnquiryForm(project: BTOProject): String // Returns enquiry text
+  + displayEnquiryList(enquiries: List<Enquiry>): void
+  + displayEnquiryDetails(enquiry: Enquiry): void
+  + displayFilterOptionsForm(): FilterSettings
+}
+
+class OfficerView { ' Inherits from ApplicantView
+  + displayOfficerMenu(): int
+  + displayProjectOfficerDetails(project: BTOProject): void // Show assigned projects etc.
+  + displayEnquiriesForProject(enquiries: List<Enquiry>): void
+  + getResponseInput(enquiry: Enquiry): String
+  + displayOfficerApplicationList(applications: List<OfficerApplication>): void
+  + displaySelectEnquiryPrompt(enquiries: List<Enquiry>): int // Returns selected enquiry ID
+}
+
+class ManagerView { ' Inherits from UserView
+  + displayManagerMenu(): int
+  + displayProjectCreationForm(): Map<String, Object>
+  + displayProjectManagementOptions(project: BTOProject): int
+  + displayAllProjects(projects: List<BTOProject>): void
+  + displayOfficerApplicationList(applications: List<OfficerApplication>): void
+  + displayAssignOfficerForm(project: BTOProject, availableOfficers: List<User>): String // Returns Officer NRIC
+  + displaySystemReports(): void // Placeholder
+  + displaySelectProjectPrompt(projects: List<BTOProject>): int // Returns selected project ID
+  + displaySelectOfficerApplicationPrompt(apps: List<OfficerApplication>): int // Returns selected app ID
+}
+
+class BTOProjectView {
+  + displayProjectList(projects: List<BTOProject>): void
+  + displayProjectDetails(project: BTOProject): void
+  + displayProjectUpdateForm(project: BTOProject): Map<String, Object>
+  + displayVisibilityOptionPrompt(): boolean
+}
+
+class BTOApplicationView {
+  + displayApplicationList(applications: List<BTOApplication>): void
+  + displayApplicationDetails(application: BTOApplication): void
+  + displayApplicationStatusUpdatePrompt(): ApplicationStatus
+  + displaySelectApplicationPrompt(apps: List<BTOApplication>): int // Returns selected app ID
+}
+
+class OfficerApplicationView {
+  + displayOfficerApplicationList(applications: List<OfficerApplication>): void
+  + displayOfficerApplicationDetails(application: OfficerApplication): void
+  + displayApprovalConfirmationPrompt(): boolean
+}
+
+class EnquiryView {
+  + displayEnquiryList(enquiries: List<Enquiry>): void
+  + displayEnquiryDetails(enquiry: Enquiry): void
+  + displayEnquiryResponseForm(enquiry: Enquiry): String // Returns response text
+}
+
+' --- Main Application Class ---
+
+class Main {
+  - userCtrl: UserCTRL
+  - projectCtrl: BTOProjectCTRL
+  - btoAppCtrl: BTOApplicationCTRL
+  - officerAppCtrl: OfficerApplicationCTRL
+  - enquiryCtrl: EnquiryCTRL
+  - userView: UserView
+  - applicantView: ApplicantView
+  - officerView: OfficerView
+  - managerView: ManagerView
+  ' other views...
+  --
+  + {static} main(args: String[]): void // Static entry point
+  - initialize(): void // Setup controllers, views, repos
+  - run(): void // Main application loop
+  - runApplicantMenu(): void
+  - runOfficerMenu(): void
+  - runManagerMenu(): void
+}
+
+
+' --- Relationships ---
+
+' Inheritance
 HDBManager --|> User
 ApplicantView --|> UserView
-OfficerView   --|> ApplicantView
-ManagerView   --|> UserView
+OfficerView --|> ApplicantView
+ManagerView --|> UserView
 
-'—— Associations ——
-UserCTRL                --> User
-UserCTRL                --> UserCSVRepository
-UserCTRL                --> UserView
+' Composition / Aggregation
+User "1" *-- "1" FilterSettings : has >
 
-BTOProjectCTRL          --> BTOProject
-BTOProjectCTRL          --> BTOProjectCSVRepository
-BTOProjectCTRL          --> BTOProjectView
+' Associations (Attribute Types & Key Links)
+User *--> MaritalState : uses >
+User *--> Role : uses >
+BTOApplication *--> FlatType : uses >
+BTOApplication *--> ApplicationStatus : uses >
+BTOApplication *--> ApplicationType : uses >
+OfficerApplication *--> RegistrationStatus : uses >
 
-BTOApplicationCTRL      --> BTOApplication
-BTOApplicationCTRL      --> ApplicationCSVRepository
-BTOApplicationCTRL      --> BTOProjectCSVRepository
-BTOApplicationCTRL      --> BTOApplicationView
+BTOApplication "many" -- BTOProject : applies to >
+BTOApplication "many" -- User : submitted by >
+OfficerApplication "many" -- BTOProject : applies to >
+OfficerApplication "many" -- User : submitted by > ' Assuming Officer is a User
+Enquiry "many" -- BTOProject : related to >
+Enquiry "many" -- User : submitted by >
 
-OfficerApplicationCTRL  --> OfficerApplication
-OfficerApplicationCTRL  --> OfficerApplicationCSVRepository
-OfficerApplicationCTRL  --> OfficerApplicationView
+' Dependencies (Controller -> Service/Repo/View/Model, View -> Model)
+UserCTRL --> UserCSVRepository : uses >
+UserCTRL --> UserView : uses >
+UserCTRL ..> User : manages > ' Dependency on the model it controls
 
-EnquiryCTRL             --> IEnquirySubmission
-EnquiryCTRL             --> IEnquiryResponse
-EnquiryCTRL             --> Enquiry
-EnquiryCTRL             --> EnquiryCSVRepository
-EnquiryCTRL             --> EnquiryView
+BTOProjectCTRL --> BTOProjectCSVRepository : uses >
+BTOProjectCTRL --> BTOProjectView : uses >
+BTOProjectCTRL ..> BTOProject : manages >
 
-User             --> MaritalState
-User             --> Role
-BTOProject       --> FlatType
-BTOApplication   --> ApplicationStatus
-BTOApplication   --> ApplicationType
-OfficerApplication --> RegistrationStatus
+BTOApplicationCTRL --> ApplicationCSVRepository : uses >
+BTOApplicationCTRL --> BTOProjectCSVRepository : uses > ' Needs project info
+BTOApplicationCTRL --> BTOApplicationView : uses >
+BTOApplicationCTRL ..> BTOApplication : manages >
 
-Main             --> UserCTRL
-Main             --> UserView
+OfficerApplicationCTRL --> OfficerApplicationCSVRepository : uses >
+OfficerApplicationCTRL --> OfficerApplicationView : uses >
+OfficerApplicationCTRL --> BTOProjectCSVRepository : uses > ' Needs project info
+OfficerApplicationCTRL ..> OfficerApplication : manages >
+
+EnquiryCTRL --> EnquiryCSVRepository : uses >
+EnquiryCTRL --> EnquiryView : uses >
+EnquiryCTRL --> IEnquirySubmission : uses > ' Depends on the interface
+EnquiryCTRL --> IEnquiryResponse : uses > ' Depends on the interface
+EnquiryCTRL ..> Enquiry : manages >
+
+' Main Application Setup Dependencies
+Main --> UserCTRL : creates >
+Main --> BTOProjectCTRL : creates >
+Main --> BTOApplicationCTRL : creates >
+Main --> OfficerApplicationCTRL : creates >
+Main --> EnquiryCTRL : creates >
+Main --> UserView : creates >
+Main --> ApplicantView : creates >
+Main --> OfficerView : creates >
+Main --> ManagerView : creates >
+' Main --> other views...
+
+' View dependencies on Models (for displaying data)
+UserView ..> User
+ApplicantView ..> BTOProject
+ApplicantView ..> BTOApplication
+ApplicantView ..> Enquiry
+OfficerView ..> BTOProject
+OfficerView ..> Enquiry
+OfficerView ..> OfficerApplication
+ManagerView ..> BTOProject
+ManagerView ..> OfficerApplication
+ManagerView ..> User ' For listing officers
+BTOProjectView ..> BTOProject
+BTOApplicationView ..> BTOApplication
+OfficerApplicationView ..> OfficerApplication
+EnquiryView ..> Enquiry
+
 
 @enduml

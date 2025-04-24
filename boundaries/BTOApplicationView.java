@@ -7,6 +7,7 @@ import entity.enumerations.ApplicationStatus;
 import entity.enumerations.ApplicationType;
 import entity.enumerations.MaritalState;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
@@ -283,4 +284,44 @@ public class BTOApplicationView {
         }
         return input;
     }
+
+    /**
+     * Displays all past applications submitted by the current user, including project details.
+     * Shows both APPLICATION and WITHDRAWAL types and their final status.
+     *
+     * @param applications List of all BTOApplication objects by the user.
+     * @param projects     List of all BTOProject objects for lookup.
+     */
+    public void displayPastUserApplications(List<BTOApplication> applications, List<BTOProject> projects) {
+        if (applications == null || applications.isEmpty()) {
+            System.out.println("You have no past BTO applications.");
+            return;
+        }
+
+        System.out.println("\n=== My Past BTO Applications ===");
+        for (BTOApplication app : applications) {
+            System.out.println("Application ID   : " + app.getApplicationId());
+
+            // Find the project details
+            Optional<BTOProject> projectOpt = projects.stream()
+                    .filter(p -> p.getProjectID() == app.getProjectID())
+                    .findFirst();
+
+            if (projectOpt.isPresent()) {
+                BTOProject project = projectOpt.get();
+                System.out.println("Project Name     : " + project.getProjectName());
+                System.out.println("Neighborhood     : " + project.getNeighborhood());
+            } else {
+                System.out.println("Project Details  : Not Found (ID: " + app.getProjectID() + ")");
+            }
+
+            System.out.println("Flat Type Applied: " + app.getFlatType());
+            System.out.println("Application Type : " + app.getApplicationType()); // APPLICATION or WITHDRAWAL
+            System.out.println("Final Status     : " + app.getStatus()); // PENDING, SUCCESSFUL, UNSUCCESSFUL, BOOKED
+            System.out.println("-----------------------------------");
+        }
+        System.out.println("=== End of Past Applications ===");
+    }
+
+
 }

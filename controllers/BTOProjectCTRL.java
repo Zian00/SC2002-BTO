@@ -1,5 +1,6 @@
 package controllers;
 
+import boundaries.BTOApplicationView;
 import boundaries.BTOProjectView;
 import boundaries.EnquiryView;
 import boundaries.OfficerApplicationView;
@@ -65,7 +66,7 @@ public class BTOProjectCTRL {
     public void runProjectMenu(Scanner sc, UserCTRL userCTRL, BTOProjectCTRL projectCTRL,
             BTOProjectView projectView, BTOApplicationCTRL applicationCTRL,
             OfficerApplicationCTRL officerAppCTRL ,OfficerApplicationView officerAppView,
-            EnquiryView enquiryView, EnquiryCTRL enquiryCTRL) {
+            EnquiryView enquiryView, EnquiryCTRL enquiryCTRL, BTOApplicationView btoApplicationView) {
         while (true) {
             Role role = userCTRL.getCurrentUser().getRole();
             switch (role) {
@@ -157,11 +158,29 @@ public class BTOProjectCTRL {
                                 break;
                             }
 
+
                             String enquiryText = enquiryView.promptEnquiryCreation(sc);
                             Enquiry newEnquiry = enquiryCTRL.createEnquiry(projectId, enquiryText);
                             enquiryView.displayEnquiry(newEnquiry);
                         }
-                        case "5" -> { // back to central menu
+                        
+                        case "5" -> { // Display Past BTO Applications
+                            try {
+                                // 1. Get all applications for the current user
+                                var pastApplications = applicationCTRL.viewUserApplications();
+                                // 2. Get all projects for lookup
+                                var allProjects = projectCTRL.getAllProjects();
+                                // 3. Call the new view method to display them
+                                btoApplicationView.displayPastUserApplications(pastApplications, allProjects);
+                            } catch (Exception e) {
+                                System.out.println("An error occurred while retrieving past applications: " + e.getMessage());
+                                // Optionally log the stack trace for debugging
+                                // e.printStackTrace();
+                            }
+
+
+                        }
+                        case "6" -> { // back to central menu
                             return;
                         }
                     }
