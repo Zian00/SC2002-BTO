@@ -13,6 +13,7 @@ import entity.enumerations.Role;
 import entity.repositories.UserCSVRepository;
 import java.util.List;
 import java.util.Scanner;
+// No need for regex import if using character checks
 
 /**
  * Controller class for managing user-related operations in the BTO system.
@@ -71,6 +72,7 @@ public class UserCTRL {
             case APPLICANT -> new ApplicantView();
             case HDBOFFICER -> new OfficerView();
             case HDBMANAGER -> new ManagerView();
+            default -> new UserView(); // Fallback, though should ideally not happen if role is valid
         };
         BTOProjectView projectView = new BTOProjectView();
         BTOApplicationView btoApplicationView = new BTOApplicationView();
@@ -83,82 +85,119 @@ public class UserCTRL {
         EnquiryCTRL enquiryCTRL = new EnquiryCTRL(userCTRL.getCurrentUser());
         OfficerApplicationCTRL officerAppCTRL = new OfficerApplicationCTRL(userCTRL.getCurrentUser());
 
-        while (true) {
+        boolean keepRunning = true; // Flag to control the loop
+        while (keepRunning) {
             baseView.displayMenu();
 
             String opt = sc.nextLine().trim();
-            // --- Common options 1–4 ---
+            boolean optionHandled = false; // Flag to track if an option was processed
+
+            // --- Common options ---
             switch (opt) {
-                case "1" ->
-                {
-                    // Update project visibility before filtering/displaying projects
+                case "1" -> {
                     projectCTRL.updateProjectVisibility();
                     projectCTRL.runProjectMenu(sc, userCTRL, projectCTRL, projectView, applicationCTRL, officerAppCTRL, officerAppView, enquiryView, enquiryCTRL, btoApplicationView);
+                    optionHandled = true;
                 }
-                case "2" -> applicationCTRL.runApplicationMenu(sc, userCTRL, projectCTRL, applicationCTRL, btoApplicationView);
-                case "3" -> enquiryCTRL.runEnquiryMenu(sc, userCTRL, projectCTRL, enquiryView, enquiryCTRL);
+                case "2" -> {
+                    applicationCTRL.runApplicationMenu(sc, userCTRL, projectCTRL, applicationCTRL, btoApplicationView);
+                    optionHandled = true;
+                }
+                case "3" -> {
+                    enquiryCTRL.runEnquiryMenu(sc, userCTRL, projectCTRL, enquiryView, enquiryCTRL);
+                    optionHandled = true;
+                }
                 case "4" -> {
                     handleChangePassword(sc, userCTRL);
-                    if (userCTRL.getCurrentUser() == null)
-                        return; // back to login
+                    if (userCTRL.getCurrentUser() == null) {
+                        keepRunning = false; // Exit loop if logged out after password change
+                    }
+                    optionHandled = true;
                 }
             }
 
-            if (role != null) // --- Role‑specific extra options ---
+            // --- Role-specific extra options ---
+            if (!optionHandled && role != null) {
                 switch (role) {
                     case APPLICANT:
-                        switch (opt) {
-                            case "5" -> { // Logout
-                                userCTRL.setCurrentUser(null);
-                                baseView.displayLogout();
-                                return;
-                            }
+                        if ("5".equals(opt)) { // Logout
+                            userCTRL.setCurrentUser(null);
+                            baseView.displayLogout();
+                            keepRunning = false; // Exit loop
+                            optionHandled = true;
                         }
+                        break;
                     case HDBOFFICER:
-                        switch (opt) {
-                            case "5" -> { // Enter Officer Application Menu
-                                officerAppCTRL.runOfficerApplicationMenu(sc, officerAppCTRL, officerAppView, projectCTRL);
-                            }
-                            case "6" -> { // Logout
-                                userCTRL.setCurrentUser(null);
-                                baseView.displayLogout();
-                                return;
-                            }
+                        if ("5".equals(opt)) { // Enter Officer Application Menu
+                            officerAppCTRL.runOfficerApplicationMenu(sc, officerAppCTRL, officerAppView, projectCTRL);
+                            optionHandled = true;
+                        } else if ("6".equals(opt)) { // Logout
+                            userCTRL.setCurrentUser(null);
+                            baseView.displayLogout();
+                            keepRunning = false; // Exit loop
+                            optionHandled = true;
                         }
                         break;
                     case HDBMANAGER:
-                        switch (opt) {
-                            case "5" -> {
-                                officerAppCTRL.runOfficerApplicationMenu(sc, officerAppCTRL, officerAppView, projectCTRL);
-                            }
-                            case "6" -> {
-                                // Logout
-                                userCTRL.setCurrentUser(null);
-                                baseView.displayLogout();
-                                return;
-                            }
+                        if ("5".equals(opt)) { // Enter Officer Application Menu
+                            officerAppCTRL.runOfficerApplicationMenu(sc, officerAppCTRL, officerAppView, projectCTRL);
+                            optionHandled = true;
+                        } else if ("6".equals(opt)) { // Logout
+                            userCTRL.setCurrentUser(null);
+                            baseView.displayLogout();
+                            keepRunning = false; // Exit loop
+                            optionHandled = true;
                         }
                         break;
                     default:
+                        // Should not happen with defined roles, but good practice
                         break;
                 }
+            }
+
+            // If no valid option was handled (common or role-specific)
+            if (!optionHandled && keepRunning) { // Check keepRunning to avoid message after logout
+                 System.out.println("Invalid choice, please try again.");
+            }
         }
     }
+
 
     // --------------------------------------------------------------------------------------------------
     // Change Password Handler
     // --------------------------------------------------------------------------------------------------
     /**
      * Handles the password change process for the current user.
-     * Prompts for a new password and updates it.
+     * Prompts for current password, new password, confirmation, and updates it after validation.
      *
      * @param sc       The Scanner object for user input.
      * @param userCTRL The UserCTRL instance.
      */
     public void handleChangePassword(Scanner sc, UserCTRL userCTRL) {
+        // Ensure user is logged in before attempting password change
+        if (userCTRL.getCurrentUser() == null) {
+            System.out.println("Error: You must be logged in to change your password.");
+            return;
+        }
+
+        System.out.print("Enter current password: ");
+        String currentPass = sc.nextLine().trim();
+
         System.out.print("Enter new password: ");
         String newPass = sc.nextLine().trim();
-        userCTRL.changePassword(newPass);
+
+        System.out.print("Confirm new password: ");
+        String confirmPass = sc.nextLine().trim();
+
+        // Check if new password and confirmation match
+        if (!newPass.equals(confirmPass)) {
+            System.out.println("New passwords do not match. Password change cancelled.");
+            return;
+        }
+
+        // Call the updated changePassword method with both passwords
+        userCTRL.changePassword(currentPass, newPass);
+        // The changePassword method now handles logout on success
     }
 
     /**
@@ -184,49 +223,113 @@ public class UserCTRL {
     /**
      * Updates the filter settings for the current user and persists the change.
      *
-     * @param me        The user whose filter settings are to be updated.
+     * @param me        The user whose filter settings are to be updated (can be derived from currentUser).
      * @param filterCsv The new filter settings in CSV format.
      */
     public void updateFilterSettings(User me, String filterCsv) {
-        if (userList == null)
-        {
-            loadUserData();
+        if (currentUser == null) {
+            System.err.println("Error: Cannot update filter settings. No user logged in.");
+            return;
         }
+        // Ensure the user passed is the current user, or just use currentUser directly
+        if (me == null || !me.getNRIC().equalsIgnoreCase(currentUser.getNRIC())) {
+             System.err.println("Warning: Attempting to update filter settings for a user different from the logged-in user. Using logged-in user.");
+        }
+
+        if (userList == null) {
+            loadUserData();
+            if (userList == null) {
+                 System.err.println("Error: User data could not be loaded. Filter settings not saved.");
+                 return;
+            }
+        }
+
         currentUser.setFilterSettings(filterCsv);
+        boolean found = false;
         // Also synchronize the change into userList
         for (User u : userList) {
             if (u.getNRIC().equalsIgnoreCase(currentUser.getNRIC())) {
                 u.setFilterSettings(filterCsv);
+                found = true;
                 break;
             }
         }
-        saveUserData();
+        if (found) {
+            saveUserData();
+        } else {
+             System.err.println("Error: Logged-in user not found in the main user list. Filter settings not saved to file.");
+        }
     }
 
     /**
-     * Changes the current user's password to the specified new password and persists the change.
+     * Changes the current user's password after verifying the current password
+     * and validating the new password's complexity.
      * Logs out the user after a successful change.
      *
-     * @param newPassword The desired new password.
+     * @param currentPassword The user's claimed current password.
+     * @param newPassword     The desired new password.
      * @return true if the change succeeded, false otherwise.
      */
-    public boolean changePassword(String newPassword) {
-        if (newPassword == null || newPassword.trim().isEmpty()) {
-            System.out.println("Password cannot be blank");
-            return false;
-        }
-
+    public boolean changePassword(String currentPassword, String newPassword) {
         if (currentUser == null) {
             System.out.println("Error: no user is currently logged in.");
             return false;
         }
 
+        // 1. Verify current password
+        if (!currentUser.getPassword().equals(currentPassword)) {
+            System.out.println("Incorrect old password. Password change failed.");
+            return false;
+        }
+
+        // 2. Validate new password complexity
+        boolean hasUpper = false;
+        boolean hasLower = false;
+        boolean hasDigit = false;
+        final int MIN_LENGTH = 8;
+
+        if (newPassword == null || newPassword.length() < MIN_LENGTH) {
+            System.out.println("Password change failed. New password must be at least " + MIN_LENGTH + " characters long.");
+            return false;
+        }
+
+        for (char c : newPassword.toCharArray()) {
+            if (Character.isUpperCase(c)) {
+                hasUpper = true;
+            } else if (Character.isLowerCase(c)) {
+                hasLower = true;
+            } else if (Character.isDigit(c)) {
+                hasDigit = true;
+            }
+            // Optimization: break early if all conditions met
+            if (hasUpper && hasLower && hasDigit) {
+                break;
+            }
+        }
+
+        if (!(hasUpper && hasLower && hasDigit)) {
+            System.out.println("Password change failed. New password must contain:");
+            System.out.println("- At least one uppercase letter (A-Z)");
+            System.out.println("- At least one lowercase letter (a-z)");
+            System.out.println("- At least one number (0-9)");
+            return false;
+        }
+
+        // 3. Check if new password is the same as the old one
+         if (newPassword.equals(currentPassword)) {
+             System.out.println("Password change failed. New password cannot be the same as the old password.");
+             return false;
+         }
+
+
+        // All checks passed, update password
         currentUser.setPassword(newPassword);
         saveUserData(); // writes out assets/userList.csv
         System.out.println("Password changed successfully. You will be logged out now.");
         setCurrentUser(null); // <— force logout
         return true;
     }
+
 
     /**
      * Gets the currently logged-in user.
@@ -253,13 +356,21 @@ public class UserCTRL {
      * @return The {@link User} with the specified NRIC, or null if not found.
      */
     public User getUserByNRIC(String nric) {
-        if (userList != null) {
-            for (User u : userList) {
-                if (u.getNRIC().equalsIgnoreCase(nric))
-                    return u;
+        // Ensure userList is loaded before searching
+        if (userList == null) {
+            loadUserData();
+            // If still null after loading, return null
+            if (userList == null) {
+                System.err.println("Error: User data could not be loaded.");
+                return null;
             }
         }
-        return null;
+        // Proceed with search
+        for (User u : userList) {
+            if (u.getNRIC().equalsIgnoreCase(nric))
+                return u;
+        }
+        return null; // Return null if not found after searching
     }
 
 }
