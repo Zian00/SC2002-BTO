@@ -904,7 +904,6 @@ public class BTOProjectCTRL {
                 })
                 .collect(Collectors.toList());
     }
-
     /**
      * Saves new filter settings back to the user record and CSV.
      *

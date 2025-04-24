@@ -1,10 +1,9 @@
 package boundaries;
 
-import java.util.List;
-import java.util.Scanner;
-
 import entity.BTOProject;
 import entity.Enquiry;
+import java.util.List;
+import java.util.Scanner;
 
 /**
  * View class for enquiry interactions in the BTO system.
@@ -69,7 +68,7 @@ public class EnquiryView {
      * @return the selected enquiry ID, or -1 if invalid.
      */
     public int promptEnquirySelection(List<Enquiry> editableEnquiries, Scanner sc) {
-        System.out.print("Enter the Enquiry ID you want to edit: ");
+        System.out.print("Enter the Enquiry ID: ");
         try {
             return Integer.parseInt(sc.nextLine().trim());
         } catch (NumberFormatException e) {

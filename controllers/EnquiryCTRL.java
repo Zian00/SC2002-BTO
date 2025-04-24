@@ -376,10 +376,12 @@ public final class EnquiryCTRL implements IEnquiryResponse, IEnquirySubmission {
         // Filter enquiries by:
         // -- projectID that is managed by current user using project IDs
         // -- no response 
+        // -- And were not submitted by the current officer.
         return enquiries.stream()
-            .filter(e -> managedProjectIds.contains(e.getProjectId())
-                        && (e.getResponse() == null || e.getResponse().isEmpty()))
-            .collect(Collectors.toList());
+        .filter(e -> managedProjectIds.contains(e.getProjectId())
+            && (e.getResponse() == null || e.getResponse().isEmpty())
+            && !e.getSubmittedByNRIC().equalsIgnoreCase(userNRIC))
+        .collect(Collectors.toList());
     }
 
     /**
