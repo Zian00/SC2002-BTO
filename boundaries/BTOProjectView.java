@@ -259,6 +259,46 @@ public class BTOProjectView {
         System.out.println("===================================");
     }
 
+    public void displayFilteredProject(User user, List<BTOProject> projects) {
+
+        // Load filter settings from user's CSV
+        FilterSettings fs = FilterSettings.fromCsv(user.getFilterSettings());
+        String filteredRoom = fs.getRoomType();
+        if (filteredRoom != null) {
+            filteredRoom = filteredRoom.replace("\"", "").trim();
+        }
+
+        System.out.println("===================================");
+        System.out.println("            All Projects           ");
+        System.out.println("===================================");
+
+        if (projects == null || projects.isEmpty()) {
+            System.out.println("No available projects.");
+        } else {
+            for (BTOProject p : projects) {
+                System.out.println("Project ID:   " + p.getProjectID());
+                System.out.println("Name:         " + p.getProjectName());
+                System.out.println("Neighborhood: " + p.getNeighborhood());
+
+                // Follow filter: if filter is "2-Room" or "3-Room", display only that details.
+                if ("2-Room".equalsIgnoreCase(filteredRoom)) {
+                    System.out.printf("2-Room units: %d (Price: $%d)%n",
+                            p.getAvailable2Room(), p.getTwoRoomPrice());
+                } else if ("3-Room".equalsIgnoreCase(filteredRoom)) {
+                    System.out.printf("3-Room units: %d (Price: $%d)%n",
+                            p.getAvailable3Room(), p.getThreeRoomPrice());
+                } else { // No filter => display both eligible types
+                    System.out.printf("2-Room units: %d (Price: $%d)%n",
+                            p.getAvailable2Room(), p.getTwoRoomPrice());
+                    System.out.printf("3-Room units: %d (Price: $%d)%n",
+                            p.getAvailable3Room(), p.getThreeRoomPrice());
+                }
+                System.out.println("-----------------------------------");
+            }
+        }
+        System.out.println("===================================");
+    }
+
     /**
      * Prompts the user to enter a project ID.
      *

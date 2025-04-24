@@ -419,7 +419,8 @@ public class BTOProjectCTRL {
 
                             // 2) re‑fetch & display
                             var filtered = projectCTRL.getFilteredProjectsForManager(userCTRL.getCurrentUser());
-                            projectView.displayAvailableForApplicant(userCTRL.getCurrentUser(), filtered);
+
+                            projectView.displayFilteredProject(userCTRL.getCurrentUser(), filtered);
                         }
                         case "3" -> { // display all Manager bto projects by filter
                             // 1) prompt & save
@@ -437,12 +438,8 @@ public class BTOProjectCTRL {
 
                             // 2) re‑fetch & display
                             var filtered = projectCTRL.getFilteredProjectsCreatedbyCurrentManager(userCTRL.getCurrentUser());
-                            
-                            System.out.println("111111111111111111111111111111111111111111");
-                            for (BTOProject btoProject : filtered) {
-                                System.out.println(btoProject.getProjectName() + " " + btoProject.getNeighborhood());
-                            }
-                            projectView.displayAvailableForApplicant(userCTRL.getCurrentUser(), filtered);
+
+                            projectView.displayFilteredProject(userCTRL.getCurrentUser(), filtered);
                         }
                         case "4" -> { // Manager views his own projects
 
@@ -809,34 +806,24 @@ public class BTOProjectCTRL {
                     if (fs.getMinPrice() != null && price < fs.getMinPrice()) {
                         return false;
                     }
+                    if (fs.getMaxPrice() != null && price > fs.getMaxPrice()) {
+                        return false;
+                    }
                     return true;
                 })
                 .collect(Collectors.toList());
     }
 
+    // Returns a list of projects managed by current user with filter applied
     public List<BTOProject> getFilteredProjectsCreatedbyCurrentManager(User user) {
-        // 1) existing filter (visibility, marital/age)
-        List<BTOProject> base = getFilteredProjects();
+        // 1) Get the full list and restrict to projects managed by the current manager.
+        List<BTOProject> base = getAllProjects().stream()
+                .filter(p -> p.getManagerID().equalsIgnoreCase(user.getNRIC()))
+                .collect(Collectors.toList());
 
         // 2) load user’s saved filter settings
         FilterSettings fs = FilterSettings.fromCsv(user.getFilterSettings());
 
-        // check marital/age eligibility
-        boolean canSee2 = user.getMaritalStatus() == MaritalState.SINGLE
-                ? user.getAge() >= 35
-                : user.getAge() >= 21;
-        boolean canSee3 = user.getMaritalStatus() == MaritalState.MARRIED
-                && user.getAge() >= 21;
-
-        // if they asked for 3‑Room but can’t see 3‑Room, return empty immediately:
-        if ("3-Room".equals(fs.getRoomType()) && !canSee3) {
-            System.out.println(
-                    "Sorry as you are only able to view 2 rooms, and are asking to see 3 rooms, the view is empty");
-            return Collections.emptyList();
-        }
-        if ("2-Room".equals(fs.getRoomType()) && !canSee2) {
-            return Collections.emptyList();
-        }
         // 3) apply them
         return base.stream()
                 .filter(p -> {
@@ -857,6 +844,9 @@ public class BTOProjectCTRL {
                             ? p.getThreeRoomPrice()
                             : p.getTwoRoomPrice();
                     if (fs.getMinPrice() != null && price < fs.getMinPrice()) {
+                        return false;
+                    }
+                    if (fs.getMaxPrice() != null && price > fs.getMaxPrice()) {
                         return false;
                     }
                     return true;
@@ -872,21 +862,6 @@ public class BTOProjectCTRL {
         // 2) load user’s saved filter settings
         FilterSettings fs = FilterSettings.fromCsv(user.getFilterSettings());
 
-        // if they asked for 3‑Room but can’t see 3‑Room, return empty immediately:
-        if ("3-Room".equals(fs.getRoomType())) {
-            System.out.println(
-                    "Sorry as you are only able to view 2 rooms, and are asking to see 3 rooms, the view is empty");
-            return Collections.emptyList();
-        }
-        if ("2-Room".equals(fs.getRoomType())) {
-            return Collections.emptyList();
-        }
-
-        System.out.println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-        for (BTOProject btoProject : base) {
-            System.out.println(btoProject.getProjectName() + " " + btoProject.getNeighborhood());
-        }
-
         // 3) apply them
         return base.stream()
                 .filter(p -> {
@@ -909,10 +884,14 @@ public class BTOProjectCTRL {
                     if (fs.getMinPrice() != null && price < fs.getMinPrice()) {
                         return false;
                     }
+                    if (fs.getMaxPrice() != null && price > fs.getMaxPrice()) {
+                        return false;
+                    }
                     return true;
                 })
                 .collect(Collectors.toList());
     }
+
     /**
      * Saves new filter settings back to the user record and CSV.
      *
