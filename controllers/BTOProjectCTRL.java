@@ -658,7 +658,6 @@ public class BTOProjectCTRL {
                 MaritalState ms = currentUser.getMaritalStatus();
                 int age = currentUser.getAge();
                 String officerNRIC = currentUser.getNRIC();
-                System.out.println("Debug: MaritalState: " + ms + ", Age: " + age);
 
                 // Only show visible projects that officer is NOT already an approved officer of
                 filtered = projects.stream()

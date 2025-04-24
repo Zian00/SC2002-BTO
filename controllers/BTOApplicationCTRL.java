@@ -505,6 +505,7 @@ public class BTOApplicationCTRL {
                     return false;
                 }
             }
+
             // Set type to WITHDRAWAL and update status
             app.setApplicationType(ApplicationType.WITHDRAWAL);
             app.setStatus(ApplicationStatus.PENDING);

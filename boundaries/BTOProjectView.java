@@ -196,7 +196,7 @@ public class BTOProjectView {
             canSee2 = true;
             canSee3 = true;
         } else {
-            System.out.println("You are not eligible to view any projects.");
+            System.out.println("You are not eligible.");
             return;
         }
 
