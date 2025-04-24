@@ -7,7 +7,6 @@ import boundaries.OfficerApplicationView;
 import entity.BTOProject;
 import entity.Enquiry;
 import entity.FilterSettings;
-import entity.HDBManager;
 import entity.User;
 import entity.enumerations.FlatType;
 import entity.enumerations.MaritalState;
@@ -576,8 +575,11 @@ public class BTOProjectCTRL {
      */
     public BTOProject getProjectById(int id) {
         // If current user is a manager, use their method (for possible future logic)
-        if (currentUser instanceof HDBManager manager) {
-            return manager.getProjectById(projects, id);
+        if (currentUser.getRole() == Role.HDBMANAGER) {
+            return projects.stream()
+                    .filter(p -> p.getProjectID() == id && p.getManagerID().equalsIgnoreCase(currentUser.getNRIC()))
+                    .findFirst()
+                    .orElse(null);
         }
         // Otherwise, just search the list
         return projects.stream()
@@ -617,30 +619,41 @@ public class BTOProjectCTRL {
      * @return true if the project was updated, false otherwise.
      */
     public boolean editProject(int projectId, BTOProject updated) {
-        BTOProject existing = null;
-        // only manager can edit project
-        // only manager can edit project
-        if (currentUser instanceof HDBManager manager) {
-            existing = manager.getProjectById(projects, projectId);
-        }
-        if (existing == null) {
+        try {
+            BTOProject existing = getProjectById(projects, projectId);
+            if (existing == null) {
+                System.out.println("Project not found.");
+                return false;
+            }
+            System.out.println("Current user type: " + currentUser.getClass().getSimpleName());
+            
+            // Update project's fields
+            existing.setProjectName(updated.getProjectName());
+            existing.setNeighborhood(updated.getNeighborhood());
+            existing.setAvailable2Room(updated.getAvailable2Room());
+            existing.setTwoRoomPrice(updated.getTwoRoomPrice());
+            existing.setAvailable3Room(updated.getAvailable3Room());
+            existing.setThreeRoomPrice(updated.getThreeRoomPrice());
+            existing.setApplicationOpeningDate(updated.getApplicationOpeningDate());
+            existing.setApplicationClosingDate(updated.getApplicationClosingDate());
+            existing.setAvailableOfficerSlots(updated.getAvailableOfficerSlots());
+            existing.setVisibility(updated.isVisibility());
+            
+            repo.writeBTOProjectToCSV(projects);
+            return true;
+        } catch (Exception e) {
+            System.out.println("Failed to update project data: " + e.getMessage());
             return false;
         }
+    }
 
-        existing.setProjectName(updated.getProjectName());
-        existing.setNeighborhood(updated.getNeighborhood());
-        existing.setAvailable2Room(updated.getAvailable2Room());
-        existing.setTwoRoomPrice(updated.getTwoRoomPrice());
-        existing.setAvailable3Room(updated.getAvailable3Room());
-        existing.setThreeRoomPrice(updated.getThreeRoomPrice());
-        existing.setApplicationOpeningDate(updated.getApplicationOpeningDate());
-        existing.setApplicationClosingDate(updated.getApplicationClosingDate());
-        existing.setAvailableOfficerSlots(updated.getAvailableOfficerSlots());
-        existing.setVisibility(updated.isVisibility());
-
-        // manager, pending/approved lists typically left alone
-        repo.writeBTOProjectToCSV(projects);
-        return true;
+    public BTOProject getProjectById(List<BTOProject> projects, int id) {
+        if (projects == null)
+                return null;
+        return projects.stream()
+                        .filter(p -> p.getProjectID() == id)
+                        .findFirst()
+                        .orElse(null);
     }
 
     /**
