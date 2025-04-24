@@ -22,7 +22,8 @@ import java.util.stream.Collectors;
 /**
  * Controller class for managing BTO applications in the BTO system.
  * <p>
- * Handles application submission, withdrawal, approval/rejection, booking, and report generation.
+ * Handles application submission, withdrawal, approval/rejection, booking, and
+ * report generation.
  * Provides role-based application menus for applicants, officers, and managers.
  * </p>
  */
@@ -41,6 +42,7 @@ public class BTOApplicationCTRL {
 
     /**
      * Loads all applications and projects, and keeps track of the logged-in user.
+     * 
      * @param currentUser The currently logged-in user.
      */
     public BTOApplicationCTRL(User currentUser) {
@@ -56,14 +58,17 @@ public class BTOApplicationCTRL {
     // --------------------------------------------------------------------------------------------------
 
     /**
-     * Runs the application menu for the current user, displaying options and routing
-     * to the appropriate actions based on the user's role (applicant, officer, manager).
+     * Runs the application menu for the current user, displaying options and
+     * routing
+     * to the appropriate actions based on the user's role (applicant, officer,
+     * manager).
      *
-     * @param sc Scanner for user input.
-     * @param userCTRL The UserCTRL instance.
-     * @param projectCTRL The BTOProjectCTRL instance.
-     * @param applicationCTRL This BTOApplicationCTRL instance.
-     * @param btoApplicationView The BTOApplicationView for displaying menus and results.
+     * @param sc                 Scanner for user input.
+     * @param userCTRL           The UserCTRL instance.
+     * @param projectCTRL        The BTOProjectCTRL instance.
+     * @param applicationCTRL    This BTOApplicationCTRL instance.
+     * @param btoApplicationView The BTOApplicationView for displaying menus and
+     *                           results.
      */
     public void runApplicationMenu(Scanner sc, UserCTRL userCTRL, BTOProjectCTRL projectCTRL,
             BTOApplicationCTRL applicationCTRL,
@@ -320,16 +325,17 @@ public class BTOApplicationCTRL {
                                     break;
                                 }
                                 var allProjects = applicationCTRL.getProjects();
-                        
+
                                 MaritalState maritalFilter = btoApplicationView.promptMaritalStatusFilter(sc);
                                 String flatTypeFilter = btoApplicationView.promptFlatTypeFilter(sc);
                                 Integer minAge = btoApplicationView.promptMinAge(sc);
                                 Integer maxAge = btoApplicationView.promptMaxAge(sc);
                                 String neighbourhoodFilter = btoApplicationView.promptNeighbourhoodFilter(sc);
-                        
+
                                 List<BTOApplication> filteredApps = applicationCTRL.generateReport(
-                                        maritalFilter, flatTypeFilter, minAge, maxAge, neighbourhoodFilter, allProjects, userCTRL);
-                        
+                                        maritalFilter, flatTypeFilter, minAge, maxAge, neighbourhoodFilter, allProjects,
+                                        userCTRL);
+
                                 if (filteredApps.isEmpty()) {
                                     System.out.println("No applicants found matching the selected filters.");
                                 } else {
@@ -371,6 +377,7 @@ public class BTOApplicationCTRL {
 
     /**
      * Shows all applications by the currently logged-in user.
+     * 
      * @return List of {@link BTOApplication} objects for the user.
      */
     public List<BTOApplication> viewUserApplications() {
@@ -382,18 +389,21 @@ public class BTOApplicationCTRL {
     /**
      * Submits a new application for a BTO project if eligible.
      * Only one application is allowed per user.
+     * 
      * @param projectId The project ID to apply for.
-     * @param flatType The flat type to apply for.
+     * @param flatType  The flat type to apply for.
      * @return true if application was successful, false otherwise.
      */
     public boolean apply(int projectId, FlatType flatType) {
         // already applied?
-        boolean hasApplied = applicationList.stream()
-                .anyMatch(a -> a.getApplicantNRIC().equals(currentUser.getNRIC())
-                        && a.getApplicationType() == ApplicationType.APPLICATION);
-       
-        if (hasApplied) {
-            System.out.println("Cannot apply for more than one project.");
+        boolean hasActiveApplication = applicationList.stream()
+                .anyMatch(a -> a.getApplicantNRIC().equalsIgnoreCase(currentUser.getNRIC())
+                        && a.getApplicationType() == ApplicationType.APPLICATION
+                        && a.getStatus() != ApplicationStatus.UNSUCCESSFUL); // Check if status is NOT UNSUCCESSFUL
+
+        if (hasActiveApplication) {
+            System.out
+                    .println("Cannot apply: You have an existing application that is PENDING, SUCCESSFUL, or BOOKED.");
             return false;
         }
 
@@ -403,30 +413,54 @@ public class BTOApplicationCTRL {
                 .findFirst()
                 .orElse(null);
         if (proj == null) {
-            System.out.println("Project not found or not avaialable.");
+            System.out.println("Project not found or not available for application.");
             return false;
         }
 
-        // Check eligibility for Age
-        boolean eligible;
-        if (currentUser.getMaritalStatus().name().equals("SINGLE")) {
-            eligible = flatType == FlatType.TWOROOM && currentUser.getAge() >= 35;
+        // Check eligibility based on Marital Status and Age for the chosen flat type
+        boolean eligible = false;
+        MaritalState ms = currentUser.getMaritalStatus();
+        int age = currentUser.getAge();
+
+        if (ms == MaritalState.SINGLE) {
+            if (age >= 35 && flatType == FlatType.TWOROOM) {
+                eligible = true;
+            } else if (flatType == FlatType.THREEROOM) {
+                System.out.println("Eligibility Error: Single applicants cannot apply for 3-Room flats.");
+                return false; // Explicitly return false
+            } else { // Single but < 35 or applying for wrong type
+                System.out.println(
+                        "Eligibility Error: Single applicants must be >= 35 years old and can only apply for 2-Room flats.");
+                return false; // Explicitly return false
+            }
+        } else if (ms == MaritalState.MARRIED) {
+            if (age >= 21) {
+                eligible = true; // Married >= 21 can apply for either type (availability checked next)
+            } else {
+                System.out.println("Eligibility Error: Married applicants must be >= 21 years old.");
+                return false; // Explicitly return false
+            }
         } else {
-            eligible = currentUser.getAge() >= 21;
-        }
-        if (!eligible) {
-            System.out.println("You are not eligible for " + flatType);
+            System.out.println("Eligibility Error: Invalid marital status detected."); // Should not happen
             return false;
         }
 
-        // Check available slots for room type
-        if(flatType == FlatType.TWOROOM && proj.getAvailable2Room()<=0){
-            eligible = false;
-        }else if(flatType == FlatType.THREEROOM && proj.getAvailable3Room()<=0){
-            eligible = false;
+        // If basic eligibility check passed, now check flat availability
+        if (eligible) {
+            if (flatType == FlatType.TWOROOM && proj.getAvailable2Room() <= 0) {
+                System.out.println("Application Failed: No 2-Room units available in this project.");
+                eligible = false;
+            } else if (flatType == FlatType.THREEROOM && proj.getAvailable3Room() <= 0) {
+                System.out.println("Application Failed: No 3-Room units available in this project.");
+                eligible = false;
+            }
+        } else {
+            // If !eligible from the start, the specific message was already printed.
+            return false; // Return false if not eligible from age/marital status check
         }
+
+        // Final check if eligible after availability check
         if (!eligible) {
-            System.out.println("There is no more slot for this flat type: " + flatType);
             return false;
         }
 
@@ -446,6 +480,7 @@ public class BTOApplicationCTRL {
 
     /**
      * Withdraws an application by its ID if it belongs to the current user.
+     * 
      * @param applicationId The application ID to withdraw.
      * @return true if withdrawal was successful, false otherwise.
      */
@@ -483,6 +518,7 @@ public class BTOApplicationCTRL {
 
     /**
      * Utility to pick the next unique application ID.
+     * 
      * @return The next available application ID.
      */
     private int getNextProjectID() {
@@ -494,6 +530,7 @@ public class BTOApplicationCTRL {
 
     /**
      * Gets all applications handled by the current manager.
+     * 
      * @return List of {@link BTOApplication} objects.
      */
     public List<BTOApplication> getApplicationsHandledByManager() {
@@ -505,8 +542,10 @@ public class BTOApplicationCTRL {
     }
 
     /**
-     * Retrieves all applications for which the associated project's approved officer list
+     * Retrieves all applications for which the associated project's approved
+     * officer list
      * contains the current officer's NRIC.
+     * 
      * @return List of {@link BTOApplication} objects.
      */
     public List<BTOApplication> getApplicationsHandledByOfficer() {
@@ -522,8 +561,9 @@ public class BTOApplicationCTRL {
 
     /**
      * Updates the status of an application.
+     * 
      * @param applicationId The ID of the application to update.
-     * @param newStatus The new status ("SUCCESSFUL" or "UNSUCCESSFUL").
+     * @param newStatus     The new status ("SUCCESSFUL" or "UNSUCCESSFUL").
      * @return true if updated successfully, false otherwise.
      */
     public boolean updateApplicationStatus(int applicationId, String newStatus) {
@@ -553,8 +593,9 @@ public class BTOApplicationCTRL {
 
     /**
      * Processes an application decision (approve or reject) for a manager.
-     * @param appId The application ID to process.
-     * @param decision "A" for approve, "R" for reject.
+     * 
+     * @param appId       The application ID to process.
+     * @param decision    "A" for approve, "R" for reject.
      * @param projectCTRL The BTOProjectCTRL instance.
      * @return true if processed successfully, false otherwise.
      */
@@ -621,9 +662,11 @@ public class BTOApplicationCTRL {
     }
 
     /**
-     * Books a flat for a successful application and updates the application status to BOOKED.
+     * Books a flat for a successful application and updates the application status
+     * to BOOKED.
+     * 
      * @param applicationId The application ID to book.
-     * @param projectCTRL The BTOProjectCTRL instance.
+     * @param projectCTRL   The BTOProjectCTRL instance.
      * @return true if booking was successful, false otherwise.
      */
     public boolean bookApplication(int applicationId, BTOProjectCTRL projectCTRL) {
@@ -696,6 +739,7 @@ public class BTOApplicationCTRL {
 
     /**
      * Gets an application by its ID.
+     * 
      * @param applicationId The application ID.
      * @return The {@link BTOApplication} object, or null if not found.
      */
@@ -708,6 +752,7 @@ public class BTOApplicationCTRL {
 
     /**
      * Gets the list of all BTO projects.
+     * 
      * @return List of {@link BTOProject} objects.
      */
     public List<BTOProject> getProjects() {
@@ -716,10 +761,12 @@ public class BTOApplicationCTRL {
 
     /**
      * Books a successful application and generates a receipt for the applicant.
-     * @param appId The application ID to book.
+     * 
+     * @param appId       The application ID to book.
      * @param projectCTRL The BTOProjectCTRL instance.
-     * @param userCTRL The UserCTRL instance.
-     * @return true if booking and receipt generation were successful, false otherwise.
+     * @param userCTRL    The UserCTRL instance.
+     * @return true if booking and receipt generation were successful, false
+     *         otherwise.
      */
     public boolean bookAndGenerateReceipt(int appId, BTOProjectCTRL projectCTRL, UserCTRL userCTRL) {
         try {
@@ -802,7 +849,8 @@ public class BTOApplicationCTRL {
 
     /**
      * Approves a withdrawal application and updates flat availability.
-     * @param appId The withdrawal application ID.
+     * 
+     * @param appId       The withdrawal application ID.
      * @param projectCTRL The BTOProjectCTRL instance.
      * @return true if withdrawal was approved, false otherwise.
      */
@@ -852,14 +900,16 @@ public class BTOApplicationCTRL {
     }
 
     /**
-     * Generates a filtered report of all applicants under projects handled by the current manager.
-     * @param maritalFilter Marital status filter.
-     * @param flatTypeFilter Flat type filter.
-     * @param minAge Minimum age filter.
-     * @param maxAge Maximum age filter.
+     * Generates a filtered report of all applicants under projects handled by the
+     * current manager.
+     * 
+     * @param maritalFilter       Marital status filter.
+     * @param flatTypeFilter      Flat type filter.
+     * @param minAge              Minimum age filter.
+     * @param maxAge              Maximum age filter.
      * @param neighbourhoodFilter Neighbourhood filter.
-     * @param allProjects List of all BTO projects.
-     * @param userCTRL The UserCTRL instance.
+     * @param allProjects         List of all BTO projects.
+     * @param userCTRL            The UserCTRL instance.
      * @return List of filtered {@link BTOApplication} objects.
      */
     public List<BTOApplication> generateReport(
@@ -870,25 +920,25 @@ public class BTOApplicationCTRL {
             String neighbourhoodFilter,
             List<BTOProject> allProjects,
             UserCTRL userCTRL) {
-    
+
         List<BTOApplication> managerApps = getApplicationsHandledByManager(); // existing method
         if (managerApps == null || managerApps.isEmpty()) {
             return new ArrayList<>();
         }
-        
+
         List<BTOApplication> filteredApps = new ArrayList<>();
         for (BTOApplication app : managerApps) {
             // Only consider main applications (skip withdrawals)
             if (app.getApplicationType() != ApplicationType.APPLICATION) {
                 continue;
             }
-            
+
             // Get applicant details
             User applicant = userCTRL.getUserByNRIC(app.getApplicantNRIC());
             if (applicant == null) {
                 continue;
             }
-            
+
             // Get project details
             Optional<BTOProject> projectOpt = allProjects.stream()
                     .filter(p -> p.getProjectID() == app.getProjectID())
@@ -897,7 +947,7 @@ public class BTOApplicationCTRL {
                 continue;
             }
             BTOProject project = projectOpt.get();
-            
+
             // Apply filters:
             if (maritalFilter != null && applicant.getMaritalStatus() != maritalFilter)
                 continue;
@@ -910,10 +960,10 @@ public class BTOApplicationCTRL {
             if (neighbourhoodFilter != null &&
                     !project.getNeighborhood().toLowerCase().contains(neighbourhoodFilter.toLowerCase()))
                 continue;
-                
+
             filteredApps.add(app);
         }
-        
+
         return filteredApps;
     }
 }
