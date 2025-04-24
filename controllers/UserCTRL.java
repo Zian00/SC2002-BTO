@@ -8,11 +8,15 @@ import boundaries.ManagerView;
 import boundaries.OfficerApplicationView;
 import boundaries.OfficerView;
 import boundaries.UserView;
+import entity.Applicant;
 import entity.User;
+import entity.enumerations.MaritalState;
 import entity.enumerations.Role;
 import entity.repositories.UserCSVRepository;
 import java.util.List;
 import java.util.Scanner;
+import entity.interfaces.IApplicantRepository;
+import entity.repositories.ApplicantCSVRepository;
 // No need for regex import if using character checks
 
 /**
@@ -31,6 +35,8 @@ public class UserCTRL {
     /** Repository for reading/writing user data from/to CSV. */
     private final UserCSVRepository userRepo = new UserCSVRepository();
 
+    //repo for applicant
+    private final IApplicantRepository applicantRepository = new ApplicantCSVRepository();
     /**
      * Loads user data from the CSV repository into the user list.
      */
@@ -52,6 +58,99 @@ public class UserCTRL {
             }
         }
         userRepo.writeUserToCSV(this.userList);
+    }
+
+    //used for creation of user
+    public UserCTRL() {
+       
+    }
+
+    public void createNewAccount(Scanner sc) {
+        System.out.println("\n=== Create New Account ===");
+
+        // Get NRIC with validation
+        String nric;
+        while (true) {
+            System.out.print("Enter NRIC (must start with T or S, followed by 7 digits, and end with a capital letter): ");
+            nric = sc.nextLine().trim();
+            if (nric.isEmpty()) {
+                System.out.println("NRIC cannot be blank.");
+            } else if (!nric.matches("^[TS]\\d{7}[A-Z]$")) {
+                System.out.println("Invalid NRIC format. Please ensure it starts with T or S, followed by 7 digits, and ends with a capital letter.");
+            } else {
+                break;
+            }
+        }
+
+        // Get Name with validation
+        String name;
+        while (true) {
+            System.out.print("Enter Name: ");
+            name = sc.nextLine().trim();
+            if (name.isEmpty()) {
+                System.out.println("Name cannot be blank.");
+            } else if (name.matches(".*\\d.*")) {
+                System.out.println("Name cannot contain numbers.");
+            } else {
+                break;
+            }
+        }
+
+        // Get Age with error checking
+        int age = 0;
+        while (true) {
+            System.out.print("Enter Age: ");
+            String ageInput = sc.nextLine().trim();
+            try {
+                age = Integer.parseInt(ageInput);
+                if (age <= 0) {
+                    System.out.println("Age must be a positive number.");
+                } else {
+                    break;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a valid number for age.");
+            }
+        }
+
+        // Get Marital Status
+        MaritalState maritalStatus = null;
+        while (true) {
+            System.out.print("Enter Marital Status (SINGLE/MARRIED): ");
+            String maritalInput = sc.nextLine().trim().toUpperCase();
+            try {
+                maritalStatus = MaritalState.valueOf(maritalInput);
+                break;
+            } catch (IllegalArgumentException e) {
+                System.out.println("Invalid marital status. Please enter SINGLE or MARRIED.");
+            }
+        }
+        // Get Role
+        Role role = null;
+        while (true) {
+            System.out.print("Enter Role (APPLICANT/HDBOFFICER/HDBMANAGER): ");
+            String roleInput = sc.nextLine().trim().toUpperCase();
+            try {
+                role = Role.valueOf(roleInput);
+                break;
+            } catch (IllegalArgumentException e) {
+                System.out.println("Invalid role. Please enter APPLICANT, HDBOFFICER, or HDBMANAGER.");
+            }
+        }
+
+        // password
+        String password = "Passw0rd";
+
+        /// Create Applicant object
+    Applicant applicant = new Applicant(nric, name, password, age, maritalStatus, "", role, applicantRepository);
+
+    // Save the applicant using the ApplicantCSVRepository
+    try {
+        applicant.save();
+        System.out.println("Account created successfully!");
+    } catch (Exception e) {
+        System.out.println("An error occurred while saving the account: " + e.getMessage());
+    }
     }
 
     // --------------------------------------------------------------------------------------------------

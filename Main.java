@@ -18,7 +18,8 @@ public class Main {
                 // =====================================
                 System.out.println("\n=== HDB Hub ===");
                 System.out.println("1. Login");
-                System.out.println("2. Exit");
+                System.out.println("2. Create New User");
+                System.out.println("3. Exit");
                 System.out.print("Select an option: ");
                 String choice = sc.nextLine().trim();
                 switch (choice) {
@@ -33,6 +34,9 @@ public class Main {
                         }
                     }
                     case "2" -> {
+                        userCTRL.createNewAccount(sc);
+                    }
+                    case "3" -> {
                         System.out.println("Exiting... Goodbye!");
                         break OUTER;
                     }

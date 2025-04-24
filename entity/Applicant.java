@@ -2,22 +2,28 @@ package entity;
 
 import entity.enumerations.MaritalState;
 import entity.enumerations.Role;
+import entity.interfaces.IApplicantRepository;
 
 public class Applicant extends User {
 
-	public Applicant(String NRIC, String Name, String password, int age, MaritalState maritalStatus,
-			String filterSettings, Role role) {
-		super(NRIC, Name, password, age, maritalStatus, filterSettings, role);
-	}
+    private int applicationID;
+    private final IApplicantRepository applicantRepository;
 
-	private int applicationID;
+    public Applicant(String NRIC, String Name, String password, int age, MaritalState maritalStatus,
+                     String filterSettings, Role role, IApplicantRepository applicantRepository) {
+        super(NRIC, Name, password, age, maritalStatus, filterSettings, role);
+        this.applicantRepository = applicantRepository;
+    }
 
-	public int getApplicationID() {
-		return this.applicationID;
-	}
+    public int getApplicationID() {
+        return this.applicationID;
+    }
 
-	public void setApplicationID(int applicationID) {
-		this.applicationID = applicationID;
-	}
+    public void setApplicationID(int applicationID) {
+        this.applicationID = applicationID;
+    }
 
+    public void save() {
+        applicantRepository.saveApplicant(this);
+    }
 }
