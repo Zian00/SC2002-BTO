@@ -647,6 +647,17 @@ public class BTOProjectCTRL {
         }
     }
 
+   /**
+    * The function `getProjectById` takes a list of BTOProject objects and an id, then returns the
+    * first project with a matching id or null if not found.
+    * 
+    * @param projects List of BTOProject objects containing project information.
+    * @param id The `id` parameter in the `getProjectById` method is an integer value representing the
+    * unique identifier of the project that you want to retrieve from the list of projects.
+    * @return The `getProjectById` method returns a `BTOProject` object from the given list of projects
+    * based on the provided project ID. If the project with the specified ID is found in the list, it
+    * is returned; otherwise, `null` is returned.
+    */
     public BTOProject getProjectById(List<BTOProject> projects, int id) {
         if (projects == null)
                 return null;
@@ -904,6 +915,7 @@ public class BTOProjectCTRL {
                 })
                 .collect(Collectors.toList());
     }
+
     /**
      * Saves new filter settings back to the user record and CSV.
      *
@@ -921,13 +933,7 @@ public class BTOProjectCTRL {
      * application period. Projects outside their application period are set to
      * invisible. Changes are persisted to the CSV file.
      */
-    
-    /**
-     * The `updateProjectVisibility` method parses project dates, checks if the current date is within
-     * the project application period, and updates project visibility accordingly before saving the
-     * changes to a CSV file.
-     */
-     public void updateProjectVisibility() {
+    public void updateProjectVisibility() {
         // use the correct date format as in our file ("yyyy-MM-dd")
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         for (BTOProject project : getAllProjects()) {
