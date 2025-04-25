@@ -23,6 +23,9 @@ public class Applicant extends User {
         this.applicationID = applicationID;
     }
 
+    /**
+     * The `save()` function saves the current applicant object using the applicant repository.
+     */
     public void save() {
         applicantRepository.saveApplicant(this);
     }

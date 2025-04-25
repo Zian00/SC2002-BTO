@@ -7,6 +7,8 @@ package entity.interfaces;
 import entity.Applicant;
 import java.util.List;
 
+// This code snippet is defining a Java interface named `IApplicantRepository`. This interface
+// specifies two methods that any class implementing this interface must provide:
 public interface IApplicantRepository {
     List<Applicant> getAllApplicants();
     void saveApplicant(Applicant applicant);

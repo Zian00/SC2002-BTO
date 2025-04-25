@@ -921,7 +921,13 @@ public class BTOProjectCTRL {
      * application period. Projects outside their application period are set to
      * invisible. Changes are persisted to the CSV file.
      */
-    public void updateProjectVisibility() {
+    
+    /**
+     * The `updateProjectVisibility` method parses project dates, checks if the current date is within
+     * the project application period, and updates project visibility accordingly before saving the
+     * changes to a CSV file.
+     */
+     public void updateProjectVisibility() {
         // use the correct date format as in our file ("yyyy-MM-dd")
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         for (BTOProject project : getAllProjects()) {

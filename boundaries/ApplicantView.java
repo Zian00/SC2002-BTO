@@ -13,6 +13,7 @@ public class ApplicantView extends UserView {
      * Displays the main menu options for applicants.
      * Overrides the user menu with applicant-specific options.
      */
+    
     @Override
     public void displayMenu() {
         System.out.println("\n=== Main Menu ===");
